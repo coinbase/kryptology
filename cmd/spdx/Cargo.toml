@@ -1,0 +1,13 @@
+[package]
+authors = ["Coinbase Core Cryptography Developers"]
+description = "Checks and adds the specified files for the SPDX-License-Identifier and Copyright headers"
+edition = "2018"
+name = "spdx"
+readme = "README.md"
+version = "1.0.0"
+
+[dependencies]
+regex = "1.5"
+serde = { version = "1.0", features = ["serde_derive"] }
+serde_yaml = "0.8"
+structopt = "0.3"

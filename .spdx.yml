@@ -1,0 +1,37 @@
+#
+# Copyright Coinbase, Inc. All Rights Reserved.
+#
+# SPDX-License-Identifier: Apache-2.0
+#
+copyright: Copyright Coinbase, Inc. All Rights Reserved.
+license: Apache-2.0
+comments:
+  gitignore: '#'
+  dockerignore: '#'
+  sh: '#'
+  py: '#'
+  pl: '#'
+  rb: '#'
+  yml: '#'
+  yaml: '#'
+  go: '//'
+  rs: '//'
+ignore:
+  - 'testdata/'
+  - 'test/data'
+  - 'Cargo\.lock$'
+  - 'Cargo\.toml$'
+  - 'target'
+  - 'go\.mod$'
+  - 'go\.sum$'
+  - '\.gitignore$'
+  - '\.dockerignore$'
+  - '\.git$'
+  - '\.idea$'
+  - '\.vscode$'
+  - '\bLICENSE$'
+  - '\w+\.md$'
+  - '\w+\.pdf$'
+  - 'Makefile$'
+  - .DS_Store
+  - '\w+\.dat$'

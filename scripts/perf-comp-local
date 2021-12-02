@@ -1,0 +1,20 @@
+#! /usr/bin/env bash
+
+set -eo pipefail
+
+ROOT=$( cd $(dirname $0)/..;  pwd )
+
+TMP_DIR=$(mktemp -d)
+echo "tmp dir: $TMP_DIR"
+
+git clone --depth 1 -b master git@github.com:coinbase/kryptology.git "$TMP_DIR/kryptology"
+cd "$TMP_DIR/kryptology"
+go test -bench=. -short ./... > "$TMP_DIR/current-bench.log"
+
+cd "$ROOT"
+go test -bench=. -short ./... > "$TMP_DIR/new-bench.log"
+
+cd "$ROOT"
+go run cmd/benchcomp/main.go -current "$TMP_DIR/current-bench.log" -new "$TMP_DIR/new-bench.log"
+
+rm -rf "$TMP_DIR"

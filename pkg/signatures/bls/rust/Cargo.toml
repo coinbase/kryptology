@@ -1,0 +1,17 @@
+[package]
+name = "miracl"
+version = "0.1.0"
+authors = ["Mike Lodder <mike.lodder@coinbase.com>"]
+edition = "2018"
+
+[dependencies]
+bls_sigs_ref = "0.3"
+hex = "0.4"
+miracl_core = { version = "2.3", features = ["bls12381"], default-features = false }
+pairing-plus = "0.19"
+rand = "0.8"
+serious = { version = "0.1", git = "https://github.com/mikelodder7/malutils" }
+serde = { version = "1.0", features = ["derive"] }
+serde_json = "1.0"
+sha2 = "0.8"
+structopt = "0.3"

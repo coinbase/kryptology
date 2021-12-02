@@ -1,0 +1,111 @@
+------test Gennaro DKG TestAllGennaroDkgRounds for 1 time------
+
+?   	github.com/coinbase/kryptology/internal	[no test files]
+ok  	github.com/coinbase/kryptology/pkg/core	0.888s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/dkg/gennaro	0.778s
+ok  	github.com/coinbase/kryptology/pkg/paillier	0.460s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/sharing	0.622s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/dealer	0.470s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/participant	1.179s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/proof	1.033s [no tests to run]
+?   	github.com/coinbase/kryptology/test/dkg/bls	[no test files]
+?   	github.com/coinbase/kryptology/test/dkg/ed25519	[no test files]
+?   	github.com/coinbase/kryptology/test/dkg/k256	[no test files]
+
+------test Gennaro DKG TestAllGennaroDkgRounds for 10 times------
+
+?   	github.com/coinbase/kryptology/internal	[no test files]
+ok  	github.com/coinbase/kryptology/pkg/core	0.865s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/dkg/gennaro	0.602s
+ok  	github.com/coinbase/kryptology/pkg/paillier	0.617s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/sharing	0.513s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/dealer	0.380s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/participant	0.986s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/proof	0.746s [no tests to run]
+?   	github.com/coinbase/kryptology/test/dkg/bls	[no test files]
+?   	github.com/coinbase/kryptology/test/dkg/ed25519	[no test files]
+?   	github.com/coinbase/kryptology/test/dkg/k256	[no test files]
+
+------test Gennaro DKG TestAllGennaroDkgRounds for 50 times------
+
+?   	github.com/coinbase/kryptology/internal	[no test files]
+ok  	github.com/coinbase/kryptology/pkg/core	0.542s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/dkg/gennaro	1.598s
+ok  	github.com/coinbase/kryptology/pkg/paillier	0.419s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/sharing	0.788s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/dealer	0.403s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/participant	1.028s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/proof	0.919s [no tests to run]
+?   	github.com/coinbase/kryptology/test/dkg/bls	[no test files]
+?   	github.com/coinbase/kryptology/test/dkg/ed25519	[no test files]
+?   	github.com/coinbase/kryptology/test/dkg/k256	[no test files]
+
+------test Gennaro DKG TestAllGennaroDkgRounds for 100 times------
+
+?   	github.com/coinbase/kryptology/internal	[no test files]
+ok  	github.com/coinbase/kryptology/pkg/core	1.019s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/dkg/gennaro	2.401s
+ok  	github.com/coinbase/kryptology/pkg/paillier	0.666s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/sharing	0.794s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/dealer	0.441s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/participant	1.250s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/proof	1.142s [no tests to run]
+?   	github.com/coinbase/kryptology/test/dkg/bls	[no test files]
+?   	github.com/coinbase/kryptology/test/dkg/ed25519	[no test files]
+?   	github.com/coinbase/kryptology/test/dkg/k256	[no test files]
+
+------test Gennaro DKG TestAllGennaroDkgRounds for 500 times------
+
+?   	github.com/coinbase/kryptology/internal	[no test files]
+ok  	github.com/coinbase/kryptology/pkg/core	0.567s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/dkg/gennaro	9.806s
+ok  	github.com/coinbase/kryptology/pkg/paillier	0.680s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/sharing	0.464s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/dealer	0.395s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/participant	1.045s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/proof	0.924s [no tests to run]
+?   	github.com/coinbase/kryptology/test/dkg/bls	[no test files]
+?   	github.com/coinbase/kryptology/test/dkg/ed25519	[no test files]
+?   	github.com/coinbase/kryptology/test/dkg/k256	[no test files]
+
+------test Gennaro DKG TestAllGennaroDkgRounds for 1000 times------
+
+?   	github.com/coinbase/kryptology/internal	[no test files]
+ok  	github.com/coinbase/kryptology/pkg/core	0.300s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/dkg/gennaro	18.662s
+ok  	github.com/coinbase/kryptology/pkg/paillier	0.181s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/sharing	0.665s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/dealer	0.172s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/participant	0.765s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/proof	0.529s [no tests to run]
+?   	github.com/coinbase/kryptology/test/dkg/bls	[no test files]
+?   	github.com/coinbase/kryptology/test/dkg/ed25519	[no test files]
+?   	github.com/coinbase/kryptology/test/dkg/k256	[no test files]
+
+------test Gennaro DKG TestAllGennaroDkgRounds for 5000 times------
+
+?   	github.com/coinbase/kryptology/internal	[no test files]
+ok  	github.com/coinbase/kryptology/pkg/core	1.017s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/dkg/gennaro	94.413s
+ok  	github.com/coinbase/kryptology/pkg/paillier	0.461s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/sharing	0.904s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/dealer	0.461s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/participant	1.104s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/proof	0.762s [no tests to run]
+?   	github.com/coinbase/kryptology/test/dkg/bls	[no test files]
+?   	github.com/coinbase/kryptology/test/dkg/ed25519	[no test files]
+?   	github.com/coinbase/kryptology/test/dkg/k256	[no test files]
+
+------test Gennaro DKG TestAllGennaroDkgRounds for 10000 times------
+
+?   	github.com/coinbase/kryptology/internal	[no test files]
+ok  	github.com/coinbase/kryptology/pkg/core	0.514s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/dkg/gennaro	192.149s
+ok  	github.com/coinbase/kryptology/pkg/paillier	0.742s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/sharing	0.962s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/dealer	0.470s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/participant	1.199s [no tests to run]
+ok  	github.com/coinbase/kryptology/pkg/tecdsa/proof	1.055s [no tests to run]
+?   	github.com/coinbase/kryptology/test/dkg/bls	[no test files]
+?   	github.com/coinbase/kryptology/test/dkg/ed25519	[no test files]
+?   	github.com/coinbase/kryptology/test/dkg/k256	[no test files]
