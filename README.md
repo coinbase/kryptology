@@ -31,7 +31,7 @@ git clone git@github.com:coinbase/kryptology.git && make
 
 ## Contributing
 - [Versioning](https://blog.golang.org/publishing-go-modules): `vMajor.Minor.Patch`
-    - Major revision indicates breaking API change or significant new features
+    - Major revision indicates breaking API changes or significant new features
     - Minor revision indicates no API breaking changes and may include significant new features or documentation
     - Patch indicates no API breaking changes and may include only fixes
  
