@@ -17,8 +17,8 @@ import (
 	"log"
 	"os"
 
-	"github.com/coinbase/kryptology/pkg/dkg/gennaro2p"
 	"github.com/btcsuite/btcd/btcec"
+	"github.com/coinbase/kryptology/pkg/dkg/gennaro2p"
 	"github.com/pkg/errors"
 )
 

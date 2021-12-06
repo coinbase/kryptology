@@ -20,8 +20,8 @@ import (
 	"github.com/coinbase/kryptology/pkg/paillier"
 	"github.com/stretchr/testify/assert"
 
-	"github.com/coinbase/kryptology/internal"
 	"github.com/btcsuite/btcd/btcec"
+	"github.com/coinbase/kryptology/internal"
 )
 
 func TestConvertToAdditiveWorks(t *testing.T) {

@@ -11,15 +11,15 @@ import (
 	crand "crypto/rand"
 	"crypto/sha512"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core"
 	"github.com/bwesterb/go-ristretto"
+	"github.com/coinbase/kryptology/pkg/core"
 	"io"
 	"math/big"
 
 	"filippo.io/edwards25519"
+	"github.com/btcsuite/btcd/btcec"
 	"github.com/coinbase/kryptology/internal"
 	bls12381 "github.com/coinbase/kryptology/pkg/core/curves/native/bls12-381"
-	"github.com/btcsuite/btcd/btcec"
 )
 
 type EcScalar interface {

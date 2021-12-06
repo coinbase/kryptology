@@ -11,9 +11,9 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/btcsuite/btcd/btcec"
 	tt "github.com/coinbase/kryptology/internal"
 	mod "github.com/coinbase/kryptology/pkg/core"
-	"github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/assert"
 )
 

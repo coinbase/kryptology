@@ -14,9 +14,9 @@ import (
 
 	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
 
+	"github.com/btcsuite/btcd/btcec"
 	"github.com/coinbase/kryptology/pkg/core"
 	"github.com/coinbase/kryptology/pkg/paillier"
-	"github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

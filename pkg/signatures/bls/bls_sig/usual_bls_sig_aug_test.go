@@ -191,7 +191,7 @@ func TestAugAggregateVerifyG2BadSigs(t *testing.T) {
 	// Try a zero key to make sure it doesn't crash
 	g1 := bls12381.NewG2()
 	sigValue := g1.New()
-	sigs[0] = &Signature{value: *sigValue}
+	sigs[0] = &Signature{Value: *sigValue}
 
 	if res, _ := bls.AggregateVerify(pks, msgs, sigs); res {
 		t.Errorf("Aug aggregateVerify succeeded with zero byte signature it should've failed")
@@ -199,7 +199,7 @@ func TestAugAggregateVerifyG2BadSigs(t *testing.T) {
 
 	// Try with base generator
 	sigValue = g1.One()
-	sigs[0] = &Signature{value: *sigValue}
+	sigs[0] = &Signature{Value: *sigValue}
 	if res, _ := bls.AggregateVerify(pks, msgs, sigs); res {
 		t.Errorf("Aug aggregateVerify succeeded with the base generator signature it should've failed")
 	}

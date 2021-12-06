@@ -5,9 +5,14 @@ All notable changes to this repo will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.5.1
+- Export tBLS signature Value
+- Negate the DKLs signature V value
+
 ## v1.5.0
 - Add BLS12-381 curve
 - Add BLS signatures
+- Update to always produce DKLS low-s form
 
 ## v1.4.1
 - Update accumulator implementation to use alias-ing instead of one field structs

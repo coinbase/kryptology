@@ -11,8 +11,8 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core"
 	"github.com/btcsuite/btcd/btcec"
+	"github.com/coinbase/kryptology/pkg/core"
 	"io"
 	"math/big"
 )

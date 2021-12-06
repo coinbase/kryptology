@@ -13,9 +13,9 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/btcsuite/btcd/btcec"
 	"github.com/coinbase/kryptology/internal"
 	crypto "github.com/coinbase/kryptology/pkg/core"
-	"github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )

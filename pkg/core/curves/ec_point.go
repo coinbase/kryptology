@@ -13,8 +13,8 @@ import (
 	"github.com/coinbase/kryptology/pkg/core"
 	"math/big"
 
-	"github.com/coinbase/kryptology/internal"
 	"github.com/btcsuite/btcd/btcec"
+	"github.com/coinbase/kryptology/internal"
 )
 
 var curveNameToId = map[string]byte{

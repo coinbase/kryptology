@@ -13,10 +13,10 @@ import (
 
 	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
 
+	"github.com/btcsuite/btcd/btcec"
 	tt "github.com/coinbase/kryptology/internal"
 	crypto "github.com/coinbase/kryptology/pkg/core"
 	paillier "github.com/coinbase/kryptology/pkg/paillier"
-	"github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/assert"
 )
 
