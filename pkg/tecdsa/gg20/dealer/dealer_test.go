@@ -13,8 +13,8 @@ import (
 	"math/big"
 	"testing"
 
-	tt "github.com/coinbase/kryptology/internal"
 	"github.com/btcsuite/btcd/btcec"
+	tt "github.com/coinbase/kryptology/internal"
 )
 
 type proofParamsTest struct {

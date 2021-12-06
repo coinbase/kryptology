@@ -10,8 +10,8 @@ import (
 	"crypto/sha256"
 	"testing"
 
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/btcsuite/btcd/btcec"
+	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/stretchr/testify/require"
 )
 

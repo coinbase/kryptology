@@ -9,7 +9,7 @@ go get github.com/coinbase/kryptology
 
 Pin a specific release of this library:
 ```$xslt
-go get github.com/coinbase/kryptology@v1.0.0
+go get github.com/coinbase/kryptology@v1.5.1
 ```
 
 ## Components

@@ -373,7 +373,7 @@ func (b SigPop) AggregateSignatures(sigs ...*Signature) (*MultiSignature, error)
 	if err != nil {
 		return nil, err
 	}
-	return &MultiSignature{value: g1.value}, nil
+	return &MultiSignature{value: g1.Value}, nil
 }
 
 // Combine many public keys together to form a Multipublickey.
@@ -391,7 +391,7 @@ func (b SigPop) AggregatePublicKeys(pks ...*PublicKey) (*MultiPublicKey, error) 
 // combined. See section 3.3.4 from
 // https://tools.ietf.org/html/draft-irtf-cfrg-bls-signature-03
 func (b SigPop) VerifyMultiSignature(pk *MultiPublicKey, msg []byte, sig *MultiSignature) (bool, error) {
-	s := &Signature{value: sig.value}
+	s := &Signature{Value: sig.value}
 	p := &PublicKey{value: pk.value}
 	return p.verifySignature(msg, s, b.sigDst)
 }

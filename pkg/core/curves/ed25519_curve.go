@@ -13,9 +13,9 @@ import (
 	"filippo.io/edwards25519"
 	"filippo.io/edwards25519/field"
 	"fmt"
-	"github.com/coinbase/kryptology/internal"
 	"github.com/bwesterb/go-ristretto"
 	ed "github.com/bwesterb/go-ristretto/edwards25519"
+	"github.com/coinbase/kryptology/internal"
 	"io"
 	"math/big"
 )

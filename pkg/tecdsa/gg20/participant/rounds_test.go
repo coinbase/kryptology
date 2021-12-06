@@ -20,10 +20,10 @@ import (
 
 	"github.com/stretchr/testify/assert"
 
+	"github.com/btcsuite/btcd/btcec"
 	tt "github.com/coinbase/kryptology/internal"
 	"github.com/coinbase/kryptology/pkg/core"
 	"github.com/coinbase/kryptology/pkg/paillier"
-	"github.com/btcsuite/btcd/btcec"
 )
 
 var (

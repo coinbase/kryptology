@@ -16,8 +16,8 @@ import (
 	"github.com/coinbase/kryptology/pkg/sharing"
 	"math/big"
 
-	dkg "github.com/coinbase/kryptology/pkg/dkg/frost"
 	"github.com/btcsuite/btcd/btcec"
+	dkg "github.com/coinbase/kryptology/pkg/dkg/frost"
 )
 
 const LIMIT = 4

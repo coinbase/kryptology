@@ -61,7 +61,7 @@ func (pk *PublicKey) UnmarshalBinary(data []byte) error {
 
 // Represents a BLS signature in G2
 type Signature struct {
-	value bls12381.PointG2
+	Value bls12381.PointG2
 }
 
 // Serialize a signature to a byte array in compressed form.
@@ -69,7 +69,7 @@ type Signature struct {
 // https://github.com/zcash/librustzcash/blob/master/pairing/src/bls12_381/README.md#serialization
 // https://docs.rs/bls12_381/0.1.1/bls12_381/notes/serialization/index.html
 func (sig Signature) MarshalBinary() ([]byte, error) {
-	return blsEngine.G2.ToCompressed(&sig.value), nil
+	return blsEngine.G2.ToCompressed(&sig.Value), nil
 }
 
 func (sig Signature) verify(pk *PublicKey, message []byte, signDst string) (bool, error) {
@@ -96,7 +96,7 @@ func (sig Signature) coreAggregateVerify(pks []*PublicKey, msgs [][]byte, signDs
 	if len(pks) != len(msgs) {
 		return false, fmt.Errorf("the number of public keys does not match the number of messages: %v != %v", len(pks), len(msgs))
 	}
-	if !blsEngine.G2.InCorrectSubgroup(&sig.value) {
+	if !blsEngine.G2.InCorrectSubgroup(&sig.Value) {
 		return false, fmt.Errorf("signature is not in the correct subgroup")
 	}
 
@@ -119,7 +119,7 @@ func (sig Signature) coreAggregateVerify(pks []*PublicKey, msgs [][]byte, signDs
 		}
 		engine.AddPair(&pk.value, p2)
 	}
-	engine.AddPairInv(engine.G1.One(), &sig.value)
+	engine.AddPairInv(engine.G1.One(), &sig.Value)
 	return engine.Check()
 }
 
@@ -140,7 +140,7 @@ func (sig *Signature) UnmarshalBinary(data []byte) error {
 	if blsEngine.G2.IsZero(p2) {
 		return fmt.Errorf("signatures cannot be zero")
 	}
-	sig.value = *p2
+	sig.Value = *p2
 	return nil
 }
 
@@ -179,7 +179,7 @@ func (sk SecretKey) createSignature(message []byte, dst string) (*Signature, err
 	if !blsEngine.G2.InCorrectSubgroup(result) {
 		return nil, fmt.Errorf("point is not on correct subgroup")
 	}
-	return &Signature{value: *result}, nil
+	return &Signature{Value: *result}, nil
 }
 
 // Verify a signature is valid for the message under this public key.
@@ -188,7 +188,7 @@ func (pk PublicKey) verifySignature(message []byte, signature *Signature, dst st
 	if signature == nil || message == nil || blsEngine.G1.IsZero(&pk.value) {
 		return false, fmt.Errorf("signature and message and public key cannot be nil or zero")
 	}
-	if blsEngine.G2.IsZero(&signature.value) || !blsEngine.G2.InCorrectSubgroup(&signature.value) {
+	if blsEngine.G2.IsZero(&signature.Value) || !blsEngine.G2.InCorrectSubgroup(&signature.Value) {
 		return false, fmt.Errorf("signature is not in the correct subgroup")
 	}
 	engine := bls12381.NewEngine()
@@ -202,7 +202,7 @@ func (pk PublicKey) verifySignature(message []byte, signature *Signature, dst st
 	// by doing the equivalent of
 	// e(pk^-1, H(m)) * e(g1, s) == 1
 	engine.AddPair(&pk.value, p2)
-	engine.AddPairInv(engine.G1.One(), &signature.value)
+	engine.AddPairInv(engine.G1.One(), &signature.Value)
 	return engine.Check()
 }
 
@@ -234,12 +234,12 @@ func aggregateSignatures(sigs ...*Signature) (*Signature, error) {
 		if s == nil {
 			return nil, fmt.Errorf("signature at %d is nil, signature cannot be nil", i)
 		}
-		if !blsEngine.G2.InCorrectSubgroup(&s.value) {
+		if !blsEngine.G2.InCorrectSubgroup(&s.Value) {
 			return nil, fmt.Errorf("signature at %d is not in the correct subgroup", i)
 		}
-		blsEngine.G2.Add(result, result, &s.value)
+		blsEngine.G2.Add(result, result, &s.Value)
 	}
-	return &Signature{value: *result}, nil
+	return &Signature{Value: *result}, nil
 }
 
 // A proof of possession scheme uses a separate public key validation
@@ -266,7 +266,7 @@ func (sk SecretKey) createProofOfPossession(popDst string) (*ProofOfPossession, 
 	if err != nil {
 		return nil, err
 	}
-	return &ProofOfPossession{value: sig.value}, nil
+	return &ProofOfPossession{value: sig.Value}, nil
 }
 
 // Serialize a proof of possession to a byte array in compressed form.
@@ -289,7 +289,7 @@ func (pop *ProofOfPossession) UnmarshalBinary(data []byte) error {
 	if err != nil {
 		return err
 	}
-	pop.value = p2.value
+	pop.value = p2.Value
 	return nil
 }
 
@@ -303,7 +303,7 @@ func (pop ProofOfPossession) verify(pk *PublicKey, popDst string) (bool, error) 
 	if err != nil {
 		return false, err
 	}
-	return pk.verifySignature(msg, &Signature{value: pop.value}, popDst)
+	return pk.verifySignature(msg, &Signature{Value: pop.value}, popDst)
 }
 
 // Represents an MultiSignature in G2. A multisignature is used when multiple signatures
@@ -327,7 +327,7 @@ func (sig MultiSignature) verify(pk *MultiPublicKey, message []byte, signDst str
 		return false, fmt.Errorf("public key cannot be nil")
 	}
 	p := PublicKey{value: pk.value}
-	return p.verifySignature(message, &Signature{value: sig.value}, signDst)
+	return p.verifySignature(message, &Signature{Value: sig.value}, signDst)
 }
 
 // Deserialize a signature from a byte array in compressed form.
@@ -345,7 +345,7 @@ func (sig *MultiSignature) UnmarshalBinary(data []byte) error {
 	if err != nil {
 		return err
 	}
-	sig.value = s2.value
+	sig.value = s2.Value
 	return nil
 }
 
@@ -390,8 +390,8 @@ func (pk MultiPublicKey) verify(message []byte, sig *MultiSignature, signDst str
 // that can be combined with other partials to yield a completed BLS signature
 // See section 3.2 in <https://www.cc.gatech.edu/~aboldyre/papers/bold.pdf>
 type PartialSignature struct {
-	identifier byte
-	signature  bls12381.PointG2
+	Identifier byte
+	Signature  *bls12381.PointG2
 }
 
 // partialSign creates a partial signature that can be combined with other partial signatures
@@ -409,7 +409,7 @@ func (sks SecretKeyShare) partialSign(message []byte, signDst string) (*PartialS
 	if !blsEngine.G2.InCorrectSubgroup(result) {
 		return nil, fmt.Errorf("point is not on correct subgroup")
 	}
-	return &PartialSignature{identifier: sks.value.Identifier, signature: *result}, nil
+	return &PartialSignature{Identifier: sks.value.Identifier, Signature: result}, nil
 }
 
 // combineSigs gathers partial signatures and yields a complete signature
@@ -455,7 +455,7 @@ func combineSigs(partials []*PartialSignature) (*Signature, error) {
 		return nil, fmt.Errorf("signature is not in the correct subgroup")
 	}
 
-	return &Signature{value: *sig}, nil
+	return &Signature{Value: *sig}, nil
 }
 
 // Ensure no duplicates x values and convert x values to field elements
@@ -469,15 +469,15 @@ func splitXY(field *finitefield.Field, partials []*PartialSignature) ([]*finitef
 		if sp == nil {
 			return nil, nil, fmt.Errorf("partial signature cannot be nil")
 		}
-		if _, exists := dup[sp.identifier]; exists {
+		if _, exists := dup[sp.Identifier]; exists {
 			return nil, nil, fmt.Errorf("duplicate signature included")
 		}
-		if !blsEngine.G2.InCorrectSubgroup(&sp.signature) {
+		if !blsEngine.G2.InCorrectSubgroup(sp.Signature) {
 			return nil, nil, fmt.Errorf("signature is not in the correct subgroup")
 		}
-		dup[sp.identifier] = true
-		x[i] = field.ElementFromBytes([]byte{sp.identifier})
-		y[i] = &sp.signature
+		dup[sp.Identifier] = true
+		x[i] = field.ElementFromBytes([]byte{sp.Identifier})
+		y[i] = sp.Signature
 	}
 	return x, y, nil
 }

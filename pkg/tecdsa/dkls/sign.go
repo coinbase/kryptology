@@ -263,6 +263,10 @@ func (bob *Bob) signFinal(digest []byte, r io.Reader) error {
 	}
 	temp = sha256.Sum256(gamma2.Bytes())
 	bob.Sig.S = bob.params.Scalar.Add(sigB, bob.params.Scalar.Sub(input.EtaSig, new(big.Int).SetBytes(temp[:])))
+	if bob.Sig.S.Bit(255) == 1 {
+		bob.Sig.S = bob.params.Scalar.Neg(bob.Sig.S)
+		bob.Sig.V ^= 1
+	}
 	// now verify the signature
 	if !ecdsa.Verify(&ecdsa.PublicKey{Curve: bob.params.Curve, X: bob.Pk.X, Y: bob.Pk.Y}, digest, bob.Sig.R, bob.Sig.S) {
 		return fmt.Errorf("final signature failed to verify")
