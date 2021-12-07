@@ -104,7 +104,7 @@ AssertSomeError fails the test if err == nil
 func B10(s string) *big.Int
 ```
 
-B10 creating a big\.Int from a base 10 string\. panics on failure to to ensure zero\-values aren't used in place of malformed strings\.
+B10 creating a big\.Int from a base 10 string\. panics on failure to ensure zero\-values aren't used in place of malformed strings\.
 
 ## func [BigInt2Ed25519Point](<https://github.com/coinbase/kryptology/blob/master/internal/point.go#L31>)
 
