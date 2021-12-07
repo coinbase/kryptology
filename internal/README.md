@@ -148,7 +148,7 @@ salt is zero\-filled byte slice with length equal to the hash output length
 info is the protocol name
 okm is the 32 byte output
 
-The each subsequent iteration is computed by as okm\_i = KDF\(f\_i || value || okm\_\{i\-1\}\) where f\_i = 2^b \- 1 \- i such that there are 0xFF bytes prior to the value\. f\_1 changes the first byte to 0xFE\, f\_2 to 0xFD\. The previous okm is appended to the value to provide cryptographic domain separation See https://signal.org/docs/specifications/x3dh/#cryptographic-notation and https://signal.org/docs/specifications/xeddsa/#hash-functions for more details\. This uses the KDF function similar to X3DH for each \`value\` But changes the key just like XEdDSA where the prefix bytes change by a single bit
+The each subsequent iteration is computed by as okm\_i = KDF\(f\_i || value || okm\_\{i\-1\}\) where f\_i = 2^b \- 1 \- i such that there are 0xFF bytes prior to the value\. f\_1 changes the first byte to 0xFE\, f\_2 to 0xFD\. The previous okm is appended to the value to provide cryptographic domain separation. See https://signal.org/docs/specifications/x3dh/#cryptographic-notation and https://signal.org/docs/specifications/xeddsa/#hash-functions for more details\. This uses the KDF function similar to X3DH for each \`value\` But changes the key just like XEdDSA where the prefix bytes change by a single bit
 
 ## func [ReverseScalarBytes](<https://github.com/coinbase/kryptology/blob/master/internal/point.go#L21>)
 
