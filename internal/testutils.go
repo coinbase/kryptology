@@ -83,7 +83,7 @@ func AssertNil(t *testing.T, values ...*big.Int) {
 }
 
 // B10 creating a big.Int from a base 10 string. panics on failure to
-// to ensure zero-values aren't used in place of malformed strings.
+// ensure zero-values aren't used in place of malformed strings.
 func B10(s string) *big.Int {
 	x, ok := new(big.Int).SetString(s, 10)
 	if !ok {
