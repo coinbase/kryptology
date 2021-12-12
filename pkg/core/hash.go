@@ -238,7 +238,7 @@ func Hash(msg []byte, curve elliptic.Curve) (*big.Int, error) {
 // The each subsequent iteration is computed by as okm_i = KDF(f_i || value || okm_{i-1})
 // where f_i = 2^b - 1 - i such that there are 0xFF bytes prior to the value.
 // f_1 changes the first byte to 0xFE, f_2 to 0xFD. The previous okm is appended to the value
-// to provide cryptographic domain separation
+// to provide cryptographic domain separation.
 // See https://signal.org/docs/specifications/x3dh/#cryptographic-notation
 // and https://signal.org/docs/specifications/xeddsa/#hash-functions
 // for more details.
