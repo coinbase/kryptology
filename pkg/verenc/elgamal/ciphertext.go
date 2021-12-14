@@ -16,10 +16,10 @@ import (
 // CipherText represents verifiably encrypted ciphertext
 // using El-Gamal encryption
 type CipherText struct {
-	c1, c2      curves.Point
-	nonce       []byte
-	aead        []byte
-	msgIsHashed bool
+	C1, C2      curves.Point
+	Nonce       []byte
+	Aead        []byte
+	MsgIsHashed bool
 }
 
 // HomomorphicCipherText represents encrypted ciphertexts
@@ -28,7 +28,7 @@ type CipherText struct {
 // these are not homomorphic. This is solely for checking
 // results or ignoring the AEAD ciphertext.
 type HomomorphicCipherText struct {
-	c1, c2 curves.Point
+	C1, C2 curves.Point
 }
 
 type cipherTextMarshal struct {
@@ -48,14 +48,14 @@ type homomorphicCipherTextMarshal struct {
 
 func (c CipherText) MarshalBinary() ([]byte, error) {
 	tv := new(cipherTextMarshal)
-	tv.C1 = c.c1.ToAffineCompressed()
-	tv.C2 = c.c2.ToAffineCompressed()
-	tv.Nonce = make([]byte, len(c.nonce))
-	copy(tv.Nonce, c.nonce)
-	tv.Aead = make([]byte, len(c.aead))
-	tv.Curve = c.c1.CurveName()
-	copy(tv.Aead, c.aead)
-	tv.MsgIsHashed = c.msgIsHashed
+	tv.C1 = c.C1.ToAffineCompressed()
+	tv.C2 = c.C2.ToAffineCompressed()
+	tv.Nonce = make([]byte, len(c.Nonce))
+	copy(tv.Nonce, c.Nonce)
+	tv.Aead = make([]byte, len(c.Aead))
+	tv.Curve = c.C1.CurveName()
+	copy(tv.Aead, c.Aead)
+	tv.MsgIsHashed = c.MsgIsHashed
 	return bare.Marshal(tv)
 }
 
@@ -77,11 +77,11 @@ func (c *CipherText) UnmarshalBinary(data []byte) error {
 	if err != nil {
 		return err
 	}
-	c.c1 = c1
-	c.c2 = c2
-	c.aead = tv.Aead
-	c.nonce = tv.Nonce
-	c.msgIsHashed = tv.MsgIsHashed
+	c.C1 = c1
+	c.C2 = c2
+	c.Aead = tv.Aead
+	c.Nonce = tv.Nonce
+	c.MsgIsHashed = tv.MsgIsHashed
 
 	return nil
 }
@@ -90,16 +90,16 @@ func (c *CipherText) UnmarshalBinary(data []byte) error {
 // homomorphically multiplied
 func (c CipherText) ToHomomorphicCipherText() *HomomorphicCipherText {
 	return &HomomorphicCipherText{
-		c1: c.c1,
-		c2: c.c2,
+		C1: c.C1,
+		C2: c.C2,
 	}
 }
 
 // Add combines two ciphertexts multiplicatively homomorphic
 func (c HomomorphicCipherText) Add(rhs *HomomorphicCipherText) *HomomorphicCipherText {
 	return &HomomorphicCipherText{
-		c1: c.c1.Add(rhs.c1),
-		c2: c.c2.Add(rhs.c2),
+		C1: c.C1.Add(rhs.C1),
+		C2: c.C2.Add(rhs.C2),
 	}
 }
 
@@ -108,14 +108,14 @@ func (c HomomorphicCipherText) Decrypt(dk *DecryptionKey) (curves.Point, error) 
 	if dk == nil {
 		return nil, internal.ErrNilArguments
 	}
-	return c.c2.Sub(c.c1.Mul(dk.x)), nil
+	return c.C2.Sub(c.C1.Mul(dk.x)), nil
 }
 
 func (c HomomorphicCipherText) MarshalBinary() ([]byte, error) {
 	tv := new(homomorphicCipherTextMarshal)
-	tv.C1 = c.c1.ToAffineCompressed()
-	tv.C2 = c.c2.ToAffineCompressed()
-	tv.Curve = c.c1.CurveName()
+	tv.C1 = c.C1.ToAffineCompressed()
+	tv.C2 = c.C2.ToAffineCompressed()
+	tv.Curve = c.C1.CurveName()
 	return bare.Marshal(tv)
 }
 
@@ -137,7 +137,7 @@ func (c *HomomorphicCipherText) UnmarshalBinary(in []byte) error {
 	if err != nil {
 		return err
 	}
-	c.c1 = c1
-	c.c2 = c2
+	c.C1 = c1
+	c.C2 = c2
 	return nil
 }

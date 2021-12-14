@@ -94,8 +94,8 @@ func (ek *EncryptionKey) UnmarshalBinary(data []byte) error {
 func (ek EncryptionKey) HomomorphicEncrypt(msg curves.Scalar) (*HomomorphicCipherText, error) {
 	r := ek.value.Scalar().Random(crand.Reader)
 	return &HomomorphicCipherText{
-		c1: ek.value.Generator().Mul(r),
-		c2: ek.value.Mul(r).Add(ek.value.Generator().Mul(msg)),
+		C1: ek.value.Generator().Mul(r),
+		C2: ek.value.Mul(r).Add(ek.value.Generator().Mul(msg)),
 	}, nil
 }
 

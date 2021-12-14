@@ -68,7 +68,7 @@ func (dk *DecryptionKey) Decrypt(cipherText *HomomorphicCipherText) curves.Point
 	if cipherText == nil {
 		return nil
 	}
-	return cipherText.c2.Sub(cipherText.c1.Mul(dk.x))
+	return cipherText.C2.Sub(cipherText.C1.Mul(dk.x))
 }
 
 // VerifiableDecrypt the ciphertext. This performs verifiable decryption
@@ -101,7 +101,7 @@ func (dk DecryptionKey) VerifiableDecryptWithDomain(domain []byte, cipherText *C
 	}
 	ek := dk.EncryptionKey()
 	genBytes := append(domain, ek.value.ToAffineUncompressed()...)
-	genBytes = append(genBytes, cipherText.nonce...)
+	genBytes = append(genBytes, cipherText.Nonce...)
 
 	h := ek.value.Hash(genBytes)
 	lhs := h.Mul(msgScalar)
@@ -115,15 +115,15 @@ func (dk DecryptionKey) decryptData(cipherText *CipherText) ([]byte, curves.Scal
 	if cipherText == nil {
 		return nil, nil, nil, internal.ErrNilArguments
 	}
-	if cipherText.c1 == nil || cipherText.c2 == nil || cipherText.nonce == nil || cipherText.aead == nil {
+	if cipherText.C1 == nil || cipherText.C2 == nil || cipherText.Nonce == nil || cipherText.Aead == nil {
 		return nil, nil, nil, internal.ErrNilArguments
 	}
 	// Have to check these because aesgcm will panic if not the correct length
-	if len(cipherText.nonce) < 12 || len(cipherText.aead) < 16 {
+	if len(cipherText.Nonce) < 12 || len(cipherText.Aead) < 16 {
 		return nil, nil, nil, internal.ErrZeroValue
 	}
 	// r * Q
-	t := cipherText.c1.Mul(dk.x)
+	t := cipherText.C1.Mul(dk.x)
 
 	aeadKey, err := core.FiatShamir(new(big.Int).SetBytes(t.ToAffineCompressed()))
 	if err != nil {
@@ -138,15 +138,15 @@ func (dk DecryptionKey) decryptData(cipherText *CipherText) ([]byte, curves.Scal
 		return nil, nil, nil, err
 	}
 
-	aad := cipherText.c1.ToAffineUncompressed()
-	aad = append(aad, cipherText.c2.ToAffineUncompressed()...)
+	aad := cipherText.C1.ToAffineUncompressed()
+	aad = append(aad, cipherText.C2.ToAffineUncompressed()...)
 	// AAD = C1 || C2
-	msgBytes, err := aesGcm.Open(nil, cipherText.nonce, cipherText.aead, aad)
+	msgBytes, err := aesGcm.Open(nil, cipherText.Nonce, cipherText.Aead, aad)
 	if err != nil {
 		return nil, nil, nil, err
 	}
 	msg := dk.x.New(0)
-	if cipherText.msgIsHashed {
+	if cipherText.MsgIsHashed {
 		msg, err = msg.SetBytes(msgBytes)
 		if err != nil {
 			return nil, nil, nil, err
@@ -157,7 +157,7 @@ func (dk DecryptionKey) decryptData(cipherText *CipherText) ([]byte, curves.Scal
 	if err != nil {
 		return nil, nil, nil, err
 	}
-	rhs := cipherText.c2.Sub(t)
+	rhs := cipherText.C2.Sub(t)
 
 	return msgBytes, msg, rhs, nil
 }
