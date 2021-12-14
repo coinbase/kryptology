@@ -12,6 +12,7 @@ import (
 
 	"github.com/coinbase/kryptology/internal"
 	"github.com/coinbase/kryptology/pkg/core"
+	"github.com/coinbase/kryptology/pkg/paillier"
 	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
 	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/proof"
 )
@@ -68,10 +69,21 @@ func (dp *DkgParticipant) DkgRound2(params map[uint32]*DkgRound1Bcast) (*DkgRoun
 	dp.state.otherParticipantData = make(map[uint32]*dkgParticipantData)
 
 	// For j = [1...n]
+	expKeySize := 2 * paillier.PaillierPrimeBits
 	for id, param := range params {
 		// If i = j, Continue
 		if id == dp.id {
 			continue
+		}
+
+		// Mitigate possible attack from
+		// https://eprint.iacr.org/2021/1621.pdf
+		// by checking that paillier keys are the correct size
+		// See section 5
+		bitlen := param.Pki.N.BitLen()
+		if bitlen != expKeySize &&
+			bitlen != expKeySize-1 {
+			return nil, nil, fmt.Errorf("invalid paillier keys")
 		}
 
 		// If VerifyCompositeDL(pi_1j^CDL, g, q, h1j, h2j, tildeN_j) = False, Abort
