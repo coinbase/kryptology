@@ -5,6 +5,10 @@ All notable changes to this repo will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.5.2
+- Export Verifiable Encryption ECC ciphertext values
+- Update to GO 1.17
+
 ## v1.5.1
 - Export tBLS signature Value
 - Negate the DKLs signature V value

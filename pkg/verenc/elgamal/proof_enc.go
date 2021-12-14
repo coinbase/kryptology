@@ -124,7 +124,7 @@ func (ek EncryptionKey) genProof(nonce, msg []byte, msgIsHashed bool, cipherText
 	// R2 = r * Q + b * H
 	r2 := ek.value.Mul(r).Add(h.Mul(blinding))
 
-	challengeBytes := append(cipherText.c1.ToAffineCompressed(), cipherText.c2.ToAffineCompressed()...)
+	challengeBytes := append(cipherText.C1.ToAffineCompressed(), cipherText.C2.ToAffineCompressed()...)
 	challengeBytes = append(challengeBytes, r1.ToAffineCompressed()...)
 	challengeBytes = append(challengeBytes, r2.ToAffineCompressed()...)
 	challengeBytes = append(challengeBytes, nonce...)
@@ -157,12 +157,12 @@ func (ek EncryptionKey) VerifyDomainEncryptProof(nonce []byte, ciphertext *Ciphe
 	if proof.challenge == nil || proof.schnorr1 == nil || proof.schnorr2 == nil {
 		return internal.ErrNilArguments
 	}
-	if ciphertext.c1 == nil || ciphertext.c2 == nil {
+	if ciphertext.C1 == nil || ciphertext.C2 == nil {
 		return internal.ErrNilArguments
 	}
 
 	genBytes := append(nonce, ek.value.ToAffineUncompressed()...)
-	genBytes = append(genBytes, ciphertext.nonce[:]...)
+	genBytes = append(genBytes, ciphertext.Nonce[:]...)
 	h := ek.value.Hash(genBytes)
 	return ek.verify(nonce, ciphertext, proof, h)
 }
@@ -177,7 +177,7 @@ func (ek EncryptionKey) VerifyEncryptProof(nonce []byte, ciphertext *CipherText,
 	if proof.challenge == nil || proof.schnorr1 == nil || proof.schnorr2 == nil {
 		return internal.ErrNilArguments
 	}
-	if ciphertext.c1 == nil || ciphertext.c2 == nil {
+	if ciphertext.C1 == nil || ciphertext.C2 == nil {
 		return internal.ErrNilArguments
 	}
 
@@ -189,15 +189,15 @@ func (ek EncryptionKey) verify(nonce []byte, ciphertext *CipherText, proof *Proo
 	// Reconstruct R1
 	// R1 = c * C1 + schnorr2 * G = c * ( b * G ) + (r - cb) * G
 	// = (cb + r - cb) * G = r * G
-	r1 := ciphertext.c1.Mul(proof.challenge).Add(ek.value.Generator().Mul(proof.schnorr2))
+	r1 := ciphertext.C1.Mul(proof.challenge).Add(ek.value.Generator().Mul(proof.schnorr2))
 	// Reconstruct R2
 	// R2 = c * C2 + schnorr2 * Q + schnorr1 * H =
 	// c * (b * Q + m * H) + (r - cb) * Q + (b - cm) * H =
 	// (cb + r - cb) * Q + (cm + b - cm) * H =
 	// r * Q + b * H
-	r2 := ciphertext.c2.Mul(proof.challenge).Add(ek.value.Mul(proof.schnorr2)).Add(h.Mul(proof.schnorr1))
+	r2 := ciphertext.C2.Mul(proof.challenge).Add(ek.value.Mul(proof.schnorr2)).Add(h.Mul(proof.schnorr1))
 
-	challengeBytes := append(ciphertext.c1.ToAffineCompressed(), ciphertext.c2.ToAffineCompressed()...)
+	challengeBytes := append(ciphertext.C1.ToAffineCompressed(), ciphertext.C2.ToAffineCompressed()...)
 	challengeBytes = append(challengeBytes, r1.ToAffineCompressed()...)
 	challengeBytes = append(challengeBytes, r2.ToAffineCompressed()...)
 	challengeBytes = append(challengeBytes, nonce...)

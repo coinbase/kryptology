@@ -33,8 +33,8 @@ func TestCipherTextMarshal(t *testing.T) {
 	dup := new(CipherText)
 	err = dup.UnmarshalBinary(bin)
 	require.NoError(t, err)
-	require.True(t, cs.c1.Equal(dup.c1))
-	require.True(t, cs.c2.Equal(dup.c2))
-	require.Equal(t, cs.nonce, dup.nonce)
-	require.Equal(t, cs.aead, dup.aead)
+	require.True(t, cs.C1.Equal(dup.C1))
+	require.True(t, cs.C2.Equal(dup.C2))
+	require.Equal(t, cs.Nonce, dup.Nonce)
+	require.Equal(t, cs.Aead, dup.Aead)
 }

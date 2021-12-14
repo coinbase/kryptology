@@ -38,19 +38,19 @@ func TestDecryptionKeyDecryptBadCiphertext(t *testing.T) {
 	require.Error(t, err)
 
 	cs := new(CipherText)
-	cs.c1 = k256.Point.Generator()
-	cs.c2 = k256.Point.Generator()
-	cs.nonce = make([]byte, 12)
-	cs.aead = make([]byte, 16)
+	cs.C1 = k256.Point.Generator()
+	cs.C2 = k256.Point.Generator()
+	cs.Nonce = make([]byte, 12)
+	cs.Aead = make([]byte, 16)
 
 	// empty data in ciphertext
 	_, _, err = dk.VerifiableDecryptWithDomain([]byte{}, cs)
 	require.Error(t, err)
 
-	cs.c1 = k256.Point.Identity()
-	cs.c2 = k256.Point.Identity()
-	cs.nonce = []byte{}
-	cs.aead = []byte{}
+	cs.C1 = k256.Point.Identity()
+	cs.C2 = k256.Point.Identity()
+	cs.Nonce = []byte{}
+	cs.Aead = []byte{}
 	// ensure no panic happens when nonce and aead are invalid lengths
 	_, _, err = dk.VerifiableDecryptWithDomain([]byte{}, cs)
 	require.Error(t, err)
