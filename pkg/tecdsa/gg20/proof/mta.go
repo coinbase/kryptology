@@ -849,7 +849,15 @@ func (pi Range2Proof) wHatConstruct(pp *verifyProof2Params) (*big.Int, error) {
 // [spec] fig 12: MtaProveRange2
 func rand2(N, Ntilde, q *big.Int) (*randProof2Params, error) {
 	// Rings in which we'll operate
+	q2, err := core.Mul(q, q, nil)
+	if err != nil {
+		return nil, err
+	}
 	q3, err := core.Exp(q, big.NewInt(3), nil) // q^3
+	if err != nil {
+		return nil, err
+	}
+	q2N, err := core.Mul(q2, N, nil) // q^2N
 	if err != nil {
 		return nil, err
 	}
@@ -882,11 +890,14 @@ func rand2(N, Ntilde, q *big.Int) (*randProof2Params, error) {
 	if err != nil {
 		return nil, err
 	}
-	gamma, err := core.Rand(N)
+	// Draw bigger random values to mitigate possible attack
+	// from https://eprint.iacr.org/2021/1621.pdf.
+	// See section 5
+	gamma, err := core.Rand(q2N)
 	if err != nil {
 		return nil, err
 	}
-	tau, err := core.Rand(qNtilde)
+	tau, err := core.Rand(q3Ntilde)
 	if err != nil {
 		return nil, err
 	}
