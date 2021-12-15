@@ -1,4 +1,6 @@
 # Kryptology
+[![GoDoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](https://pkg.go.dev/github.com/coinbase/kryptology)
+
 Coinbase's advanced cryptography library
 
 ## Quickstart
