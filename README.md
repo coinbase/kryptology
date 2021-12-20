@@ -21,7 +21,7 @@ go get github.com/coinbase/kryptology@v1.5.1
     - [DKLs18](pkg/tecdsa/dkls)
 - [Distributed key generation](pkg/dkg/gennaro) 
     - [BLS DKG](test/dkg/bls)
-    - [ed25119 DKG](test/dkg/ed25519)
+    - [ed25519 DKG](test/dkg/ed25519)
 - [Verifiable encryption](pkg/verenc)
     
 ## Developer Setup
