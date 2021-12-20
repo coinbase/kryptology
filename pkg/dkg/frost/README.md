@@ -14,6 +14,9 @@ import "github.com/coinbase/kryptology/pkg/dkg/frost"
   - [func (dp *DkgParticipant) Round2(bcast map[uint32]*Round1Bcast, p2psend map[uint32]*sharing.ShamirShare) (*Round2Bcast, error)](<#func-dkgparticipant-round2>)
 - [type Round1Bcast](<#type-round1bcast>)
 - [type Round1P2PSend](<#type-round1p2psend>)
+- [type Round1Result](<#type-round1result>)
+  - [func (result *Round1Result) Decode(input []byte) error](<#func-round1result-decode>)
+  - [func (result *Round1Result) Encode() ([]byte, error)](<#func-round1result-encode>)
 - [type Round2Bcast](<#type-round2bcast>)
 
 
@@ -70,6 +73,27 @@ Round1P2PSend are values that are P2PSend to all other participants after round1
 
 ```go
 type Round1P2PSend = map[uint32]*sharing.ShamirShare
+```
+
+## type [Round1Result](<https://github.com/coinbase/kryptology/blob/master/pkg/dkg/frost/dkg_round1.go#L28-L31>)
+
+```go
+type Round1Result struct {
+    Broadcast *Round1Bcast
+    P2P       *sharing.ShamirShare
+}
+```
+
+### func \(\*Round1Result\) [Decode](<https://github.com/coinbase/kryptology/blob/master/pkg/dkg/frost/dkg_round1.go#L44>)
+
+```go
+func (result *Round1Result) Decode(input []byte) error
+```
+
+### func \(\*Round1Result\) [Encode](<https://github.com/coinbase/kryptology/blob/master/pkg/dkg/frost/dkg_round1.go#L33>)
+
+```go
+func (result *Round1Result) Encode() ([]byte, error)
 ```
 
 ## type [Round2Bcast](<https://github.com/coinbase/kryptology/blob/master/pkg/dkg/frost/dkg_round2.go#L18-L21>)

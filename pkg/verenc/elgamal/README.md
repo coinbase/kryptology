@@ -52,7 +52,10 @@ CipherText represents verifiably encrypted ciphertext using El\-Gamal encryption
 
 ```go
 type CipherText struct {
-    // contains filtered or unexported fields
+    C1, C2      curves.Point
+    Nonce       []byte
+    Aead        []byte
+    MsgIsHashed bool
 }
 ```
 
@@ -210,7 +213,7 @@ HomomorphicCipherText represents encrypted ciphertexts that have been added toge
 
 ```go
 type HomomorphicCipherText struct {
-    // contains filtered or unexported fields
+    C1, C2 curves.Point
 }
 ```
 

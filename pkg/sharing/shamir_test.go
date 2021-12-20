@@ -108,7 +108,11 @@ func TestShamirComputeL(t *testing.T) {
 	shares, err := scheme.Split(secret, crand.Reader)
 	assert.Nil(t, err)
 	assert.NotNil(t, shares)
-	lCoeffs, err := scheme.LagrangeCoeffs(map[uint32]*ShamirShare{1: shares[0], 2: shares[1]})
+	identities := make([]uint32, 0)
+	for _, xi := range shares {
+		identities = append(identities, xi.Id)
+	}
+	lCoeffs, err := scheme.LagrangeCoeffs(identities)
 	assert.Nil(t, err)
 	assert.NotNil(t, lCoeffs)
 

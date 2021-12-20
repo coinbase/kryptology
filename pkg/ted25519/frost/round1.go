@@ -7,14 +7,37 @@
 package frost
 
 import (
+	"bytes"
 	crand "crypto/rand"
+	"encoding/gob"
 	"github.com/coinbase/kryptology/internal"
 	"github.com/coinbase/kryptology/pkg/core/curves"
+	"github.com/pkg/errors"
 )
 
 // Round1Bcast contains values to be broadcast to all players after the completion of signing round 1.
 type Round1Bcast struct {
 	Di, Ei curves.Point
+}
+
+func (result *Round1Bcast) Encode() ([]byte, error) {
+	gob.Register(result.Di) // just the point for now
+	gob.Register(result.Ei)
+	buf := &bytes.Buffer{}
+	enc := gob.NewEncoder(buf)
+	if err := enc.Encode(result); err != nil {
+		return nil, errors.Wrap(err, "couldn't encode round 1 broadcast")
+	}
+	return buf.Bytes(), nil
+}
+
+func (result *Round1Bcast) Decode(input []byte) error {
+	buf := bytes.NewBuffer(input)
+	dec := gob.NewDecoder(buf)
+	if err := dec.Decode(result); err != nil {
+		return errors.Wrap(err, "couldn't encode round 1 broadcast")
+	}
+	return nil
 }
 
 func (signer *Signer) SignRound1() (*Round1Bcast, error) {

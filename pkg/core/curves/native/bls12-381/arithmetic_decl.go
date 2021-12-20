@@ -3,7 +3,7 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-
+//go:build amd64 && !generic
 // +build amd64,!generic
 
 package bls12381

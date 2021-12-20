@@ -58,14 +58,12 @@ func main() {
 		shares[i] = &sharing.ShamirShare{Id: uint32(i + 1), Value: participants[uint32(i+1)].SkShare.Bytes()}
 	}
 
-	lCoeffs, _ := scheme.LagrangeCoeffs(map[uint32]*sharing.ShamirShare{
-		shares[0].Id: shares[0],
-		shares[1].Id: shares[1],
-		shares[2].Id: shares[2],
-	})
+	lCoeffs, err := scheme.LagrangeCoeffs([]uint32{shares[0].Id, shares[1].Id, shares[2].Id})
+	if err != nil {
+		panic(err)
+	}
 
 	// Using signer starting from 1 as cosigners
-	var err error
 	signerIds := make([]uint32, threshold)
 	for i := 0; i < threshold; i++ {
 		signerIds[i] = uint32(i + 1)

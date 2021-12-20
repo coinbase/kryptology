@@ -84,5 +84,5 @@ func TestEncryptionKeyMarshaling(t *testing.T) {
 	ekClone := new(EncryptionKey)
 	err = ekClone.UnmarshalBinary(bin)
 	require.NoError(t, err)
-	require.True(t, ek.value.Equal(ekClone.value))
+	require.True(t, ek.Value.Equal(ekClone.Value))
 }

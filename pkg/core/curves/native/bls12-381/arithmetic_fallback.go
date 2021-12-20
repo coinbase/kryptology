@@ -4,7 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// +build !amd64 generic
+//go:build !amd64 && generic
+// +build !amd64,generic
 
 // Native go field arithmetic code is generated with 'goff'
 // https://github.com/ConsenSys/goff

@@ -80,10 +80,7 @@ func main() {
 	fmt.Printf("Signature verification - %v\n", ok)
 
 	// Test threshold signing
-	lCoeffs, err := scheme.LagrangeCoeffs(map[uint32]*sharing.ShamirShare{
-		signingShares[1].Id: signingShares[1],
-		signingShares[2].Id: signingShares[2],
-	})
+	lCoeffs, err := scheme.LagrangeCoeffs([]uint32{signingShares[1].Id, signingShares[2].Id})
 	if err != nil {
 		panic(err)
 	}

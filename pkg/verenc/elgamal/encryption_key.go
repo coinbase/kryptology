@@ -45,7 +45,7 @@ type EncryptParams struct {
 // EncryptionKey encrypts a message to a ciphertext from which
 // zero-knowledge proofs can be derived
 type EncryptionKey struct {
-	value curves.Point
+	Value curves.Point
 }
 
 // NewKeys creates a new key pair for El-Gamal encryption
@@ -67,8 +67,8 @@ func NewKeys(curve *curves.Curve) (*EncryptionKey, *DecryptionKey, error) {
 // MarshalBinary serializes a key to bytes
 func (ek EncryptionKey) MarshalBinary() ([]byte, error) {
 	tv := new(encryptionKeyMarshal)
-	tv.Curve = ek.value.CurveName()
-	tv.Value = ek.value.ToAffineCompressed()
+	tv.Curve = ek.Value.CurveName()
+	tv.Value = ek.Value.ToAffineCompressed()
 	return bare.Marshal(tv)
 }
 
@@ -87,21 +87,21 @@ func (ek *EncryptionKey) UnmarshalBinary(data []byte) error {
 	if err != nil {
 		return err
 	}
-	ek.value = value
+	ek.Value = value
 	return nil
 }
 
 func (ek EncryptionKey) HomomorphicEncrypt(msg curves.Scalar) (*HomomorphicCipherText, error) {
-	r := ek.value.Scalar().Random(crand.Reader)
+	r := ek.Value.Scalar().Random(crand.Reader)
 	return &HomomorphicCipherText{
-		C1: ek.value.Generator().Mul(r),
-		C2: ek.value.Mul(r).Add(ek.value.Generator().Mul(msg)),
+		C1: ek.Value.Generator().Mul(r),
+		C2: ek.Value.Mul(r).Add(ek.Value.Generator().Mul(msg)),
 	}, nil
 }
 
 func (ek EncryptionKey) encryptWithRandNonce(msg []byte, msgIsHashed bool, r curves.Scalar, h curves.Point, nonce []byte) (*CipherText, error) {
 	// r * Q
-	t := ek.value.Mul(r)
+	t := ek.Value.Mul(r)
 	// Derive AEAD encryption key
 	aeadKey, err := core.FiatShamir(new(big.Int).SetBytes(t.ToAffineCompressed()))
 	if err != nil {
@@ -117,7 +117,7 @@ func (ek EncryptionKey) encryptWithRandNonce(msg []byte, msgIsHashed bool, r cur
 	}
 
 	// C1 = r * G
-	c1 := ek.value.Generator().Mul(r)
+	c1 := ek.Value.Generator().Mul(r)
 	// C2 = m * H + r * Q
 	msgScalar := r.New(0)
 	if msgIsHashed {

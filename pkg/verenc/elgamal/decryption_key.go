@@ -30,7 +30,7 @@ type DecryptionKey struct {
 // EncryptionKey returns the corresponding encryption key for this decryption key
 func (dk DecryptionKey) EncryptionKey() *EncryptionKey {
 	return &EncryptionKey{
-		value: dk.x.Point().Generator().Mul(dk.x),
+		Value: dk.x.Point().Generator().Mul(dk.x),
 	}
 }
 
@@ -80,7 +80,7 @@ func (dk DecryptionKey) VerifiableDecrypt(cipherText *CipherText) ([]byte, curve
 	if err != nil {
 		return nil, nil, err
 	}
-	h := dk.EncryptionKey().value.Generator()
+	h := dk.EncryptionKey().Value.Generator()
 	lhs := h.Mul(msgScalar)
 	if !lhs.Equal(rhs) {
 		return nil, nil, fmt.Errorf("ciphertext mismatch")
@@ -100,10 +100,10 @@ func (dk DecryptionKey) VerifiableDecryptWithDomain(domain []byte, cipherText *C
 		return nil, nil, err
 	}
 	ek := dk.EncryptionKey()
-	genBytes := append(domain, ek.value.ToAffineUncompressed()...)
+	genBytes := append(domain, ek.Value.ToAffineUncompressed()...)
 	genBytes = append(genBytes, cipherText.Nonce...)
 
-	h := ek.value.Hash(genBytes)
+	h := ek.Value.Hash(genBytes)
 	lhs := h.Mul(msgScalar)
 	if !lhs.Equal(rhs) {
 		return nil, nil, fmt.Errorf("ciphertext mismatch")

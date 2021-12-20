@@ -77,9 +77,9 @@ func (ek EncryptionKey) VerifiableEncrypt(msg []byte, params *EncryptParams) (*C
 		return nil, nil, internal.ErrNilArguments
 	}
 	if params.Blinding == nil {
-		params.Blinding = ek.value.Scalar().Random(crand.Reader)
+		params.Blinding = ek.Value.Scalar().Random(crand.Reader)
 		for params.Blinding.IsZero() {
-			params.Blinding = ek.value.Scalar().Random(crand.Reader)
+			params.Blinding = ek.Value.Scalar().Random(crand.Reader)
 		}
 	} else if params.Blinding.IsZero() {
 		return nil, nil, internal.ErrZeroValue
@@ -92,12 +92,12 @@ func (ek EncryptionKey) VerifiableEncrypt(msg []byte, params *EncryptParams) (*C
 
 	if params.Domain == nil {
 		// With no domain, the generator is used as h
-		h = ek.value.Generator()
+		h = ek.Value.Generator()
 	} else {
 		// If domain is provided, calculate h using domain as part of the input, then encrypt
-		genBytes := append(params.Domain, ek.value.ToAffineUncompressed()...)
+		genBytes := append(params.Domain, ek.Value.ToAffineUncompressed()...)
 		genBytes = append(genBytes, cnonce...)
-		h = ek.value.Hash(genBytes)
+		h = ek.Value.Hash(genBytes)
 	}
 
 	cipherText, err = ek.encryptWithRandNonce(msg, params.MessageIsHashed, params.Blinding, h, cnonce)
@@ -118,17 +118,17 @@ func (ek EncryptionKey) VerifiableEncrypt(msg []byte, params *EncryptParams) (*C
 }
 
 func (ek EncryptionKey) genProof(nonce, msg []byte, msgIsHashed bool, cipherText *CipherText, blinding curves.Scalar, h curves.Point) (*ProofVerEnc, error) {
-	r := ek.value.Scalar().Random(crand.Reader)
+	r := ek.Value.Scalar().Random(crand.Reader)
 	// R1 = r * G
-	r1 := ek.value.Generator().Mul(r)
+	r1 := ek.Value.Generator().Mul(r)
 	// R2 = r * Q + b * H
-	r2 := ek.value.Mul(r).Add(h.Mul(blinding))
+	r2 := ek.Value.Mul(r).Add(h.Mul(blinding))
 
 	challengeBytes := append(cipherText.C1.ToAffineCompressed(), cipherText.C2.ToAffineCompressed()...)
 	challengeBytes = append(challengeBytes, r1.ToAffineCompressed()...)
 	challengeBytes = append(challengeBytes, r2.ToAffineCompressed()...)
 	challengeBytes = append(challengeBytes, nonce...)
-	challenge := ek.value.Scalar().Hash(challengeBytes)
+	challenge := ek.Value.Scalar().Hash(challengeBytes)
 	// b - cm
 	var msgScalar curves.Scalar
 	var err error
@@ -161,9 +161,9 @@ func (ek EncryptionKey) VerifyDomainEncryptProof(nonce []byte, ciphertext *Ciphe
 		return internal.ErrNilArguments
 	}
 
-	genBytes := append(nonce, ek.value.ToAffineUncompressed()...)
+	genBytes := append(nonce, ek.Value.ToAffineUncompressed()...)
 	genBytes = append(genBytes, ciphertext.Nonce[:]...)
-	h := ek.value.Hash(genBytes)
+	h := ek.Value.Hash(genBytes)
 	return ek.verify(nonce, ciphertext, proof, h)
 }
 
@@ -181,7 +181,7 @@ func (ek EncryptionKey) VerifyEncryptProof(nonce []byte, ciphertext *CipherText,
 		return internal.ErrNilArguments
 	}
 
-	h := ek.value.Generator()
+	h := ek.Value.Generator()
 	return ek.verify(nonce, ciphertext, proof, h)
 }
 
@@ -189,13 +189,13 @@ func (ek EncryptionKey) verify(nonce []byte, ciphertext *CipherText, proof *Proo
 	// Reconstruct R1
 	// R1 = c * C1 + schnorr2 * G = c * ( b * G ) + (r - cb) * G
 	// = (cb + r - cb) * G = r * G
-	r1 := ciphertext.C1.Mul(proof.challenge).Add(ek.value.Generator().Mul(proof.schnorr2))
+	r1 := ciphertext.C1.Mul(proof.challenge).Add(ek.Value.Generator().Mul(proof.schnorr2))
 	// Reconstruct R2
 	// R2 = c * C2 + schnorr2 * Q + schnorr1 * H =
 	// c * (b * Q + m * H) + (r - cb) * Q + (b - cm) * H =
 	// (cb + r - cb) * Q + (cm + b - cm) * H =
 	// r * Q + b * H
-	r2 := ciphertext.C2.Mul(proof.challenge).Add(ek.value.Mul(proof.schnorr2)).Add(h.Mul(proof.schnorr1))
+	r2 := ciphertext.C2.Mul(proof.challenge).Add(ek.Value.Mul(proof.schnorr2)).Add(h.Mul(proof.schnorr1))
 
 	challengeBytes := append(ciphertext.C1.ToAffineCompressed(), ciphertext.C2.ToAffineCompressed()...)
 	challengeBytes = append(challengeBytes, r1.ToAffineCompressed()...)

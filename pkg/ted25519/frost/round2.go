@@ -7,15 +7,38 @@
 package frost
 
 import (
+	"bytes"
+	"encoding/gob"
 	"fmt"
 	"github.com/coinbase/kryptology/internal"
 	"github.com/coinbase/kryptology/pkg/core/curves"
+	"github.com/pkg/errors"
 )
 
 // Round2Bcast contains values that will be broadcast to other signers after completion of round 2.
 type Round2Bcast struct {
-	zi  curves.Scalar
-	vki curves.Point
+	Zi  curves.Scalar
+	Vki curves.Point
+}
+
+func (result *Round2Bcast) Encode() ([]byte, error) {
+	gob.Register(result.Zi)
+	gob.Register(result.Vki) // just the point for now
+	buf := &bytes.Buffer{}
+	enc := gob.NewEncoder(buf)
+	if err := enc.Encode(result); err != nil {
+		return nil, errors.Wrap(err, "couldn't encode round 1 broadcast")
+	}
+	return buf.Bytes(), nil
+}
+
+func (result *Round2Bcast) Decode(input []byte) error {
+	buf := bytes.NewBuffer(input)
+	dec := gob.NewDecoder(buf)
+	if err := dec.Decode(result); err != nil {
+		return errors.Wrap(err, "couldn't encode round 1 broadcast")
+	}
+	return nil
 }
 
 // SignRound2 implements FROST signing round 2.
