@@ -49,11 +49,8 @@ func TestSignRound1Works(t *testing.T) {
 	require.NotNil(t, p2)
 
 	scheme, _ := sharing.NewShamir(2, 2, testCurve)
-	lCoeffs, _ := scheme.LagrangeCoeffs(map[uint32]*sharing.ShamirShare{
-		p1.Id: {Id: p1.Id, Value: p1.SkShare.Bytes()},
-		p2.Id: {Id: p2.Id, Value: p2.SkShare.Bytes()},
-	})
-
+	lCoeffs, err := scheme.LagrangeCoeffs([]uint32{p1.Id, p2.Id})
+	require.NoError(t, err)
 	signer1, err := NewSigner(p1, 1, 2, lCoeffs, []uint32{1, 2}, &Ed25519ChallengeDeriver{})
 	require.NoError(t, err)
 	round1Out, _ := signer1.SignRound1()
@@ -70,12 +67,10 @@ func TestSignRound1Works(t *testing.T) {
 func TestSignRound1RepeatCall(t *testing.T) {
 	p1, p2 := PrepareDkgOutput(t)
 	scheme, _ := sharing.NewShamir(2, 2, testCurve)
-	lCoeffs, _ := scheme.LagrangeCoeffs(map[uint32]*sharing.ShamirShare{
-		p1.Id: {Id: p1.Id, Value: p1.SkShare.Bytes()},
-		p2.Id: {Id: p2.Id, Value: p2.SkShare.Bytes()},
-	})
+	lCoeffs, err := scheme.LagrangeCoeffs([]uint32{p1.Id, p2.Id})
+	require.NoError(t, err)
 	signer1, _ := NewSigner(p1, 1, 2, lCoeffs, []uint32{1, 2}, &Ed25519ChallengeDeriver{})
-	_, err := signer1.SignRound1()
+	_, err = signer1.SignRound1()
 	require.NoError(t, err)
 	_, err = signer1.SignRound1()
 	require.Error(t, err)
@@ -90,10 +85,7 @@ func PrepareNewSigners(t *testing.T) (*Signer, *Signer) {
 	// field = sharing.NewField(p1.curve.Params().N)
 	require.NotNil(t, scheme)
 	require.NoError(t, err)
-	lCoeffs, err := scheme.LagrangeCoeffs(map[uint32]*sharing.ShamirShare{
-		p1.Id: {Id: p1.Id, Value: p1.SkShare.Bytes()},
-		p2.Id: {Id: p2.Id, Value: p2.SkShare.Bytes()},
-	})
+	lCoeffs, err := scheme.LagrangeCoeffs([]uint32{p1.Id, p2.Id})
 	require.NotNil(t, lCoeffs[1])
 	require.NotNil(t, lCoeffs[2])
 	require.NoError(t, err)
@@ -224,10 +216,7 @@ func PrepareRound3Input(t *testing.T) (*Signer, *Signer, map[uint32]*Round2Bcast
 	scheme, err := sharing.NewShamir(threshold, limit, testCurve)
 	require.NotNil(t, scheme)
 	require.NoError(t, err)
-	lCoeffs, err := scheme.LagrangeCoeffs(map[uint32]*sharing.ShamirShare{
-		p1.Id: {Id: p1.Id, Value: p1.SkShare.Bytes()},
-		p2.Id: {Id: p2.Id, Value: p2.SkShare.Bytes()},
-	})
+	lCoeffs, err := scheme.LagrangeCoeffs([]uint32{p1.Id, p2.Id})
 	require.NotNil(t, lCoeffs[1])
 	require.NotNil(t, lCoeffs[2])
 	require.NoError(t, err)
@@ -266,6 +255,21 @@ func TestSignRound3Works(t *testing.T) {
 	// signer1 and signer2 outputs the same signature
 	require.Equal(t, round3Out1.Z, round3Out2.Z)
 	require.Equal(t, round3Out1.C, round3Out2.C)
+
+	// test verify method
+	msg := []byte("message")
+	signature := &Signature{
+		round3Out1.Z,
+		round3Out1.C,
+	}
+	vk := signer1.verificationKey
+	ok, err := signer1.Verify(vk, msg, signature)
+	require.True(t, ok)
+	require.NoError(t, err)
+
+	ok, err = signer2.Verify(vk, msg, signature)
+	require.True(t, ok)
+	require.NoError(t, err)
 }
 
 func TestSignRound3RepeatCall(t *testing.T) {
@@ -295,7 +299,7 @@ func TestSignRound3BadInput(t *testing.T) {
 
 	// Actual test: maul the round3Input
 	signer1, _, round3Input = PrepareRound3Input(t)
-	round3Input[signer1.id].zi = round3Input[signer1.id].zi.Add(testCurve.Scalar.New(2))
+	round3Input[signer1.id].Zi = round3Input[signer1.id].Zi.Add(testCurve.Scalar.New(2))
 	_, err = signer1.SignRound3(round3Input)
 	require.Error(t, err)
 
@@ -307,9 +311,9 @@ func TestSignRound3BadInput(t *testing.T) {
 }
 
 func TestFullRoundsWorks(t *testing.T) {
-	// Give a full-round test (FROST DKG + FROST Signing) with threshold = 3 and limit = 5, same as the test of tECDSA
-	threshold := 3
-	limit := 5
+	// Give a full-round test (FROST DKG + FROST Signing) with threshold = 2 and limit = 3, same as the test of tECDSA
+	threshold := 2
+	limit := 3
 
 	// Prepare DKG participants
 	participants := make(map[uint32]*dkg.DkgParticipant, limit)
@@ -353,51 +357,46 @@ func TestFullRoundsWorks(t *testing.T) {
 
 	// Prepare Lagrange coefficients
 	scheme, _ := sharing.NewShamir(uint32(threshold), uint32(limit), testCurve)
-	lCoeffs, _ := scheme.LagrangeCoeffs(map[uint32]*sharing.ShamirShare{
-		participants[1].Id: {Id: participants[1].Id, Value: participants[1].SkShare.Bytes()},
-		participants[2].Id: {Id: participants[2].Id, Value: participants[2].SkShare.Bytes()},
-		participants[3].Id: {Id: participants[3].Id, Value: participants[3].SkShare.Bytes()},
-	})
 
-	// Using signer 1, 2 and 3 as cosigners
-	var err error
+	// Here we use {1, 3} as 2 of 3 cosigners, we can also set cosigners as {1, 2}, {2, 3}
+	signerIds := []uint32{1, 3}
+	lCoeffs, err := scheme.LagrangeCoeffs(signerIds)
+	require.NoError(t, err)
 	signers := make(map[uint32]*Signer, threshold)
-	for i := 1; i <= threshold; i++ {
-		signers[uint32(i)], err = NewSigner(participants[uint32(i)], uint32(i), uint32(threshold), lCoeffs, []uint32{1, 2, 3}, &Ed25519ChallengeDeriver{})
+	for _, id := range signerIds {
+		signers[id], err = NewSigner(participants[id], id, uint32(threshold), lCoeffs, signerIds, &Ed25519ChallengeDeriver{})
 		require.NoError(t, err)
-		require.NotNil(t, signers[uint32(i)].skShare)
+		require.NotNil(t, signers[id].skShare)
 	}
 
 	// Running sign round 1
 	round2Input := make(map[uint32]*Round1Bcast, threshold)
-	for i := 1; i <= threshold; i++ {
-		round1Out, err := signers[uint32(i)].SignRound1()
+	for id := range signers {
+		round1Out, err := signers[id].SignRound1()
 		require.NoError(t, err)
-		round2Input[signers[uint32(i)].id] = round1Out
+		round2Input[signers[id].id] = round1Out
 	}
 
 	// Running sign round 2
 	msg := []byte("message")
 	round3Input := make(map[uint32]*Round2Bcast, threshold)
-	for i := 1; i <= threshold; i++ {
-		round2Out, err := signers[uint32(i)].SignRound2(msg, round2Input)
+	for id := range signers {
+		round2Out, err := signers[id].SignRound2(msg, round2Input)
 		require.NoError(t, err)
-		round3Input[signers[uint32(i)].id] = round2Out
+		round3Input[signers[id].id] = round2Out
 	}
 
 	// Running sign round 3
 	result := make(map[uint32]*Round3Bcast, threshold)
-	for i := 1; i <= threshold; i++ {
-		round3Out, err := signers[uint32(i)].SignRound3(round3Input)
+	for id := range signers {
+		round3Out, err := signers[id].SignRound3(round3Input)
 		require.NoError(t, err)
-		result[signers[uint32(i)].id] = round3Out
+		result[signers[id].id] = round3Out
 	}
 
 	// Every signer has the same output Schnorr signature
-	z := result[1].Z
-	require.Equal(t, z, result[2].Z)
-	require.Equal(t, z, result[3].Z)
-	c := result[1].C
-	require.Equal(t, c, result[2].C)
-	require.Equal(t, c, result[3].C)
+	require.Equal(t, result[1].Z, result[3].Z)
+	// require.Equal(t, z, result[3].Z)
+	require.Equal(t, result[1].C, result[3].C)
+	// require.Equal(t, c, result[3].C)
 }

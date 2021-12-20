@@ -5,6 +5,9 @@ All notable changes to this repo will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.5.4
+- Export Value in ElGamal Public Keys
+
 ## v1.5.3
 - Address Alpha-Rays attack on GG20 DKG https://eprint.iacr.org/2021/1621.pdf
 

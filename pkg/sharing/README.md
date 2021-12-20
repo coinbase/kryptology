@@ -32,7 +32,7 @@ import "github.com/coinbase/kryptology/pkg/sharing"
   - [func NewShamir(threshold, limit uint32, curve *curves.Curve) (*Shamir, error)](<#func-newshamir>)
   - [func (s Shamir) Combine(shares ...*ShamirShare) (curves.Scalar, error)](<#func-shamir-combine>)
   - [func (s Shamir) CombinePoints(shares ...*ShamirShare) (curves.Point, error)](<#func-shamir-combinepoints>)
-  - [func (s Shamir) LagrangeCoeffs(shares map[uint32]*ShamirShare) (map[uint32]curves.Scalar, error)](<#func-shamir-lagrangecoeffs>)
+  - [func (s Shamir) LagrangeCoeffs(identities []uint32) (map[uint32]curves.Scalar, error)](<#func-shamir-lagrangecoeffs>)
   - [func (s Shamir) Split(secret curves.Scalar, reader io.Reader) ([]*ShamirShare, error)](<#func-shamir-split>)
 - [type ShamirShare](<#type-shamirshare>)
   - [func (ss ShamirShare) Bytes() []byte](<#func-shamirshare-bytes>)

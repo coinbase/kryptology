@@ -85,7 +85,11 @@ func (f Feldman) LagrangeCoeffs(shares map[uint32]*ShamirShare) (map[uint32]curv
 		limit:     f.Limit,
 		curve:     f.Curve,
 	}
-	return shamir.LagrangeCoeffs(shares)
+	identities := make([]uint32, 0)
+	for _, xi := range shares {
+		identities = append(identities, xi.Id)
+	}
+	return shamir.LagrangeCoeffs(identities)
 }
 
 func (f Feldman) Combine(shares ...*ShamirShare) (curves.Scalar, error) {

@@ -7,11 +7,14 @@
 package frost
 
 import (
+	"bytes"
 	crand "crypto/rand"
+	"encoding/gob"
 	"fmt"
 	"github.com/coinbase/kryptology/internal"
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/sharing"
+	"github.com/pkg/errors"
 	"reflect"
 )
 
@@ -20,6 +23,31 @@ import (
 type Round1Bcast struct {
 	Verifiers *sharing.FeldmanVerifier
 	Wi, Ci    curves.Scalar
+}
+
+type Round1Result struct {
+	Broadcast *Round1Bcast
+	P2P       *sharing.ShamirShare
+}
+
+func (result *Round1Result) Encode() ([]byte, error) {
+	gob.Register(result.Broadcast.Verifiers.Commitments[0]) // just the point for now
+	gob.Register(result.Broadcast.Ci)
+	buf := &bytes.Buffer{}
+	enc := gob.NewEncoder(buf)
+	if err := enc.Encode(result); err != nil {
+		return nil, errors.Wrap(err, "couldn't encode round 1 broadcast")
+	}
+	return buf.Bytes(), nil
+}
+
+func (result *Round1Result) Decode(input []byte) error {
+	buf := bytes.NewBuffer(input)
+	dec := gob.NewDecoder(buf)
+	if err := dec.Decode(result); err != nil {
+		return errors.Wrap(err, "couldn't encode round 1 broadcast")
+	}
+	return nil
 }
 
 // Round1P2PSend are values that are P2PSend to all other participants

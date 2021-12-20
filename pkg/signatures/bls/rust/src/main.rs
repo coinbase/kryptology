@@ -1,3 +1,9 @@
+//
+// Copyright Coinbase, Inc. All Rights Reserved.
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
 use bls_sigs_ref::BLSSignaturePop;
 use miracl_core::{
     bls12381::{

@@ -20,6 +20,12 @@ type Round3Bcast struct {
 	msg  []byte
 }
 
+// Define frost signature type
+type Signature struct {
+	Z curves.Scalar
+	C curves.Scalar
+}
+
 func (signer *Signer) SignRound3(round3Input map[uint32]*Round2Bcast) (*Round3Bcast, error) {
 	// Make sure signer is not empty
 	if signer == nil || signer.curve == nil {
@@ -66,8 +72,8 @@ func (signer *Signer) SignRound3(round3Input map[uint32]*Round2Bcast) (*Round3Bc
 	z := signer.curve.NewScalar()
 	negate := signer.state.sumR.IsNegative()
 	for id, data := range round3Input {
-		zj := data.zi
-		vkj := data.vki
+		zj := data.Zi
+		vkj := data.Vki
 
 		// Step 2: Verify zj*G = Rj + c*Lj*vkj
 		// zj*G
@@ -121,4 +127,29 @@ func (signer *Signer) SignRound3(round3Input map[uint32]*Round2Bcast) (*Round3Bc
 		signer.state.c,
 		signer.state.msg,
 	}, nil
+}
+
+// Method to verify a frost signature.
+func (signer *Signer) Verify(vk curves.Point, message []byte, signature *Signature) (bool, error) {
+	if vk == nil || message == nil || signature.Z == nil || signature.C == nil {
+		return false, fmt.Errorf("invalid input!")
+	}
+	z := signature.Z
+	c := signature.C
+	// R' = z*G + (-c)*vk
+	zG := signer.curve.ScalarBaseMult(z)
+	cvk := vk.Mul(c.Neg())
+	tempR := zG.Add(cvk)
+	// Step 6 - c' = H(m, R')
+	tempC, err := signer.challengeDeriver.DeriveChallenge(signer.state.msg, signer.verificationKey, tempR)
+	if err != nil {
+		return false, err
+	}
+
+	// Step 7 - Check c = c'
+	if tempC.Cmp(c) != 0 {
+		return false, fmt.Errorf("invalid signature: c != c'")
+	}
+
+	return true, nil
 }

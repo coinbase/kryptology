@@ -80,13 +80,13 @@ func (s Shamir) getPolyAndShares(secret curves.Scalar, reader io.Reader) ([]*Sha
 	return shares, poly
 }
 
-func (s Shamir) LagrangeCoeffs(shares map[uint32]*ShamirShare) (map[uint32]curves.Scalar, error) {
-	xs := make(map[uint32]curves.Scalar, len(shares))
-	for i, xi := range shares {
-		xs[i] = s.curve.Scalar.New(int(xi.Id))
+func (s Shamir) LagrangeCoeffs(identities []uint32) (map[uint32]curves.Scalar, error) {
+	xs := make(map[uint32]curves.Scalar, len(identities))
+	for _, xi := range identities {
+		xs[xi] = s.curve.Scalar.New(int(xi))
 	}
 
-	result := make(map[uint32]curves.Scalar, len(shares))
+	result := make(map[uint32]curves.Scalar, len(identities))
 	for i, xi := range xs {
 		num := s.curve.Scalar.One()
 		den := s.curve.Scalar.One()

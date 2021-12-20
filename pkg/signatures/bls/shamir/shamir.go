@@ -1,3 +1,9 @@
+//
+// Copyright Coinbase, Inc. All Rights Reserved.
+//
+// SPDX-License-Identifier: Apache-2.0
+//
+
 /*
 Package shamir is a port of the hashicorp/vault implementation of Shamir's Secret Sharing
 which has been modified to work with a finite field rather than arbitrary length content.

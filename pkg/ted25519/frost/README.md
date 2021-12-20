@@ -12,13 +12,19 @@ import "github.com/coinbase/kryptology/pkg/ted25519/frost"
 - [type Ed25519ChallengeDeriver](<#type-ed25519challengederiver>)
   - [func (ed Ed25519ChallengeDeriver) DeriveChallenge(msg []byte, pubKey curves.Point, r curves.Point) (curves.Scalar, error)](<#func-ed25519challengederiver-derivechallenge>)
 - [type Round1Bcast](<#type-round1bcast>)
+  - [func (result *Round1Bcast) Decode(input []byte) error](<#func-round1bcast-decode>)
+  - [func (result *Round1Bcast) Encode() ([]byte, error)](<#func-round1bcast-encode>)
 - [type Round2Bcast](<#type-round2bcast>)
+  - [func (result *Round2Bcast) Decode(input []byte) error](<#func-round2bcast-decode>)
+  - [func (result *Round2Bcast) Encode() ([]byte, error)](<#func-round2bcast-encode>)
 - [type Round3Bcast](<#type-round3bcast>)
+- [type Signature](<#type-signature>)
 - [type Signer](<#type-signer>)
   - [func NewSigner(info *frost.DkgParticipant, id, thresh uint32, lcoeffs map[uint32]curves.Scalar, cosigners []uint32, challengeDeriver ChallengeDerive) (*Signer, error)](<#func-newsigner>)
   - [func (signer *Signer) SignRound1() (*Round1Bcast, error)](<#func-signer-signround1>)
   - [func (signer *Signer) SignRound2(msg []byte, round2Input map[uint32]*Round1Bcast) (*Round2Bcast, error)](<#func-signer-signround2>)
   - [func (signer *Signer) SignRound3(round3Input map[uint32]*Round2Bcast) (*Round3Bcast, error)](<#func-signer-signround3>)
+  - [func (signer *Signer) Verify(vk curves.Point, message []byte, signature *Signature) (bool, error)](<#func-signer-verify>)
 
 
 ## type [ChallengeDerive](<https://github.com/coinbase/kryptology/blob/master/pkg/ted25519/frost/challenge_derive.go#L14-L16>)
@@ -51,14 +57,39 @@ type Round1Bcast struct {
 }
 ```
 
-## type [Round2Bcast](<https://github.com/coinbase/kryptology/blob/master/pkg/ted25519/frost/round2.go#L16-L19>)
+### func \(\*Round1Bcast\) [Decode](<https://github.com/coinbase/kryptology/blob/master/pkg/ted25519/frost/round1.go#L34>)
+
+```go
+func (result *Round1Bcast) Decode(input []byte) error
+```
+
+### func \(\*Round1Bcast\) [Encode](<https://github.com/coinbase/kryptology/blob/master/pkg/ted25519/frost/round1.go#L23>)
+
+```go
+func (result *Round1Bcast) Encode() ([]byte, error)
+```
+
+## type [Round2Bcast](<https://github.com/coinbase/kryptology/blob/master/pkg/ted25519/frost/round2.go#L19-L22>)
 
 Round2Bcast contains values that will be broadcast to other signers after completion of round 2\.
 
 ```go
 type Round2Bcast struct {
-    // contains filtered or unexported fields
+    Zi  curves.Scalar
+    Vki curves.Point
 }
+```
+
+### func \(\*Round2Bcast\) [Decode](<https://github.com/coinbase/kryptology/blob/master/pkg/ted25519/frost/round2.go#L35>)
+
+```go
+func (result *Round2Bcast) Decode(input []byte) error
+```
+
+### func \(\*Round2Bcast\) [Encode](<https://github.com/coinbase/kryptology/blob/master/pkg/ted25519/frost/round2.go#L24>)
+
+```go
+func (result *Round2Bcast) Encode() ([]byte, error)
 ```
 
 ## type [Round3Bcast](<https://github.com/coinbase/kryptology/blob/master/pkg/ted25519/frost/round3.go#L17-L21>)
@@ -70,6 +101,17 @@ type Round3Bcast struct {
     R    curves.Point
     Z, C curves.Scalar
     // contains filtered or unexported fields
+}
+```
+
+## type [Signature](<https://github.com/coinbase/kryptology/blob/master/pkg/ted25519/frost/round3.go#L24-L27>)
+
+Define frost signature type
+
+```go
+type Signature struct {
+    Z   curves.Scalar
+    C   curves.Scalar
 }
 ```
 
@@ -110,6 +152,14 @@ SignRound2 implements FROST signing round 2\.
 ```go
 func (signer *Signer) SignRound3(round3Input map[uint32]*Round2Bcast) (*Round3Bcast, error)
 ```
+
+### func \(\*Signer\) [Verify](<https://github.com/coinbase/kryptology/blob/master/pkg/ted25519/frost/round3.go#L133>)
+
+```go
+func (signer *Signer) Verify(vk curves.Point, message []byte, signature *Signature) (bool, error)
+```
+
+Method to verify a frost signature\.
 
 
 
