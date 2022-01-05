@@ -249,7 +249,7 @@ func benchSign(b *testing.B, hash []byte, curve elliptic.Curve, verify curves.Ec
 		}
 		p2p[i], err = s.SignRound2(in, nil) // TODO: fix me later
 		if err != nil {
-			return nil
+			return err
 		}
 	}
 

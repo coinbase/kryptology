@@ -408,7 +408,7 @@ func (b SigPop) VerifyMultiSignature(pk *MultiPublicKey, msg []byte, sig *MultiS
 func (b SigPop) FastAggregateVerify(pks []*PublicKey, msg []byte, asig *Signature) (bool, error) {
 	apk, err := aggregatePublicKeys(pks...)
 	if err != nil {
-		return false, nil
+		return false, err
 	}
 	return apk.verifySignature(msg, asig, b.sigDst)
 }
