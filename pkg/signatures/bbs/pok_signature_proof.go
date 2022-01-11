@@ -8,6 +8,7 @@ package bbs
 
 import (
 	"fmt"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/signatures/common"
 	"github.com/gtank/merlin"
@@ -139,7 +140,7 @@ func (pok PokSignatureProof) GetChallengeContribution(
 
 	r := pok.aPrime.SumOfProducts(rPoints, rScalars)
 
-	pts := 2 + generators.length - len(revealedMessages)
+	pts := 3 + generators.length - len(revealedMessages)
 	proof2Points := make([]curves.Point, 3, pts)
 	proof2Scalars := make([]curves.Scalar, 3, pts)
 
