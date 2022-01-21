@@ -206,8 +206,17 @@ func genResponseProof(rp ResponseProofParams, wc bool) (*ResponseProof, error) {
 	}
 	// 2. Set N = Pk.N
 
-	// 3. \beta' = Z_{\mathbb{N}}
-	betaTick, err := core.Rand(rp.Pk.N)
+	// Draw from a smaller range to mitigate bit probing attack
+	// The attack is described in section 4.1 from
+	// https://info.fireblocks.com/hubfs/A_Note_on_the_Security_of_GG.pdf
+	// The mitigation is described in section 3 from
+	// https://eprint.iacr.org/2019/114.pdf
+	// 3. \beta' = Z_{\mathbb{q5}}
+	q5, err := core.Exp(rp.Curve.Params().N, big.NewInt(5), nil)
+	if err != nil {
+		return nil, err
+	}
+	betaTick, err := core.Rand(q5)
 	if err != nil {
 		return nil, err
 	}
@@ -693,10 +702,25 @@ func verify2Proof(pi Range2Proof, pp *verifyProof2Params, wc bool) error {
 		return err
 	}
 
+	q7, err := core.Exp(pp.curve.Params().N, big.NewInt(7), nil) // q^7
+	if err != nil {
+		return err
+	}
+
 	// 2: If s1 > q3, Return False
 	if pi.s1.Cmp(q3) == 1 {
 		return fmt.Errorf("s1 > q3")
 	}
+
+	// Mitigate bit probing attack
+	// The attack is described in section 4.1 from
+	// https://info.fireblocks.com/hubfs/A_Note_on_the_Security_of_GG.pdf
+	// The mitigation is described in Appendix A.3 from
+	// https://eprint.iacr.org/2019/114.pdf
+	if pi.t1.Cmp(q7) == 1 {
+		return fmt.Errorf("t1 > q7")
+	}
+
 	// steps 3 and 4 are needed only if wc: we check for X=g^x
 
 	// step 5
@@ -849,15 +873,11 @@ func (pi Range2Proof) wHatConstruct(pp *verifyProof2Params) (*big.Int, error) {
 // [spec] fig 12: MtaProveRange2
 func rand2(N, Ntilde, q *big.Int) (*randProof2Params, error) {
 	// Rings in which we'll operate
-	q2, err := core.Mul(q, q, nil)
-	if err != nil {
-		return nil, err
-	}
 	q3, err := core.Exp(q, big.NewInt(3), nil) // q^3
 	if err != nil {
 		return nil, err
 	}
-	q2N, err := core.Mul(q2, N, nil) // q^2N
+	q7, err := core.Exp(q, big.NewInt(7), nil) // q^7
 	if err != nil {
 		return nil, err
 	}
@@ -890,13 +910,19 @@ func rand2(N, Ntilde, q *big.Int) (*randProof2Params, error) {
 	if err != nil {
 		return nil, err
 	}
-	// Draw bigger random values to mitigate possible attack
-	// from https://eprint.iacr.org/2021/1621.pdf.
-	// See section 5
-	gamma, err := core.Rand(q2N)
+
+	// Draw from a smaller range to mitigate bit probing attack
+	// The attack is described in section 4.1 from
+	// https://info.fireblocks.com/hubfs/A_Note_on_the_Security_of_GG.pdf
+	// The mitigation is described in Appendix A.3 from
+	// https://eprint.iacr.org/2019/114.pdf
+	gamma, err := core.Rand(q7)
 	if err != nil {
 		return nil, err
 	}
+	// Draw bigger random values to mitigate possible attack
+	// from https://eprint.iacr.org/2021/1621.pdf.
+	// See section 5
 	tau, err := core.Rand(q3Ntilde)
 	if err != nil {
 		return nil, err
