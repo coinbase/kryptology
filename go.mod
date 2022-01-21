@@ -6,10 +6,8 @@ require (
 	filippo.io/edwards25519 v1.0.0-rc.1
 	git.sr.ht/~sircmpwn/go-bare v0.0.0-20210406120253-ab86bc2846d9
 	github.com/btcsuite/btcd v0.21.0-beta.0.20201114000516-e9c7a5ac6401
-	github.com/btcsuite/btcutil v1.0.2
 	github.com/bwesterb/go-ristretto v1.2.0
 	github.com/consensys/gnark-crypto v0.5.3
-	github.com/dropbox/godropbox v0.0.0-20200228041828-52ad444d3502
 	github.com/gtank/merlin v0.1.1
 	github.com/nixberg/chacha-rng-go v0.1.0
 	github.com/pkg/errors v0.9.1
