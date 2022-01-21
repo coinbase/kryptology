@@ -3,8 +3,11 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-// Package proof contains the proof of discrete logarithm (PDL) subprotocol from [spec] §8
 
+// Package proof contains the following implementations
+//  - proof of discrete logarithm (PDL) subprotocol from [spec] §8
+//  - multiplicative-to-additive (MtA) subprotocol from [spec] §7
+//  - proof of knowledge of a discrete log modulo a composite (fig 16), i.e., ProveCompositeDL and VerifyCompositeDL
 package proof
 
 import (
