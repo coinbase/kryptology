@@ -2,7 +2,7 @@
 
 set -eo pipefail
 
-ROOT=$( cd $(dirname $0)/..;  pwd )
+ROOT=$( cd "$(dirname "$0")/.."; pwd )
 
 TMP_DIR=$(mktemp -d)
 echo "tmp dir: $TMP_DIR"
