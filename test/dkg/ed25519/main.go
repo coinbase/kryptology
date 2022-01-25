@@ -7,15 +7,12 @@
 package main
 
 import (
-	"crypto/rand"
 	"crypto/sha512"
 	"flag"
 	"fmt"
-	"log"
-	"math/big"
-
+	
 	"github.com/coinbase/kryptology/pkg/core/curves"
-	v1 "github.com/coinbase/kryptology/pkg/sharing/v1"
+	"github.com/coinbase/kryptology/pkg/sharing/v1"
 
 	"filippo.io/edwards25519"
 	"github.com/coinbase/kryptology/internal"
@@ -203,9 +200,11 @@ func round3(participants map[uint32]*dkg.Participant, rnd2Bcast map[uint32]dkg.R
 
 func createDkgParticipants(thresh, limit int) map[uint32]*dkg.Participant {
 	curve := v1.Ed25519()
-	generator, err := curves.NewScalarBaseMult(curve, getRandomBigInt())
-	if err != nil {
-		log.Fatalf("Failed to create generator: %v", err)
+	gx, gy := curve.Hash([]byte("Fair is foul, and foul is fair: Hover through the fog and filthy air."))
+	generator := &curves.EcPoint{
+		Curve: curve,
+		X:     gx,
+		Y:     gy,
 	}
 	participants := make(map[uint32]*dkg.Participant, limit)
 	for i := 1; i <= limit; i++ {
@@ -225,19 +224,6 @@ func createDkgParticipants(thresh, limit int) map[uint32]*dkg.Participant {
 		participants[uint32(i)] = p
 	}
 	return participants
-}
-
-func getRandomBigInt() *big.Int {
-	// Max random value, a 130-bits integer, i.e 2^130 - 1
-	max := new(big.Int)
-	max.Exp(big.NewInt(2), big.NewInt(130), nil).Sub(max, big.NewInt(1))
-
-	//Generate cryptographically strong pseudo-random between 0 - max
-	n, err := rand.Int(rand.Reader, max)
-	if err != nil {
-		log.Fatalf("Failed to generate random number: %v", err)
-	}
-	return n
 }
 
 func printHelp() {

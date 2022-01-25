@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+// Package bbs is an implementation of BBS+ signature of https://eprint.iacr.org/2016/663.pdf
 package bbs
 
 import (
