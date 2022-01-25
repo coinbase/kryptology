@@ -37,6 +37,8 @@ deps: ## Build dockerized autodoc tools
 .PHONY: docs
 docs: ## Apply copyright headers and re-build package-level documents
 	@${DOCTOOLS} spdx
+
+gen-readme-docs:
 	@${DOCTOOLS} gomarkdoc --output '{{.Dir}}/README.md' ./...
 
 .PHONY: deflake

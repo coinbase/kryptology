@@ -17,6 +17,7 @@ comments:
   go: '//'
   rs: '//'
 ignore:
+  - 'pkg/signatures/schnorr/mina/bitvector\.go$'
   - 'testdata/'
   - 'test/data'
   - 'Cargo\.lock$'

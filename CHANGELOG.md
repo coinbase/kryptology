@@ -14,6 +14,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## v1.5.2
 - Export Verifiable Encryption ECC ciphertext values
 - Update to GO 1.17
+- Add Mina network ID to transactions
 
 ## v1.5.1
 - Export tBLS signature Value
@@ -29,10 +30,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Update accumulator implementation marshaling implementation
 
 ## v1.4.0
+- Update Mina sign/verify API
 - Update verifiable encryption API
 
 ## v1.3.0
 - Add Accumulator
+- Add Mina signing
+- Add NEM signing
 - Update for new curve abstraction
 - Update verifiable encryption API 
 
@@ -43,6 +47,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add DKLS threshold signing 
 - Add curve abstraction
 - Pasta Curves: Pallas and Vesta
+- Mina protocol signing
 - BBS+ signatures
 
 ## v1.1.0
