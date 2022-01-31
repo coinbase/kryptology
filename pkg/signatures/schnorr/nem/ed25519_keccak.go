@@ -1,9 +1,3 @@
-//
-// Copyright Coinbase, Inc. All Rights Reserved.
-//
-// SPDX-License-Identifier: Apache-2.0
-//
-
 // This file implements the Ed25519 signature algorithm. See
 // https://ed25519.cr.yp.to/.
 //
