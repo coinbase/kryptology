@@ -4,8 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-//go:build !amd64 && generic
-// +build !amd64,generic
+//go:build !amd64 || generic
+// +build !amd64 generic
 
 // Native go field arithmetic code is generated with 'goff'
 // https://github.com/ConsenSys/goff
@@ -158,26 +158,15 @@ func subAssign(z, x *fe) {
 }
 
 func updateIfBNotZero(z *fe, b uint64) {
-	// Get cmove flag based off of b
-	bIsZero := b == 0
-	isZeroToMap := make(map[bool]uint)
-	isZeroToMap[true] = 0
-	isZeroToMap[false] = 1
-
-	flag := isZeroToMap[bIsZero]
-
-	// To set if B is not Zero
-	zPrime := &fe{}
-	var c uint64
-	zPrime[0], c = bits.Add64(z[0], 13402431016077863595, 0)
-	zPrime[1], c = bits.Add64(z[1], 2210141511517208575, c)
-	zPrime[2], c = bits.Add64(z[2], 7435674573564081700, c)
-	zPrime[3], c = bits.Add64(z[3], 7239337960414712511, c)
-	zPrime[4], c = bits.Add64(z[4], 5412103778470702295, c)
-	zPrime[5], _ = bits.Add64(z[5], 1873798617647539866, c)
-
-	// Move zPrime into z if flag
-	z.cmove(flag, zPrime)
+	if b != 0 {
+		var c uint64
+		z[0], c = bits.Add64(z[0], 13402431016077863595, 0)
+		z[1], c = bits.Add64(z[1], 2210141511517208575, c)
+		z[2], c = bits.Add64(z[2], 7435674573564081700, c)
+		z[3], c = bits.Add64(z[3], 7239337960414712511, c)
+		z[4], c = bits.Add64(z[4], 5412103778470702295, c)
+		z[5], _ = bits.Add64(z[5], 1873798617647539866, c)
+	}
 }
 
 func lsubAssign(z, x *fe) {
@@ -191,6 +180,10 @@ func lsubAssign(z, x *fe) {
 }
 
 func neg(z *fe, x *fe) {
+	if x.isZero() {
+		z.zero()
+		return
+	}
 	var borrow uint64
 	z[0], borrow = bits.Sub64(13402431016077863595, x[0], 0)
 	z[1], borrow = bits.Sub64(2210141511517208575, x[1], borrow)
@@ -198,16 +191,6 @@ func neg(z *fe, x *fe) {
 	z[3], borrow = bits.Sub64(7239337960414712511, x[3], borrow)
 	z[4], borrow = bits.Sub64(5412103778470702295, x[4], borrow)
 	z[5], _ = bits.Sub64(1873798617647539866, x[5], borrow)
-
-	isZeroToMap := make(map[bool]uint)
-	isZeroToMap[true] = 1
-	isZeroToMap[false] = 0
-
-	flag := isZeroToMap[x.isZero()]
-	zPrime := &fe{}
-	zPrime.zero()
-
-	z.cmove(flag, zPrime)
 }
 
 func mul(z, x, y *fe) {
@@ -417,34 +400,15 @@ func square(z, x *fe) {
 
 // zminusq
 func zMinusQConstantTime(z *fe) {
-	// Get q as fe
-	q := &fe{
-		13402431016077863595,
-		2210141511517208575,
-		7435674573564081700,
-		7239337960414712511,
-		5412103778470702295,
-		1873798617647539866,
+	if !(z[5] < 1873798617647539866 || (z[5] == 1873798617647539866 && (z[4] < 5412103778470702295 || (z[4] == 5412103778470702295 && (z[3] < 7239337960414712511 || (z[3] == 7239337960414712511 && (z[2] < 7435674573564081700 || (z[2] == 7435674573564081700 && (z[1] < 2210141511517208575 || (z[1] == 2210141511517208575 && (z[0] < 13402431016077863595))))))))))) {
+		var b uint64
+		z[0], b = bits.Sub64(z[0], 13402431016077863595, 0)
+		z[1], b = bits.Sub64(z[1], 2210141511517208575, b)
+		z[2], b = bits.Sub64(z[2], 7435674573564081700, b)
+		z[3], b = bits.Sub64(z[3], 7239337960414712511, b)
+		z[4], b = bits.Sub64(z[4], 5412103778470702295, b)
+		z[5], _ = bits.Sub64(z[5], 1873798617647539866, b)
 	}
-
-	// if z > q -> 1
-	// if z < q -> -1
-	// if z == q -> 0
-	cmpZQ := z.cmp(q)
-	// twiddle cmpZQ st 1 --> 1, {-1,0} --> 0
-	flag := ^((cmpZQ - 1) >> 31) & 1
-
-	// z-q
-	zPrime := &fe{}
-	var b uint64
-	zPrime[0], b = bits.Sub64(z[0], q[0], 0)
-	zPrime[1], b = bits.Sub64(z[1], q[1], b)
-	zPrime[2], b = bits.Sub64(z[2], q[2], b)
-	zPrime[3], b = bits.Sub64(z[3], q[3], b)
-	zPrime[4], b = bits.Sub64(z[4], q[4], b)
-	zPrime[5], _ = bits.Sub64(z[5], q[5], b)
-
-	z.cmove(uint(flag), zPrime)
 }
 
 // arith.go
