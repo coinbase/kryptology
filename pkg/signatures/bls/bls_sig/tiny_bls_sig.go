@@ -7,12 +7,11 @@
 package bls_sig
 
 import (
-	"crypto/sha256"
 	"fmt"
 	"math/big"
 
-	bls12381 "github.com/coinbase/kryptology/pkg/core/curves/native/bls12-381"
 	"github.com/coinbase/kryptology/pkg/signatures/bls/finitefield"
+	bls12381 "github.com/kilic/bls12-381"
 )
 
 // Implement BLS signatures on the BLS12-381 curve
@@ -119,7 +118,7 @@ func (sig *SignatureVt) coreAggregateVerify(pks []*PublicKeyVt, msgs [][]byte, s
 		if engine.G2.IsZero(&pk.value) || !engine.G2.InCorrectSubgroup(&pk.value) {
 			return false, fmt.Errorf("public key at %d is not in the correct subgroup", i)
 		}
-		p1, err := engine.G1.HashToCurve(sha256.New, msgs[i], dst)
+		p1, err := engine.G1.HashToCurve(msgs[i], dst)
 		if err != nil {
 			return false, err
 		}
@@ -128,7 +127,7 @@ func (sig *SignatureVt) coreAggregateVerify(pks []*PublicKeyVt, msgs [][]byte, s
 	g2 := engine.G2.One()
 	engine.G2.Neg(g2, g2)
 	engine.AddPair(&sig.value, g2)
-	return engine.Check()
+	return engine.Check(), nil
 }
 
 // Deserialize a signature from a byte array in compressed form.
@@ -156,7 +155,7 @@ func (sig *SignatureVt) UnmarshalBinary(data []byte) error {
 // Verifies the public key is in the correct subgroup
 func (sk *SecretKey) GetPublicKeyVt() (*PublicKeyVt, error) {
 	result := blsEngine.G2.New()
-	blsEngine.G2.MulScalar(result, blsEngine.G2.One(), &sk.value)
+	blsEngine.G2.MulScalarBig(result, blsEngine.G2.One(), &sk.value)
 	if !blsEngine.G2.InCorrectSubgroup(result) || blsEngine.G2.IsZero(result) {
 		return nil, fmt.Errorf("point is not in correct subgroup")
 	}
@@ -178,12 +177,12 @@ func (sk *SecretKey) createSignatureVt(message []byte, dstVt string) (*Signature
 	if sk.value.Cmp(big.NewInt(0)) == 0 {
 		return nil, fmt.Errorf("invalid secret key")
 	}
-	p1, err := blsEngine.G1.HashToCurve(sha256.New, message, []byte(dstVt))
+	p1, err := blsEngine.G1.HashToCurve(message, []byte(dstVt))
 	if err != nil {
 		return nil, err
 	}
 	result := blsEngine.G1.New()
-	blsEngine.G1.MulScalar(result, p1, &sk.value)
+	blsEngine.G1.MulScalarBig(result, p1, &sk.value)
 	if !blsEngine.G1.InCorrectSubgroup(result) {
 		return nil, fmt.Errorf("point is not in correct subgroup")
 	}
@@ -201,7 +200,7 @@ func (pk PublicKeyVt) verifySignatureVt(message []byte, signature *SignatureVt, 
 	}
 	engine := bls12381.NewEngine()
 
-	p1, err := engine.G1.HashToCurve(sha256.New, message, []byte(dstVt))
+	p1, err := engine.G1.HashToCurve(message, []byte(dstVt))
 	if err != nil {
 		return false, err
 	}
@@ -211,7 +210,7 @@ func (pk PublicKeyVt) verifySignatureVt(message []byte, signature *SignatureVt, 
 	// e(H(m)^-1, pk) * e(s, g2) == 1
 	engine.AddPairInv(p1, &pk.value)
 	engine.AddPair(&signature.value, engine.G2.One())
-	return engine.Check()
+	return engine.Check(), nil
 }
 
 // Combine public keys into one aggregated key
@@ -408,12 +407,12 @@ func (sks *SecretKeyShare) partialSignVt(message []byte, signDst string) (*Parti
 	if len(message) == 0 {
 		return nil, fmt.Errorf("message cannot be empty or nil")
 	}
-	p1, err := blsEngine.G1.HashToCurve(sha256.New, message, []byte(signDst))
+	p1, err := blsEngine.G1.HashToCurve(message, []byte(signDst))
 	if err != nil {
 		return nil, err
 	}
 	result := blsEngine.G1.New()
-	blsEngine.G1.MulScalar(result, p1, sks.value.Secret.BigInt())
+	blsEngine.G1.MulScalarBig(result, p1, sks.value.Secret.BigInt())
 	if !blsEngine.G1.InCorrectSubgroup(result) {
 		return nil, fmt.Errorf("point is not on correct subgroup")
 	}
@@ -455,7 +454,7 @@ func combineSigsVt(partials []*PartialSignatureVt) (*SignatureVt, error) {
 			}
 			basis = basis.Mul(num.Div(den))
 		}
-		blsEngine.G1.MulScalar(sTmp, yVars[i], basis.BigInt())
+		blsEngine.G1.MulScalarBig(sTmp, yVars[i], basis.BigInt())
 		blsEngine.G1.Add(sig, sig, sTmp)
 	}
 	if !blsEngine.G1.InCorrectSubgroup(sig) {

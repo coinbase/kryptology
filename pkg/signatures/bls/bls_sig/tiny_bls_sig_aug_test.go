@@ -9,7 +9,7 @@ package bls_sig
 import (
 	"testing"
 
-	bls12381 "github.com/coinbase/kryptology/pkg/core/curves/native/bls12-381"
+	bls12381 "github.com/kilic/bls12-381"
 )
 
 func generateAugSignatureG1(sk *SecretKey, msg []byte, t *testing.T) *SignatureVt {

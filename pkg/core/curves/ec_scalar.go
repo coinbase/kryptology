@@ -19,7 +19,7 @@ import (
 	"filippo.io/edwards25519"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/coinbase/kryptology/internal"
-	bls12381 "github.com/coinbase/kryptology/pkg/core/curves/native/bls12-381"
+	bls12381 "github.com/kilic/bls12-381"
 )
 
 type EcScalar interface {

@@ -13,9 +13,9 @@ import (
 	"fmt"
 	"math/big"
 
-	bls12381 "github.com/coinbase/kryptology/pkg/core/curves/native/bls12-381"
 	"github.com/coinbase/kryptology/pkg/signatures/bls/finitefield"
 	"github.com/coinbase/kryptology/pkg/signatures/bls/shamir"
+	bls12381 "github.com/kilic/bls12-381"
 	"golang.org/x/crypto/hkdf"
 )
 

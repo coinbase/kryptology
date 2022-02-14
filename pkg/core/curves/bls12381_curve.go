@@ -12,7 +12,7 @@ import (
 	"crypto/subtle"
 	"fmt"
 	"github.com/coinbase/kryptology/pkg/core"
-	bls12381 "github.com/coinbase/kryptology/pkg/core/curves/native/bls12-381"
+	bls12381 "github.com/kilic/bls12-381"
 	cc20rand "github.com/nixberg/chacha-rng-go"
 	"io"
 	"math/big"
@@ -343,7 +343,7 @@ func (p *PointBls12381G1) Random(reader io.Reader) Point {
 
 func (p *PointBls12381G1) Hash(bytes []byte) Point {
 	var domain = []byte("BLS12381G1_XMD:SHA-256_SSWU_RO_")
-	pt, err := g1.HashToCurve(sha256.New, bytes, domain)
+	pt, err := g1.HashToCurve(bytes, domain)
 	if err != nil {
 		return nil
 	}
@@ -425,7 +425,7 @@ func (p *PointBls12381G1) Mul(rhs Scalar) Point {
 	}
 	r, ok := rhs.(*ScalarBls12381)
 	if ok {
-		value := g1.MulScalar(g1.New(), p.Value, r.Value)
+		value := g1.MulScalarBig(g1.New(), p.Value, r.Value)
 		return &PointBls12381G1{value}
 	} else {
 		return nil
@@ -461,11 +461,7 @@ func (p *PointBls12381G1) ToAffineCompressed() []byte {
 }
 
 func (p *PointBls12381G1) ToAffineUncompressed() []byte {
-	bytes, err := g1.ToUncompressed(p.Value)
-	if err != nil {
-		panic(err)
-	}
-	return bytes
+	return g1.ToUncompressed(p.Value)
 }
 
 func (p *PointBls12381G1) FromAffineCompressed(bytes []byte) (Point, error) {
@@ -506,7 +502,7 @@ func (p *PointBls12381G1) SumOfProducts(points []Point, scalars []Scalar) Point 
 		nScalars[i] = s.Value
 	}
 	value := g1.New()
-	_, err := g1.MultiExp(value, nPoints, nScalars)
+	_, err := g1.MultiExpBig(value, nPoints, nScalars)
 	if err != nil {
 		return nil
 	}
@@ -518,7 +514,6 @@ func (p *PointBls12381G1) OtherGroup() PairingPoint {
 }
 
 func (p *PointBls12381G1) Pairing(rhs PairingPoint) Scalar {
-	var err error
 	pt, ok := rhs.(*PointBls12381G2)
 	if !ok {
 		return nil
@@ -534,10 +529,7 @@ func (p *PointBls12381G1) Pairing(rhs PairingPoint) Scalar {
 	eng := bls12381.NewEngine()
 	eng.AddPair(p.Value, pt.Value)
 
-	value, err = eng.Result()
-	if err != nil {
-		panic(err)
-	}
+	value = eng.Result()
 
 	return &ScalarBls12381Gt{value}
 }
@@ -619,7 +611,7 @@ func (p *PointBls12381G2) Random(reader io.Reader) Point {
 
 func (p *PointBls12381G2) Hash(bytes []byte) Point {
 	var domain = []byte("BLS12381G2_XMD:SHA-256_SSWU_RO_")
-	pt, err := g2.HashToCurve(sha256.New, bytes, domain)
+	pt, err := g2.HashToCurve(bytes, domain)
 	if err != nil {
 		return nil
 	}
@@ -701,7 +693,7 @@ func (p *PointBls12381G2) Mul(rhs Scalar) Point {
 	}
 	r, ok := rhs.(*ScalarBls12381)
 	if ok {
-		value := g2.MulScalar(g2.New(), p.Value, r.Value)
+		value := g2.MulScalarBig(g2.New(), p.Value, r.Value)
 		return &PointBls12381G2{value}
 	} else {
 		return nil
@@ -737,11 +729,7 @@ func (p *PointBls12381G2) ToAffineCompressed() []byte {
 }
 
 func (p *PointBls12381G2) ToAffineUncompressed() []byte {
-	bytes, err := g2.ToUncompressed(p.Value)
-	if err != nil {
-		panic(err)
-	}
-	return bytes
+	return g2.ToUncompressed(p.Value)
 }
 
 func (p *PointBls12381G2) FromAffineCompressed(bytes []byte) (Point, error) {
@@ -782,7 +770,7 @@ func (p *PointBls12381G2) SumOfProducts(points []Point, scalars []Scalar) Point 
 		nScalars[i] = s.Value
 	}
 	value := g2.New()
-	_, err := g2.MultiExp(value, nPoints, nScalars)
+	_, err := g2.MultiExpBig(value, nPoints, nScalars)
 	if err != nil {
 		return nil
 	}
@@ -794,7 +782,6 @@ func (p *PointBls12381G2) OtherGroup() PairingPoint {
 }
 
 func (p *PointBls12381G2) Pairing(rhs PairingPoint) Scalar {
-	var err error
 	pt, ok := rhs.(*PointBls12381G1)
 	if !ok {
 		return nil
@@ -810,10 +797,7 @@ func (p *PointBls12381G2) Pairing(rhs PairingPoint) Scalar {
 	eng := bls12381.NewEngine()
 	eng.AddPair(pt.Value, p.Value)
 
-	value, err = eng.Result()
-	if err != nil {
-		panic(err)
-	}
+	value = eng.Result()
 
 	return &ScalarBls12381Gt{value}
 }
@@ -910,10 +894,7 @@ func multiPairing(points ...PairingPoint) Scalar {
 		return nil
 	}
 
-	value, err := eng.Result()
-	if err != nil {
-		panic(err)
-	}
+	value := eng.Result()
 
 	return &ScalarBls12381Gt{value}
 }

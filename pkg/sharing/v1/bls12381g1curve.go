@@ -8,11 +8,10 @@ package v1
 
 import (
 	"crypto/elliptic"
-	"crypto/sha256"
 	"math/big"
 	"sync"
 
-	bls12381 "github.com/coinbase/kryptology/pkg/core/curves/native/bls12-381"
+	bls12381 "github.com/kilic/bls12-381"
 )
 
 const g1pointSize = 48
@@ -63,7 +62,7 @@ func bigIntCoordsToPointG1(x, y *big.Int, pointSize int) (*bls12381.PointG1, err
 }
 
 func pointG1ToBigIntCoords(p *bls12381.PointG1, pointSize int) (*big.Int, *big.Int) {
-	b, _ := g1.ToUncompressed(p)
+	b := g1.ToUncompressed(p)
 	x := new(big.Int).SetBytes(b[:pointSize])
 	y := new(big.Int).SetBytes(b[pointSize:])
 	return x, y
@@ -107,7 +106,7 @@ func (curve *Bls12381G1Curve) ScalarMult(Bx, By *big.Int, k []byte) (*big.Int, *
 		panic(err)
 	}
 	s := new(big.Int).SetBytes(k)
-	g1.MulScalar(p, p, s)
+	g1.MulScalarBig(p, p, s)
 	if !g1.InCorrectSubgroup(p) {
 		panic("point is not in correct subgroup")
 	}
@@ -117,7 +116,7 @@ func (curve *Bls12381G1Curve) ScalarMult(Bx, By *big.Int, k []byte) (*big.Int, *
 func (curve *Bls12381G1Curve) ScalarBaseMult(k []byte) (*big.Int, *big.Int) {
 	s := new(big.Int).SetBytes(k)
 	p := g1.New()
-	g1.MulScalar(p, g1.One(), s)
+	g1.MulScalarBig(p, g1.One(), s)
 	if !g1.InCorrectSubgroup(p) {
 		panic("point is not in correct subgroup")
 	}
@@ -126,7 +125,7 @@ func (curve *Bls12381G1Curve) ScalarBaseMult(k []byte) (*big.Int, *big.Int) {
 
 // Hash an arbitrary byte sequence to a G1 point according to the hash-to-curve standard
 func (curve *Bls12381G1Curve) Hash(msg []byte) (*big.Int, *big.Int) {
-	p, err := g1.HashToCurve(sha256.New, msg, []byte("BLS12381G1_XMD:SHA-256_SSWU_RO_"))
+	p, err := g1.HashToCurve(msg, []byte("BLS12381G1_XMD:SHA-256_SSWU_RO_"))
 	if err != nil {
 		panic(err)
 	}
