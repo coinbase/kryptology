@@ -7,11 +7,11 @@
 package ted25519
 
 import (
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"math/big"
 	"testing"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPartialSignNormalSignature(t *testing.T) {
@@ -49,7 +49,7 @@ func TestNewPartialSignature(t *testing.T) {
 	require.Equal(t, r, sig.R())
 	require.Equal(t, sigBytes, sig.Bytes())
 
-	assert.PanicsWithValue(t, "ted25519: invalid partial signature length: 3", func() {
+	require.PanicsWithValue(t, "ted25519: invalid partial signature length: 3", func() {
 		NewPartialSignature(1, []byte("sig"))
 	})
 }

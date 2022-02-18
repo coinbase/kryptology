@@ -16,7 +16,7 @@ import (
 	"strconv"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestExpandMessageXmd(t *testing.T) {
@@ -54,41 +54,41 @@ func TestExpandMessageXmd(t *testing.T) {
 		t.Run(fmt.Sprintf("msg: %s", test.msg), func(t *testing.T) {
 			DST := []byte("QUUX-V01-CS02-with-expander")
 			lenInBytes, err := strconv.ParseInt(test.lenInBytesHex, 16, 64)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			expected, err := hex.DecodeString(test.expectedHex)
-			assert.NoError(t, err)
+			require.NoError(t, err)
 			actual, err := ExpandMessageXmd(test.f, test.msg, DST, int(lenInBytes))
-			assert.NoError(t, err)
-			assert.Equal(t, actual, expected)
+			require.NoError(t, err)
+			require.Equal(t, actual, expected)
 		})
 	}
 }
 func TestFiatShamirDeterministic(t *testing.T) {
 	a := big.NewInt(1)
 	hash, err := FiatShamir(a)
-	assert.Nil(t, err)
-	assert.Equal(t, hash, []byte{0x3d, 0x95, 0xc0, 0x9f, 0x41, 0x33, 0x25, 0xbb, 0x10, 0x77, 0x2d, 0x83, 0x1d, 0x3e, 0x67, 0x98, 0xce, 0x7b, 0xde, 0xd5, 0x7f, 0x9, 0x7e, 0xfc, 0x77, 0x23, 0xfc, 0x49, 0x36, 0x82, 0xdd, 0x6a})
+	require.Nil(t, err)
+	require.Equal(t, hash, []byte{0x3d, 0x95, 0xc0, 0x9f, 0x41, 0x33, 0x25, 0xbb, 0x10, 0x77, 0x2d, 0x83, 0x1d, 0x3e, 0x67, 0x98, 0xce, 0x7b, 0xde, 0xd5, 0x7f, 0x9, 0x7e, 0xfc, 0x77, 0x23, 0xfc, 0x49, 0x36, 0x82, 0xdd, 0x6a})
 
 	a = big.NewInt(0xaaa)
 	hash, err = FiatShamir(a)
-	assert.Nil(t, err)
-	assert.Equal(t, hash, []byte{0x61, 0xa9, 0x7f, 0x6, 0x74, 0xec, 0x47, 0xf5, 0xac, 0x30, 0xa0, 0x4c, 0x34, 0xdb, 0x51, 0x97, 0x60, 0x7e, 0xb2, 0x4a, 0x97, 0x9, 0xa5, 0xb9, 0x1c, 0x89, 0x30, 0x39, 0xb7, 0x29, 0xe6, 0x30})
+	require.Nil(t, err)
+	require.Equal(t, hash, []byte{0x61, 0xa9, 0x7f, 0x6, 0x74, 0xec, 0x47, 0xf5, 0xac, 0x30, 0xa0, 0x4c, 0x34, 0xdb, 0x51, 0x97, 0x60, 0x7e, 0xb2, 0x4a, 0x97, 0x9, 0xa5, 0xb9, 0x1c, 0x89, 0x30, 0x39, 0xb7, 0x29, 0xe6, 0x30})
 }
 
 func TestFiatShamirEqual(t *testing.T) {
 	pi, err := FiatShamir(One)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	pi_, err := FiatShamir(One)
-	assert.Nil(t, err)
-	assert.Equal(t, pi, pi_)
+	require.Nil(t, err)
+	require.Equal(t, pi, pi_)
 }
 
 func TestFiatShamirNotEqual(t *testing.T) {
 	pi, err := FiatShamir(One)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	pi_, err := FiatShamir(Two)
-	assert.Nil(t, err)
-	assert.NotEqual(t, pi, pi_)
+	require.Nil(t, err)
+	require.NotEqual(t, pi, pi_)
 }
 
 func TestFiatShamirOrderDependent(t *testing.T) {
@@ -96,13 +96,13 @@ func TestFiatShamirOrderDependent(t *testing.T) {
 	b := big.NewInt(100)
 
 	pi, err := FiatShamir(a, b)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	pi_, err := FiatShamir(a, b)
-	assert.Nil(t, err)
-	assert.Equal(t, pi, pi_)
+	require.Nil(t, err)
+	require.Equal(t, pi, pi_)
 
 	q, _ := FiatShamir(b, a)
-	assert.NotEqual(t, pi, q)
+	require.NotEqual(t, pi, q)
 }
 
 func TestFiatShamirExtensionAttackResistance(t *testing.T) {
@@ -113,10 +113,10 @@ func TestFiatShamirExtensionAttackResistance(t *testing.T) {
 	d := big.NewInt(0xFFFF00)
 
 	pi, err := FiatShamir(a, b)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	pi_, err := FiatShamir(c, d)
-	assert.Nil(t, err)
-	assert.NotEqual(t, pi, pi_)
+	require.Nil(t, err)
+	require.NotEqual(t, pi, pi_)
 
 	a = big.NewInt(0x0000)
 	b = big.NewInt(0xFFFF)
@@ -125,8 +125,8 @@ func TestFiatShamirExtensionAttackResistance(t *testing.T) {
 	d = big.NewInt(0xFFF)
 
 	q, err := FiatShamir(a, b)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	q_, err := FiatShamir(c, d)
-	assert.Nil(t, err)
-	assert.NotEqual(t, q, q_)
+	require.Nil(t, err)
+	require.NotEqual(t, q, q_)
 }

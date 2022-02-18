@@ -168,8 +168,8 @@ func (pd Pedersen) Verify(share *ShamirShare, blinding *ShamirShare, blindedveri
 func K256GeneratorFromHashedBytes(bytes []byte) (x, y *big.Int, err error) {
 	pt := new(curves.PointK256).Hash(bytes)
 	p, _ := pt.(*curves.PointK256)
-	x = p.X()
-	y = p.Y()
+	x = p.X().BigInt()
+	y = p.Y().BigInt()
 	err = nil
 	return
 }

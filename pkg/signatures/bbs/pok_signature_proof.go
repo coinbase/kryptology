@@ -8,7 +8,6 @@ package bbs
 
 import (
 	"fmt"
-
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/signatures/common"
 	"github.com/gtank/merlin"

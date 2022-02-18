@@ -14,11 +14,6 @@ import (
 	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
-// This file implements the zero knowledge proof of knowledge protocol
-// described in section 7 of https://eprint.iacr.org/2020/777.pdf
-// Note: the paper only describes for non-membership witness case, but we don't
-// use non-membership witness. We only implement the membership witness case.
-
 type proofParamsMarshal struct {
 	X     []byte `bare:"x"`
 	Y     []byte `bare:"y"`

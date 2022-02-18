@@ -7,12 +7,12 @@
 package ted25519
 
 import (
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/coinbase/kryptology/pkg/sharing/v1"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"math/big"
 	"testing"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
+	v1 "github.com/coinbase/kryptology/pkg/sharing/v1"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNonceShareFromBytes(t *testing.T) {
@@ -84,14 +84,14 @@ func TestNonceSharesAdd(t *testing.T) {
 
 	// basic addition
 	sum := one.Add(two)
-	assert.Equal(t, uint32(0), sum.Identifier)
-	assert.Equal(t, []byte{0x03}, sum.Value.Bytes())
+	require.Equal(t, uint32(0), sum.Identifier)
+	require.Equal(t, []byte{0x03}, sum.Value.Bytes())
 }
 
 func TestNonceSharesAdd_errors(t *testing.T) {
 	one := NewNonceShare(0, []byte{0x01})
 	two := NewNonceShare(1, []byte{0x02})
-	assert.PanicsWithValue(t, "identifiers must match for valid addition", func() {
+	require.PanicsWithValue(t, "identifiers must match for valid addition", func() {
 		one.Add(two)
 	})
 }

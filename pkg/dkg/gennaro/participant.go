@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+// Package gennaro is an implementation of the DKG part of https://eprint.iacr.org/2020/540.pdf
 package gennaro
 
 import (

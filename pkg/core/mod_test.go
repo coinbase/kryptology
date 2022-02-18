@@ -7,11 +7,11 @@
 package core
 
 import (
-	"github.com/coinbase/kryptology/internal"
 	"math/big"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/coinbase/kryptology/internal"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -56,7 +56,7 @@ func TestConstantTimeEqByteSound(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			actual := ConstantTimeEqByte(test.a, test.b)
-			assert.Equal(t, test.expected, actual)
+			require.Equal(t, test.expected, actual)
 		})
 	}
 }
@@ -86,7 +86,7 @@ func TestConstantTimeEqSound(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			actual := ConstantTimeEq(test.a, test.b)
-			assert.Equal(t, test.expected, actual)
+			require.Equal(t, test.expected, actual)
 		})
 	}
 }
@@ -155,7 +155,7 @@ func TestIn(t *testing.T) {
 	// All the tests!
 	for _, test := range tests {
 		actual := In(test.x, test.m)
-		assert.Equal(t, test.expected, actual)
+		require.Equal(t, test.expected, actual)
 	}
 }
 
@@ -163,7 +163,7 @@ func TestIn(t *testing.T) {
 func TestAdd(t *testing.T) {
 	// Pre-compute some values
 	sumXyModn, err := Add(x, y, n)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	var tests = []struct {
 		x, y, m, expected *big.Int // inputs: x,y,m
@@ -460,13 +460,13 @@ func TestInvRoundTrip(t *testing.T) {
 
 		// Invert and check
 		aInv, err := Inv(a, m)
-		assert.NoError(t, err, "a=%v", a)
-		assert.NotNil(t, aInv)
+		require.NoError(t, err, "a=%v", a)
+		require.NotNil(t, aInv)
 
 		// Invert again and check
 		a_, err := Inv(aInv, m)
-		if assert.NoError(t, err) {
-			assert.Equal(t, expected, a_)
+		if err != nil {
+			require.Equal(t, expected, a_)
 		}
 	}
 }
@@ -486,8 +486,8 @@ func TestInvNotFound(t *testing.T) {
 	} {
 		// Invert and check
 		aInv, err := Inv(a, m)
-		assert.Error(t, err, "a=%v", a)
-		assert.Nil(t, aInv)
+		require.Error(t, err, "a=%v", a)
+		require.Nil(t, aInv)
 	}
 }
 
@@ -510,8 +510,8 @@ func TestExpKnownAnswer(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			actual, err := Exp(test.x, test.e, test.m)
-			if assert.NoError(t, err) {
-				assert.Equal(t, test.expected, actual)
+			if err != nil {
+				require.Equal(t, test.expected, actual)
 			}
 		})
 	}

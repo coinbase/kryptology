@@ -9,14 +9,14 @@ package paillier
 import (
 	"crypto/elliptic"
 	"encoding/json"
-	curves2 "github.com/coinbase/kryptology/pkg/core/curves"
 	"math/big"
 	"testing"
 
-	"github.com/btcsuite/btcd/btcec"
+	curves2 "github.com/coinbase/kryptology/pkg/core/curves"
+
 	"github.com/coinbase/kryptology/internal"
 	crypto "github.com/coinbase/kryptology/pkg/core"
-	"github.com/stretchr/testify/assert"
+	"github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/require"
 )
 
@@ -69,11 +69,11 @@ func TestGenerateChallengesWorks(t *testing.T) {
 				skN := new(big.Int).Mul(testPrimes[i], testPrimes[j])
 				x, err := generateChallenges(curve.Params(), skN, uint32(i+1), y)
 
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				for _, xj := range x {
-					assert.NotNil(t, xj)
-					assert.Greater(t, xj.Cmp(crypto.Zero), 0)
-					assert.Equal(t, xj.Cmp(skN), -1)
+					require.NotNil(t, xj)
+					require.Greater(t, xj.Cmp(crypto.Zero), 0)
+					require.Equal(t, xj.Cmp(skN), -1)
 				}
 			}
 		}
@@ -100,10 +100,10 @@ func TestGenerateChallengesPrimeN(t *testing.T) {
 			for j := 0; j < 5; j++ {
 				x, err := generateChallenges(curve.Params(), n[i], uint32(j+1), y)
 
-				assert.NoError(t, err)
+				require.NoError(t, err)
 				for _, xj := range x {
-					assert.NotNil(t, xj)
-					assert.Greater(t, xj.Cmp(crypto.Zero), 0)
+					require.NotNil(t, xj)
+					require.Greater(t, xj.Cmp(crypto.Zero), 0)
 				}
 			}
 		}
@@ -114,19 +114,19 @@ func TestGenerateChallengesNilInputs(t *testing.T) {
 	y, _ := curves2.NewScalarBaseMult(elliptic.P256(), big.NewInt(1))
 
 	_, err := generateChallenges(nil, nil, 0, nil)
-	assert.Error(t, err)
+	require.Error(t, err)
 	_, err = generateChallenges(elliptic.P256().Params(), nil, 0, nil)
-	assert.Error(t, err)
+	require.Error(t, err)
 	_, err = generateChallenges(elliptic.P256().Params(), big.NewInt(0), 0, nil)
-	assert.Error(t, err)
+	require.Error(t, err)
 	_, err = generateChallenges(elliptic.P256().Params(), big.NewInt(1), 1, nil)
-	assert.Error(t, err)
+	require.Error(t, err)
 	_, err = generateChallenges(elliptic.P256().Params(), big.NewInt(1), 1, y)
-	assert.Error(t, err)
+	require.Error(t, err)
 	_, err = generateChallenges(elliptic.P256().Params(), big.NewInt(1), 1, y)
-	assert.Error(t, err)
+	require.Error(t, err)
 	_, err = generateChallenges(elliptic.P256().Params(), big.NewInt(255), 1, y)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func TestPsfProofParams_Prove(t *testing.T) {
@@ -213,8 +213,8 @@ func TestPsfProofParams_Prove(t *testing.T) {
 			result, err := test.in.Prove()
 
 			// Verify the results are as expected
-			assert.Equal(t, test.expectedError, err)
-			assert.Len(t, result, test.expectedResultLen)
+			require.Equal(t, test.expectedError, err)
+			require.Len(t, result, test.expectedResultLen)
 		})
 	}
 
@@ -247,7 +247,7 @@ func TestPsfProof_MarshalJSON(t *testing.T) {
 	require.NoError(t, err)
 
 	// Test for equality
-	assert.Len(t, ([]*big.Int)(unmarshaled), len(([]*big.Int)(proof)))
+	require.Len(t, ([]*big.Int)(unmarshaled), len(([]*big.Int)(proof)))
 	for i := range proof {
 		internal.AssertBigIntEq(t, proof[i], unmarshaled[i])
 	}
@@ -281,5 +281,5 @@ func TestPsfProofWorks(t *testing.T) {
 		Pi:        pi,
 		Y:         Qp256,
 	}
-	assert.NoError(t, proof.Verify(verifyParams))
+	require.NoError(t, proof.Verify(verifyParams))
 }

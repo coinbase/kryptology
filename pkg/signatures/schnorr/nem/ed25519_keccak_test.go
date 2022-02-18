@@ -9,9 +9,10 @@ package nem
 import (
 	"bytes"
 	"encoding/hex"
-	"github.com/stretchr/testify/assert"
-	"golang.org/x/crypto/sha3"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/sha3"
 )
 
 type KeyPair struct {
@@ -34,15 +35,15 @@ func TestKeccak256SanityCheck(t *testing.T) {
 	data := "A6151D4904E18EC288243028CEDA30556E6C42096AF7150D6A7232CA5DBA52BD2192E23DAA5FA2BEA3D4BD95EFA2389CD193FCD3376E70A5C097B32C1C62C80AF9D710211545F7CDDDF63747420281D64529477C61E721273CFD78F8890ABB4070E97BAA52AC8FF61C26D195FC54C077DEF7A3F6F79B36E046C1A83CE9674BA1983EC2FB58947DE616DD797D6499B0385D5E8A213DB9AD5078A8E0C940FF0CB6BF92357EA5609F778C3D1FB1E7E36C35DB873361E2BE5C125EA7148EFF4A035B0CCE880A41190B2E22924AD9D1B82433D9C023924F2311315F07B88BFD42850047BF3BE785C4CE11C09D7E02065D30F6324365F93C5E7E423A07D754EB314B5FE9DB4614275BE4BE26AF017ABDC9C338D01368226FE9AF1FB1F815E7317BDBB30A0F36DC69"
 	toMatch := "4E9E79AB7434F6C7401FB3305D55052EE829B9E46D5D05D43B59FEFB32E9A619"
 	toMatchBytes, err := hex.DecodeString(toMatch)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	dataBytes, err := hex.DecodeString(data)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	k256 := sha3.NewLegacyKeccak256()
 	_, err = k256.Write(dataBytes)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	var hashed []byte
 	hashed = k256.Sum(hashed)
-	assert.Equal(t, hashed, toMatchBytes)
+	require.Equal(t, hashed, toMatchBytes)
 }
 
 // Test that the pubkey can get derived correctly from privkey
@@ -51,16 +52,16 @@ func TestPrivToPubkey(t *testing.T) {
 
 	for _, pair := range testVectors {
 		privkeyBytes, err := hex.DecodeString(pair.Privkey)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		pubkeyBytes, err := hex.DecodeString(pair.Pubkey)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		privKeyCalced, err := NewKeyFromSeed(privkeyBytes)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		pubKeyCalced := privKeyCalced.Public().(PublicKey)
 
-		assert.Equal(t, pubKeyCalced.Bytes(), pubkeyBytes)
+		require.Equal(t, pubKeyCalced.Bytes(), pubkeyBytes)
 	}
 }
 
@@ -74,33 +75,33 @@ func TestSigs(t *testing.T) {
 	for _, ts := range testVectors {
 		// Test priv -> pubkey again
 		privkeyBytes, err := hex.DecodeString(ts.Privkey)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		pubkeyBytes, err := hex.DecodeString(ts.Pubkey)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		privKeyCalced, err := NewKeyFromSeed(privkeyBytes)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		pubKeyCalced := privKeyCalced.Public().(PublicKey)
 
-		assert.True(t, bytes.Equal(pubKeyCalced.Bytes(), pubkeyBytes))
+		require.True(t, bytes.Equal(pubKeyCalced.Bytes(), pubkeyBytes))
 
 		dataBytes, err := hex.DecodeString(ts.Data)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sigBytes, err := hex.DecodeString(ts.Sig)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		// Test sign
 		sigCalced, err := Sign(privKeyCalced, dataBytes)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
-		assert.True(t, bytes.Equal(sigCalced, sigBytes))
+		require.True(t, bytes.Equal(sigCalced, sigBytes))
 
 		// Test verify
 		verified, err := Verify(pubKeyCalced, dataBytes, sigBytes)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
-		assert.True(t, verified)
+		require.True(t, verified)
 	}
 }
 

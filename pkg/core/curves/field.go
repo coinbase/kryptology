@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// This implementation IS NOT constant time as it leverages math/big for big number operations.
+// Package curves: Field implementation IS NOT constant time as it leverages math/big for big number operations.
 package curves
 
 import (

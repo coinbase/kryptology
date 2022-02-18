@@ -9,15 +9,15 @@ package participant
 import (
 	"crypto/elliptic"
 	"encoding/json"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"testing"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 
 	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
 
-	"github.com/btcsuite/btcd/btcec"
 	"github.com/coinbase/kryptology/pkg/core"
 	"github.com/coinbase/kryptology/pkg/paillier"
-	"github.com/stretchr/testify/assert"
+	"github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/require"
 )
 
@@ -28,7 +28,7 @@ func BenchmarkDealingProofParams(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		_, err := dealer.NewProofParams()
-		assert.NoError(b, err)
+		require.NoError(b, err)
 	}
 }
 
@@ -43,56 +43,56 @@ func BenchmarkDealingShares(b *testing.B) {
 	b.Run("Secp256k1 - 2 of 2", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			err := benchDealShares(curve, 2, 2)
-			assert.NoError(b, err)
+			require.NoError(b, err)
 		}
 	})
 	b.Run("Secp256k1 - 2 of 3", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			err := benchDealShares(curve, 2, 3)
-			assert.NoError(b, err)
+			require.NoError(b, err)
 		}
 	})
 	b.Run("Secp256k1 - 3 of 5", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			err := benchDealShares(curve, 3, 5)
-			assert.NoError(b, err)
+			require.NoError(b, err)
 		}
 	})
 	b.Run("Secp256k1 - 4 of 7", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			err := benchDealShares(curve, 4, 7)
-			assert.NoError(b, err)
+			require.NoError(b, err)
 		}
 	})
 	b.Run("Secp256k1 - 5 of 9", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			err := benchDealShares(curve, 5, 9)
-			assert.NoError(b, err)
+			require.NoError(b, err)
 		}
 	})
 
 	b.Run("Secp256k1 - 10 of 19", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			err := benchDealShares(curve, 10, 19)
-			assert.NoError(b, err)
+			require.NoError(b, err)
 		}
 	})
 	b.Run("Secp256k1 - 25 of 49", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			err := benchDealShares(curve, 25, 49)
-			assert.NoError(b, err)
+			require.NoError(b, err)
 		}
 	})
 	b.Run("Secp256k1 - 50 of 99", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			err := benchDealShares(curve, 50, 99)
-			assert.NoError(b, err)
+			require.NoError(b, err)
 		}
 	})
 	b.Run("Secp256k1 - 100 of 199", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
 			err := benchDealShares(curve, 100, 199)
-			assert.NoError(b, err)
+			require.NoError(b, err)
 		}
 	})
 }
@@ -116,7 +116,7 @@ func BenchmarkDealingPaillierKeys(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		_, _, err := paillier.NewKeys()
-		assert.NoError(b, err)
+		require.NoError(b, err)
 	}
 }
 
@@ -128,35 +128,35 @@ func BenchmarkSigning(b *testing.B) {
 
 	b.Run("Secp256k1 - 2 of 2", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			assert.NoError(b,
+			require.NoError(b,
 				benchSign(b, hashBytes, curve, k256Verifier, 2, 2),
 			)
 		}
 	})
 	b.Run("Secp256k1 - 2 of 3", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			assert.NoError(b,
+			require.NoError(b,
 				benchSign(b, hashBytes, curve, k256Verifier, 2, 3),
 			)
 		}
 	})
 	b.Run("Secp256k1 - 3 of 5", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			assert.NoError(b,
+			require.NoError(b,
 				benchSign(b, hashBytes, curve, k256Verifier, 3, 5),
 			)
 		}
 	})
 	b.Run("Secp256k1 - 4 of 7", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			assert.NoError(b,
+			require.NoError(b,
 				benchSign(b, hashBytes, curve, k256Verifier, 4, 7),
 			)
 		}
 	})
 	b.Run("Secp256k1 - 5 of 9", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			assert.NoError(b,
+			require.NoError(b,
 				benchSign(b, hashBytes, curve, k256Verifier, 5, 9),
 			)
 		}
@@ -169,28 +169,28 @@ func BenchmarkSigning(b *testing.B) {
 
 	b.Run("Secp256k1 - 10 of 19", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			assert.NoError(b,
+			require.NoError(b,
 				benchSign(b, hashBytes, curve, k256Verifier, 10, 19),
 			)
 		}
 	})
 	b.Run("Secp256k1 - 25 of 49", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			assert.NoError(b,
+			require.NoError(b,
 				benchSign(b, hashBytes, curve, k256Verifier, 25, 49),
 			)
 		}
 	})
 	b.Run("Secp256k1 - 50 of 99", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			assert.NoError(b,
+			require.NoError(b,
 				benchSign(b, hashBytes, curve, k256Verifier, 50, 99),
 			)
 		}
 	})
 	b.Run("Secp256k1 - 100 of 199", func(b *testing.B) {
 		for i := 0; i < b.N; i++ {
-			assert.NoError(b,
+			require.NoError(b,
 				benchSign(b, hashBytes, curve, k256Verifier, 100, 199),
 			)
 		}
@@ -249,7 +249,7 @@ func benchSign(b *testing.B, hash []byte, curve elliptic.Curve, verify curves.Ec
 		}
 		p2p[i], err = s.SignRound2(in, nil) // TODO: fix me later
 		if err != nil {
-			return err
+			return nil
 		}
 	}
 
@@ -565,7 +565,7 @@ func sign2p(b *testing.B, bw *msgCounter, setup *signingSetup) {
 	require.NoError(b, err)
 
 	// Verify that both parties compute the same signature
-	assert.Equal(b, s1_sig, s2_sig, "computed ECDSA signature do not match")
+	require.Equal(b, s1_sig, s2_sig, "computed ECDSA signature do not match")
 }
 
 // Tracks messaging-related metrics: msg count, serialized total bytes

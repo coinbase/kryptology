@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+// Package camshoup
 // Verifiable encryption
 //
 // Verifiable encryption addresses a problem about proving statements for encrypted data. Verifiable encryption allows a prover to convince a verifier that a given ciphertext is an encryption under a given public key. A verifiable encryption scheme proves that a ciphertext encrypts a plaintext satisfying a certain relation. Our implementation is a non-interactive zero-knowledge proof (NIZK) i.e. the prover creates the proof and sends it to the verifier with no further interaction.

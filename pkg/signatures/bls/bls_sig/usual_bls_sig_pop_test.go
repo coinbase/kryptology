@@ -398,7 +398,7 @@ func TestPublicKeyG1FromBadBytes(t *testing.T) {
 		t.Errorf("Expected GetPublicKey to pass but failed.")
 	}
 	out := marshalStruct(pk1, t)
-	out[3] ^= out[4]
+	out[3] += 1
 	err = new(PublicKey).UnmarshalBinary(pk)
 	if err == nil {
 		t.Errorf("Expected PublicKeyG1FromBytes to fail but passed")

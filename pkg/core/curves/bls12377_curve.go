@@ -4,6 +4,8 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+// NOTE that the bls curves are NOT constant time. There is an open issue to address it: https://github.com/coinbase/kryptology/issues/44
+
 package curves
 
 import (

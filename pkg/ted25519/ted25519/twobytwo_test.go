@@ -11,9 +11,10 @@
 package ted25519
 
 import (
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
+	"github.com/stretchr/testify/require"
 )
 
 func AggregateSignatures(sig1, sig2 *PartialSignature) []byte {
@@ -49,5 +50,5 @@ func TestTwoByTwoSigning(t *testing.T) {
 	sig := AggregateSignatures(sig1, sig2)
 
 	ok, _ := Verify(pub, msg, sig)
-	assert.True(t, ok, "signature failed verification")
+	require.True(t, ok, "signature failed verification")
 }

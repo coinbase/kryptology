@@ -11,9 +11,8 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
-
 	"github.com/coinbase/kryptology/pkg/signatures/bls/finitefield"
+	"github.com/stretchr/testify/require"
 )
 
 // Ed25519 subgroup order
@@ -61,7 +60,7 @@ func TestCombine_invalid(t *testing.T) {
 		NewShare(1, []byte("b"), globalField),
 	}
 	_, err := combiner.Combine(shares)
-	assert.Equal(t, "less than two shares cannot be used to reconstruct the secret", err.Error())
+	require.Equal(t, "less than two shares cannot be used to reconstruct the secret", err.Error())
 
 	// No secret
 	shares = []*Share{
@@ -69,7 +68,7 @@ func TestCombine_invalid(t *testing.T) {
 		NewShare(2, []byte(""), globalField),
 	}
 	_, err = combiner.Combine(shares)
-	assert.Equal(t, "share must have a non-zero length secret", err.Error())
+	require.Equal(t, "share must have a non-zero length secret", err.Error())
 
 	// Zero identifier
 	shares = []*Share{
@@ -77,7 +76,7 @@ func TestCombine_invalid(t *testing.T) {
 		NewShare(2, []byte("abc"), globalField),
 	}
 	_, err = combiner.Combine(shares)
-	assert.Equal(t, "share must have non-zero identifier", err.Error())
+	require.Equal(t, "share must have non-zero identifier", err.Error())
 
 	// Duplicate shares
 	shares = []*Share{
@@ -85,7 +84,7 @@ func TestCombine_invalid(t *testing.T) {
 		NewShare(1, []byte("abc"), globalField),
 	}
 	_, err = combiner.Combine(shares)
-	assert.Equal(t, "duplicate share detected", err.Error())
+	require.Equal(t, "duplicate share detected", err.Error())
 }
 
 func TestCombine_single(t *testing.T) {
@@ -151,13 +150,13 @@ func TestShare_Add(t *testing.T) {
 
 	// basic addition
 	sum := one.Add(two)
-	assert.Equal(t, byte(0), sum.Identifier)
-	assert.Equal(t, []byte{0x03}, sum.Secret.Bytes())
+	require.Equal(t, byte(0), sum.Identifier)
+	require.Equal(t, []byte{0x03}, sum.Secret.Bytes())
 
 	// addition is performed within the globalField
 	sum = two.Add(NewShare(0, []byte{0x06}, field))
-	assert.Equal(t, byte(0), sum.Identifier)
-	assert.Equal(t, []byte{0x01}, sum.Secret.Bytes())
+	require.Equal(t, byte(0), sum.Identifier)
+	require.Equal(t, []byte{0x01}, sum.Secret.Bytes())
 }
 
 func TestShare_Add_errors(t *testing.T) {
@@ -165,7 +164,7 @@ func TestShare_Add_errors(t *testing.T) {
 	one := NewShare(0, []byte{0x01}, field)
 	two := NewShare(1, []byte{0x02}, field)
 
-	assert.PanicsWithValue(t, "identifiers must match for valid addition", func() { one.Add(two) })
+	require.PanicsWithValue(t, "identifiers must match for valid addition", func() { one.Add(two) })
 }
 
 func TestCombine_added_shares(t *testing.T) {
@@ -173,9 +172,9 @@ func TestCombine_added_shares(t *testing.T) {
 	two := []byte{0x02}
 
 	shareSet1, err := dealer.Split(one, 2, 3)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	shareSet2, err := dealer.Split(two, 2, 3)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 
 	sharesForOne := shareSet1.Shares
 	sharesForTwo := shareSet2.Shares
@@ -185,8 +184,8 @@ func TestCombine_added_shares(t *testing.T) {
 	shares := []*Share{share1, share2}
 
 	recomb, err := combiner.Combine(shares)
-	assert.Nil(t, err)
-	assert.Equal(t, []byte{0x03}, recomb)
+	require.Nil(t, err)
+	require.Equal(t, []byte{0x03}, recomb)
 }
 
 func TestPolynomial_SetsIntercept(t *testing.T) {

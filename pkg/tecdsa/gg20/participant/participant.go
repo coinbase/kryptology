@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+// Package participant is an implementation of a `participant` in the t-of-n threshold signature of https://eprint.iacr.org/2020/540.pdf
 package participant
 
 import (

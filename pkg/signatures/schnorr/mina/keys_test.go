@@ -7,18 +7,19 @@
 package mina
 
 import (
-	"github.com/coinbase/kryptology/pkg/core/curves/native/pasta/fq"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/coinbase/kryptology/pkg/core/curves/native/pasta/fq"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewKeys(t *testing.T) {
 	pk, sk, err := NewKeys()
-	assert.NoError(t, err)
-	assert.NotNil(t, sk)
-	assert.NotNil(t, pk)
-	assert.False(t, sk.value.IsZero())
-	assert.False(t, pk.value.IsIdentity())
+	require.NoError(t, err)
+	require.NotNil(t, sk)
+	require.NotNil(t, pk)
+	require.False(t, sk.value.IsZero())
+	require.False(t, pk.value.IsIdentity())
 }
 
 func TestSecretKeySignTransaction(t *testing.T) {
@@ -52,13 +53,13 @@ func TestSecretKeySignTransaction(t *testing.T) {
 	*/
 	feePayerPk := new(PublicKey)
 	err := feePayerPk.ParseAddress("B62qiy32p8kAKnny8ZFwoMhYpBppM1DWVCqAPBYNcXnsAHhnfAAuXgg")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	sourcePk := new(PublicKey)
 	err = sourcePk.ParseAddress("B62qiy32p8kAKnny8ZFwoMhYpBppM1DWVCqAPBYNcXnsAHhnfAAuXgg")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	receiverPk := new(PublicKey)
 	err = receiverPk.ParseAddress("B62qrcFstkpqXww1EkSGrqMCwCNho86kuqBd4FrAAUsPxNKdiPzAUsy")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	txn := &Transaction{
 		Fee:        3,
 		FeeToken:   1,
@@ -75,9 +76,9 @@ func TestSecretKeySignTransaction(t *testing.T) {
 		NetworkId:  MainNet,
 	}
 	sig, err := sk.SignTransaction(txn)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	pk := sk.GetPublicKey()
-	assert.NoError(t, pk.VerifyTransaction(sig, txn))
+	require.NoError(t, pk.VerifyTransaction(sig, txn))
 }
 
 func TestSecretKeySignMessage(t *testing.T) {
@@ -87,9 +88,9 @@ func TestSecretKeySignMessage(t *testing.T) {
 	}
 	sk := &SecretKey{value: skValue}
 	sig, err := sk.SignMessage("A test message.")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	pk := sk.GetPublicKey()
-	assert.NoError(t, pk.VerifyMessage(sig, "A test message."))
+	require.NoError(t, pk.VerifyMessage(sig, "A test message."))
 }
 
 func TestSecretKeySignTransactionStaking(t *testing.T) {
@@ -101,13 +102,13 @@ func TestSecretKeySignTransactionStaking(t *testing.T) {
 
 	feePayerPk := new(PublicKey)
 	err := feePayerPk.ParseAddress("B62qiy32p8kAKnny8ZFwoMhYpBppM1DWVCqAPBYNcXnsAHhnfAAuXgg")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	sourcePk := new(PublicKey)
 	err = sourcePk.ParseAddress("B62qiy32p8kAKnny8ZFwoMhYpBppM1DWVCqAPBYNcXnsAHhnfAAuXgg")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	receiverPk := new(PublicKey)
 	err = receiverPk.ParseAddress("B62qkfHpLpELqpMK6ZvUTJ5wRqKDRF3UHyJ4Kv3FU79Sgs4qpBnx5RR")
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	txn := &Transaction{
 		Fee:        3,
 		FeeToken:   1,
@@ -124,7 +125,7 @@ func TestSecretKeySignTransactionStaking(t *testing.T) {
 		NetworkId:  MainNet,
 	}
 	sig, err := sk.SignTransaction(txn)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	pk := sk.GetPublicKey()
-	assert.NoError(t, pk.VerifyTransaction(sig, txn))
+	require.NoError(t, pk.VerifyTransaction(sig, txn))
 }

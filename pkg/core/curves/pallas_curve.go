@@ -739,6 +739,7 @@ func (p *Ep) Double(other *Ep) *Ep {
 		return p
 	}
 	r := new(Ep)
+	// essentially paraphrased https://github.com/MinaProtocol/c-reference-signer/blob/master/crypto.c#L306-L337
 	a := new(fp.Fp).Square(other.x)
 	b := new(fp.Fp).Square(other.y)
 	c := new(fp.Fp).Square(b)

@@ -84,7 +84,7 @@ func TestBasicCustomDstG1(t *testing.T) {
 		t.Errorf("Basic Custon Dst Verify failed")
 	}
 
-	ikm[0] ^= ikm[1]
+	ikm[0] += 1
 	if res, _ := bls.Verify(pk, ikm, sig); res {
 		t.Errorf("Basic Custom Dst Verify succeeded when it should've failed.")
 	}
@@ -106,7 +106,7 @@ func TestBasicSigningG1(t *testing.T) {
 		t.Errorf("Basic Verify failed")
 	}
 
-	ikm[0] ^= ikm[1]
+	ikm[0] += 1
 	if res, _ := bls.Verify(pk, ikm, sig); res {
 		t.Errorf("Basic Verify succeeded when it should've failed.")
 	}

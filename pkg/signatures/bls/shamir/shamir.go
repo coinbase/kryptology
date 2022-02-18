@@ -4,17 +4,18 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-/*
-Package shamir is a port of the hashicorp/vault implementation of Shamir's Secret Sharing
-which has been modified to work with a finite field rather than arbitrary length content.
-
-Their implementation splits every byte independently into shares and transposes the output
-together to form a single secret. For our purposes, we expect to be able to combine secrets using
-addition and then reconstruct a shared polynomial which doesn't work with the byte wise sharing.
-
-This implementation IS NOT constant time as it leverages math/big for big number operations through the finitefield
-package.
-*/
+// Package shamir is kept for legacy reasons, for our implementation of shamir secret sharing,
+// checkout "pkg/sharing/shamir.go".
+//
+// Originally, this was a port of the hashicorp/vault implementation of Shamir's Secret Sharing
+// which has been modified to work with a finite field rather than arbitrary length content.
+//
+// Their implementation splits every byte independently into shares and transposes the output
+// together to form a single secret. For our purposes, we expect to be able to combine secrets using
+// addition and then reconstruct a shared polynomial which doesn't work with the byte wise sharing.
+//
+// This implementation IS NOT constant time as it leverages math/big for big number operations through the finitefield
+// package.
 package shamir
 
 import (

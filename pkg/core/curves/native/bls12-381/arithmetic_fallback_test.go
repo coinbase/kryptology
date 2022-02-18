@@ -7,10 +7,11 @@
 package bls12381
 
 import (
-	"github.com/stretchr/testify/assert"
 	"math/bits"
 	mrand "math/rand"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestFieldElementAdd(t *testing.T) {
@@ -31,7 +32,7 @@ func TestFieldElementAdd(t *testing.T) {
 		y[3] = mrand.Uint64()
 		newAdd(z, x, y)
 		oldAdd(a, x, y)
-		assert.Equal(t, z, a)
+		require.Equal(t, z, a)
 	}
 }
 
@@ -120,7 +121,7 @@ func TestFieldElementSub(t *testing.T) {
 		y[3] = mrand.Uint64()
 		newSub(z, x, y)
 		oldSub(a, x, y)
-		assert.Equal(t, z, a)
+		require.Equal(t, z, a)
 	}
 }
 
@@ -191,7 +192,7 @@ func TestFieldElementNeg(t *testing.T) {
 
 		newNeg(z, x)
 		oldNeg(a, x)
-		assert.Equal(t, z, a)
+		require.Equal(t, z, a)
 	}
 }
 

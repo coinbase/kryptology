@@ -15,13 +15,13 @@ import (
 
 	"github.com/btcsuite/btcd/btcec"
 	tt "github.com/coinbase/kryptology/internal"
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestIsIdentity(t *testing.T) {
 	// Should be Point at infinity
 	identity := &EcPoint{btcec.S256(), core.Zero, core.Zero}
-	assert.True(t, identity.IsIdentity())
+	require.True(t, identity.IsIdentity())
 }
 
 func TestNewScalarBaseMultZero(t *testing.T) {
@@ -219,30 +219,30 @@ func TestEcPointBytes(t *testing.T) {
 	curve := btcec.S256()
 
 	point, err := NewScalarBaseMult(curve, big.NewInt(2))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	data := point.Bytes()
 	point2, err := PointFromBytesUncompressed(curve, data)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if point.X.Cmp(point2.X) != 0 && point.Y.Cmp(point2.Y) != 0 {
 		t.Errorf("Points are not equal. Expected %v, found %v", point, point2)
 	}
 
 	curve2 := elliptic.P224()
 	p2, err := NewScalarBaseMult(curve2, big.NewInt(2))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	dta := p2.Bytes()
 	point3, err := PointFromBytesUncompressed(curve2, dta)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if p2.X.Cmp(point3.X) != 0 && p2.Y.Cmp(point3.Y) != 0 {
 		t.Errorf("Points are not equal. Expected %v, found %v", p2, point3)
 	}
 
 	curve3 := elliptic.P521()
 	p3, err := NewScalarBaseMult(curve3, big.NewInt(2))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	data = p3.Bytes()
 	point4, err := PointFromBytesUncompressed(curve3, data)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if p3.X.Cmp(point4.X) != 0 && p3.Y.Cmp(point4.Y) != 0 {
 		t.Errorf("Points are not equal. Expected %v, found %v", p3, point4)
 	}
@@ -254,12 +254,12 @@ func TestEcPointBytesDifferentCurves(t *testing.T) {
 	p256 := elliptic.P256()
 
 	kp, err := NewScalarBaseMult(k256, big.NewInt(1))
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	data := kp.Bytes()
 	_, err = PointFromBytesUncompressed(p224, data)
-	assert.Error(t, err)
+	require.Error(t, err)
 	_, err = PointFromBytesUncompressed(p256, data)
-	assert.Error(t, err)
+	require.Error(t, err)
 }
 
 func TestEcPointBytesInvalidNumberBytes(t *testing.T) {
@@ -268,25 +268,25 @@ func TestEcPointBytesInvalidNumberBytes(t *testing.T) {
 	for i := 1; i < 64; i++ {
 		data := make([]byte, i)
 		_, err := PointFromBytesUncompressed(curve, data)
-		assert.Error(t, err)
+		require.Error(t, err)
 	}
 	for i := 65; i < 128; i++ {
 		data := make([]byte, i)
 		_, err := PointFromBytesUncompressed(curve, data)
-		assert.Error(t, err)
+		require.Error(t, err)
 	}
 }
 
 func TestEcPointMultRandom(t *testing.T) {
 	curve := btcec.S256()
 	r, err := core.Rand(curve.N)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	pt, err := NewScalarBaseMult(curve, r)
-	assert.NoError(t, err)
-	assert.NotNil(t, pt)
+	require.NoError(t, err)
+	require.NotNil(t, pt)
 	data := pt.Bytes()
 	pt2, err := PointFromBytesUncompressed(curve, data)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	if pt.X.Cmp(pt2.X) != 0 || pt.Y.Cmp(pt2.Y) != 0 {
 		t.Errorf("Points are not equal. Expected: %v, found: %v", pt, pt2)
 	}
@@ -298,9 +298,7 @@ func TestIsBasePoint(t *testing.T) {
 	p256 := elliptic.P256()
 
 	notG_p224, err := NewScalarBaseMult(p224, tt.B10("9876453120"))
-	if !assert.NoError(t, err) {
-		t.FailNow()
-	}
+	require.NoError(t, err)
 
 	tests := []struct {
 		name     string
@@ -323,7 +321,7 @@ func TestIsBasePoint(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			actual := EcPoint{test.curve, test.x, test.y}.IsBasePoint()
-			assert.Equal(t, test.expected, actual)
+			require.Equal(t, test.expected, actual)
 		})
 	}
 }
@@ -365,7 +363,7 @@ func TestEquals(t *testing.T) {
 	for _, test := range tests {
 		t.Run(test.name, func(t *testing.T) {
 			actual := test.x.Equals(test.y)
-			assert.Equal(t, test.expected, actual)
+			require.Equal(t, test.expected, actual)
 		})
 	}
 }

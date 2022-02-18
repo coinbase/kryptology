@@ -8,17 +8,18 @@ package bbs
 
 import (
 	crand "crypto/rand"
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/stretchr/testify/assert"
 	"testing"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
+	"github.com/stretchr/testify/require"
 )
 
 func TestBlindSignatureContext(t *testing.T) {
 	curve := curves.BLS12381(&curves.PointBls12381G2{})
 	pk, sk, err := NewKeys(curve)
-	assert.NoError(t, err)
-	assert.NotNil(t, pk)
-	assert.NotNil(t, sk)
+	require.NoError(t, err)
+	require.NotNil(t, pk)
+	require.NotNil(t, sk)
 
 	generators := new(MessageGenerators).Init(pk, 4)
 	nonce := curve.Scalar.Random(crand.Reader)
@@ -26,14 +27,14 @@ func TestBlindSignatureContext(t *testing.T) {
 	msgs[0] = curve.Scalar.Hash([]byte("identifier"))
 
 	ctx, blinding, err := NewBlindSignatureContext(curve, msgs, generators, nonce, crand.Reader)
-	assert.NoError(t, err)
-	assert.NotNil(t, blinding)
-	assert.False(t, blinding.IsZero())
-	assert.NotNil(t, ctx)
-	assert.False(t, ctx.commitment.IsIdentity())
-	assert.False(t, ctx.challenge.IsZero())
+	require.NoError(t, err)
+	require.NotNil(t, blinding)
+	require.False(t, blinding.IsZero())
+	require.NotNil(t, ctx)
+	require.False(t, ctx.commitment.IsIdentity())
+	require.False(t, ctx.challenge.IsZero())
 	for _, p := range ctx.proofs {
-		assert.False(t, p.IsZero())
+		require.False(t, p.IsZero())
 	}
 
 	delete(msgs, 0)
@@ -41,11 +42,11 @@ func TestBlindSignatureContext(t *testing.T) {
 	msgs[2] = curve.Scalar.Hash([]byte("lastname"))
 	msgs[3] = curve.Scalar.Hash([]byte("age"))
 	blindSig, err := ctx.ToBlindSignature(msgs, sk, generators, nonce)
-	assert.NoError(t, err)
-	assert.NotNil(t, blindSig)
-	assert.False(t, blindSig.a.IsIdentity())
-	assert.False(t, blindSig.e.IsZero())
-	assert.False(t, blindSig.s.IsZero())
+	require.NoError(t, err)
+	require.NotNil(t, blindSig)
+	require.False(t, blindSig.a.IsIdentity())
+	require.False(t, blindSig.e.IsZero())
+	require.False(t, blindSig.s.IsZero())
 	sig := blindSig.ToUnblinded(blinding)
 	msgs[0] = curve.Scalar.Hash([]byte("identifier"))
 	var sigMsgs [4]curves.Scalar
@@ -53,15 +54,15 @@ func TestBlindSignatureContext(t *testing.T) {
 		sigMsgs[i] = msgs[i]
 	}
 	err = pk.Verify(sig, generators, sigMsgs[:])
-	assert.NoError(t, err)
+	require.NoError(t, err)
 }
 
 func TestBlindSignatureContextMarshalBinary(t *testing.T) {
 	curve := curves.BLS12381(&curves.PointBls12381G2{})
 	pk, sk, err := NewKeys(curve)
-	assert.NoError(t, err)
-	assert.NotNil(t, pk)
-	assert.NotNil(t, sk)
+	require.NoError(t, err)
+	require.NotNil(t, pk)
+	require.NotNil(t, sk)
 
 	generators := new(MessageGenerators).Init(pk, 4)
 	nonce := curve.Scalar.Random(crand.Reader)
@@ -69,26 +70,26 @@ func TestBlindSignatureContextMarshalBinary(t *testing.T) {
 	msgs[0] = curve.Scalar.Hash([]byte("identifier"))
 
 	ctx, blinding, err := NewBlindSignatureContext(curve, msgs, generators, nonce, crand.Reader)
-	assert.NoError(t, err)
-	assert.NotNil(t, blinding)
-	assert.False(t, blinding.IsZero())
-	assert.NotNil(t, ctx)
-	assert.False(t, ctx.commitment.IsIdentity())
-	assert.False(t, ctx.challenge.IsZero())
+	require.NoError(t, err)
+	require.NotNil(t, blinding)
+	require.False(t, blinding.IsZero())
+	require.NotNil(t, ctx)
+	require.False(t, ctx.commitment.IsIdentity())
+	require.False(t, ctx.challenge.IsZero())
 	for _, p := range ctx.proofs {
-		assert.False(t, p.IsZero())
+		require.False(t, p.IsZero())
 	}
 
 	data, err := ctx.MarshalBinary()
-	assert.NoError(t, err)
-	assert.NotNil(t, data)
+	require.NoError(t, err)
+	require.NotNil(t, data)
 	ctx2 := new(BlindSignatureContext).Init(curve)
 	err = ctx2.UnmarshalBinary(data)
-	assert.NoError(t, err)
-	assert.Equal(t, ctx.challenge.Cmp(ctx2.challenge), 0)
-	assert.True(t, ctx.commitment.Equal(ctx2.commitment))
-	assert.Equal(t, len(ctx.proofs), len(ctx2.proofs))
+	require.NoError(t, err)
+	require.Equal(t, ctx.challenge.Cmp(ctx2.challenge), 0)
+	require.True(t, ctx.commitment.Equal(ctx2.commitment))
+	require.Equal(t, len(ctx.proofs), len(ctx2.proofs))
 	for i, p := range ctx.proofs {
-		assert.Equal(t, p.Cmp(ctx2.proofs[i]), 0)
+		require.Equal(t, p.Cmp(ctx2.proofs[i]), 0)
 	}
 }

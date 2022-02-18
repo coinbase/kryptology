@@ -8,10 +8,11 @@ package mina
 
 import (
 	"encoding/hex"
+	"testing"
+
 	"github.com/coinbase/kryptology/pkg/core/curves/native/pasta/fp"
 	"github.com/coinbase/kryptology/pkg/core/curves/native/pasta/fq"
-	"github.com/stretchr/testify/assert"
-	"testing"
+	"github.com/stretchr/testify/require"
 )
 
 func TestPoseidonHash(t *testing.T) {
@@ -69,7 +70,7 @@ func TestPoseidonHash(t *testing.T) {
 		ctx := new(Context).Init(ThreeW, NetworkType(NullNet))
 		ctx.Update(tv.input)
 		res := ctx.Digest()
-		assert.True(t, res.Equal(tv.output))
+		require.True(t, res.Equal(tv.output))
 	}
 	testVectors = []struct {
 		input  []*fp.Fp
@@ -99,7 +100,7 @@ func TestPoseidonHash(t *testing.T) {
 		ctx := new(Context).Init(ThreeW, NetworkType(MainNet))
 		ctx.Update(tv.input)
 		res := ctx.Digest()
-		assert.True(t, res.Equal(tv.output))
+		require.True(t, res.Equal(tv.output))
 	}
 }
 

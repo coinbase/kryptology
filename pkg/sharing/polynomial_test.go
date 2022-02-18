@@ -14,10 +14,10 @@ package sharing
 
 import (
 	crand "crypto/rand"
-	curves "github.com/coinbase/kryptology/pkg/core/curves"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/coinbase/kryptology/pkg/core/curves"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewPoly(t *testing.T) {
@@ -25,7 +25,7 @@ func TestNewPoly(t *testing.T) {
 	secret := curve.NewScalar().Hash([]byte("test"))
 
 	poly := new(Polynomial).Init(secret, 4, crand.Reader)
-	assert.NotNil(t, poly)
+	require.NotNil(t, poly)
 
-	assert.Equal(t, poly.Coefficients[0], secret)
+	require.Equal(t, poly.Coefficients[0], secret)
 }

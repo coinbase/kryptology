@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+// Package bls_sig is an implementation of the BLS signature defined in https://tools.ietf.org/html/draft-irtf-cfrg-bls-signature-03
 package bls_sig
 
 import (

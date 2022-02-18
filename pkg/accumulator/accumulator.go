@@ -4,6 +4,11 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+// Package accumulator implements the cryptographic accumulator as described in https://eprint.iacr.org/2020/777.pdf
+// It also implements the zero knowledge proof of knowledge protocol
+// described in section 7 of the paper.
+// Note: the paper only describes for non-membership witness case, but we don't
+// use non-membership witness. We only implement the membership witness case.
 package accumulator
 
 import (

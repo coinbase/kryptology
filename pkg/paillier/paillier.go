@@ -206,12 +206,14 @@ func (pk *PublicKey) l(x *big.Int) (*big.Int, error) {
 }
 
 // NewPubkey initializes a Paillier public key with a given n.
-func NewPubkey(n *big.Int) *PublicKey {
-	// BUG(arash): TODO: It will segfault if n is nil. Refactor to check for it.
+func NewPubkey(n *big.Int) (*PublicKey, error) {
+	if n == nil {
+		return nil, errors.New("n cannot be nil")
+	}
 	return &PublicKey{
 		N:  n,
 		N2: new(big.Int).Mul(n, n), // Compute and cache N²
-	}
+	}, nil
 }
 
 // Add combines two Paillier ciphertexts.

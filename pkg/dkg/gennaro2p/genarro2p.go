@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// Wraps dkg/genarro and specializes it for the 2-party case. Simpler API, no
+// Package gennaro2p wraps dkg/genarro and specializes it for the 2-party case. Simpler API, no
 // distinction between broadcast and peer messages, and only counterparty messages are
 // used as round inputs since self-inputs are always ignored.
 package gennaro2p

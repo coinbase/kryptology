@@ -9,9 +9,9 @@ package ted25519
 import (
 	"encoding/hex"
 	"fmt"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestSigAgg(t *testing.T) {
@@ -73,7 +73,7 @@ func TestSigAgg_validations(t *testing.T) {
 	sig2 := NewPartialSignature(2, sig2bytes)
 
 	_, err = Aggregate([]*PartialSignature{sig1, sig2}, &config)
-	assert.EqualError(
+	require.EqualError(
 		t,
 		err,
 		fmt.Sprintf("ted25519: unexpected nonce pubkey. got: %x expected: %x", sig2bytes[:32], sig1bytes[:32]),
