@@ -388,6 +388,35 @@ func (c Curve) NewScalar() Scalar {
 	return c.Scalar.Zero()
 }
 
+// ToEllipticCurve returns the equivalent of this curve as the go interface `elliptic.Curve`
+func (c Curve) ToEllipticCurve() (elliptic.Curve, error) {
+	err := fmt.Errorf("can't convert %s", c.Name)
+	switch c.Name {
+	case K256Name:
+		return K256Curve(), nil
+	case BLS12381G1Name:
+		return nil, err
+	case BLS12381G2Name:
+		return nil, err
+	case BLS12831Name:
+		return nil, err
+	case P256Name:
+		return NistP256Curve(), nil
+	case ED25519Name:
+		return nil, err
+	case PallasName:
+		return nil, err
+	case BLS12377G1Name:
+		return nil, err
+	case BLS12377G2Name:
+		return nil, err
+	case BLS12377Name:
+		return nil, err
+	default:
+		return nil, err
+	}
+}
+
 // PairingCurve represents a named elliptic curve
 // that supports pairings
 type PairingCurve struct {
@@ -607,58 +636,6 @@ func pallasInit() {
 	}
 }
 
-func isogenyMap(inX, inY *big.Int, isoParams *isogenyParams) (x, y *big.Int) {
-	xnumL := len(isoParams.Xnum)
-	xdenL := len(isoParams.Xden)
-	ynumL := len(isoParams.Ynum)
-	ydenL := len(isoParams.Yden)
-
-	degree := 0
-	for _, i := range []int{xnumL, xdenL, ynumL, ydenL} {
-		if degree < i {
-			degree = i
-		}
-	}
-
-	xs := make([]*big.Int, degree)
-	xs[0] = big.NewInt(1)              // x[0] = x^0
-	xs[1] = new(big.Int).Set(inX)      // x[1] = x^1
-	xs[2] = new(big.Int).Mul(inX, inX) // x[2] = x^2
-	xs[2].Mod(xs[2], isoParams.P)
-	for i := 3; i < degree; i++ {
-		// x[i] = x^i
-		xs[i] = new(big.Int).Mul(xs[i-1], inX)
-		xs[i].Mod(xs[i], isoParams.P)
-	}
-
-	xNum := computeIsoK(xs, isoParams.Xnum, isoParams.P)
-	xDen := computeIsoK(xs, isoParams.Xden, isoParams.P)
-	yNum := computeIsoK(xs, isoParams.Ynum, isoParams.P)
-	yDen := computeIsoK(xs, isoParams.Yden, isoParams.P)
-
-	xDen.ModInverse(xDen, isoParams.P)
-	yDen.ModInverse(yDen, isoParams.P)
-
-	x = new(big.Int).Mul(xNum, xDen)
-	x.Mod(x, isoParams.P)
-
-	y = new(big.Int).Mul(yNum, yDen)
-	y.Mul(inY, y)
-	y.Mod(y, isoParams.P)
-
-	return
-}
-
-func computeIsoK(xxs, k []*big.Int, p *big.Int) *big.Int {
-	xx := new(big.Int)
-	for i := range k {
-		t := new(big.Int).Mul(xxs[i], k[i])
-		xx.Add(xx, t)
-		xx.Mod(xx, p)
-	}
-	return xx
-}
-
 // https://tools.ietf.org/html/draft-irtf-cfrg-hash-to-curve-11#appendix-G.2.1
 func osswu3mod4(u *big.Int, p *sswuParams) (x, y *big.Int) {
 	params := p.Params
@@ -784,14 +761,6 @@ func expandMsgXmd(h hash.Hash, msg, domain []byte, outLen int) ([]byte, error) {
 	// b_ell
 	copy(out[(ell-1)*h.Size():], bi[:])
 	return out[:outLen], nil
-}
-
-type isogenyParams struct {
-	P    *big.Int
-	Xnum []*big.Int
-	Xden []*big.Int
-	Ynum []*big.Int
-	Yden []*big.Int
 }
 
 func bhex(s string) *big.Int {

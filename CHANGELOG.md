@@ -5,6 +5,28 @@ All notable changes to this repo will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v2.0.0
+
+### Add
+
+- Constant time K256 curve.
+- Constant time P256 curve.
+- New DKLs18 implementation that fixes the issues in v0.
+    - This also refactors OT, OT Extension, and Schnorr ZKP to their own packages.
+    - Furthermore, this generalizes the input curve type of the protocol.
+
+### Fixed
+
+- nil check in `paillier.Newpubkey`.
+- Mark the current DKLs18 implementation as v0 and not suitable for production.
+- Establish a new interface for MPC protocols and their messages.
+- Fireblocks bit probe attack.
+
+### Removed
+
+- Godropbox dependency
+- Autogeneration of readmes
+
 ## v1.5.5
 - Fix BBS+ error when revealing all messages
 - Add Mina signing

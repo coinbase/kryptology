@@ -17,7 +17,7 @@ import (
 	tt "github.com/coinbase/kryptology/internal"
 	crypto "github.com/coinbase/kryptology/pkg/core"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -391,7 +391,8 @@ func TestLcmBigPrimes(t *testing.T) {
 
 func TestLKnownCases(t *testing.T) {
 	// test multiples of 5 for L
-	pk := NewPubkey(big.NewInt(5))
+	pk, err := NewPubkey(big.NewInt(5))
+	require.NoError(t, err)
 	tests := []struct {
 		in, expected *big.Int
 	}{
@@ -409,7 +410,8 @@ func TestLKnownCases(t *testing.T) {
 }
 
 func TestLFailureCases(t *testing.T) {
-	pk := NewPubkey(big.NewInt(5))
+	pk, err := NewPubkey(big.NewInt(5))
+	require.NoError(t, err)
 	tests := []*big.Int{
 		pk.N,                // u = N should fail
 		big.NewInt(25),      // u = NN should fail
@@ -595,7 +597,8 @@ func TestNewKeysDistinct(t *testing.T) {
 
 // Tests the restrictions on input values for paillier.Add
 func TestAddErrorConditions(t *testing.T) {
-	pk := NewPubkey(N)
+	pk, err := NewPubkey(N)
+	require.NoError(t, err)
 
 	var tests = []struct {
 		x, y         *big.Int
@@ -640,8 +643,10 @@ func TestAddErrorConditions(t *testing.T) {
 
 // Tests for paillier addition with known answers
 func TestAdd(t *testing.T) {
-	z9 := NewPubkey(big.NewInt(3))
-	pk := NewPubkey(N)
+	z9, err := NewPubkey(big.NewInt(3))
+	require.NoError(t, err)
+	pk, err := NewPubkey(N)
+	require.NoError(t, err)
 
 	// Pre-compute values for testing
 	NplusOne := NplusOne
@@ -681,7 +686,8 @@ func TestAdd(t *testing.T) {
 
 // Tests the restrictions on input values for paillier.Mul
 func TestMulErrorConditions(t *testing.T) {
-	pk := NewPubkey(N)
+	pk, err := NewPubkey(N)
+	require.NoError(t, err)
 
 	var tests = []struct {
 		x, y         *big.Int
@@ -724,12 +730,16 @@ func TestMulErrorConditions(t *testing.T) {
 
 // Tests for paillier multiplication with known answers
 func TestMul(t *testing.T) {
-	z25 := NewPubkey(big.NewInt(5))
-	pk := NewPubkey(N)
+	z25, err := NewPubkey(big.NewInt(5))
+	require.NoError(t, err)
+	pk, err := NewPubkey(N)
+	require.NoError(t, err)
+	newPk, err := NewPubkey(tt.B10("66563913295148834609789506"))
+	require.NoError(t, err)
 
 	// Compute: ɑ ≡ -2N -1  (N²)
 	alpha, err := crypto.Mul(N, big.NewInt(-2), NN)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	alpha.Add(alpha, crypto.One)
 
 	var tests = []struct {
@@ -756,7 +766,7 @@ func TestMul(t *testing.T) {
 		{pk, NminusOne, two, alpha},               // (N-1)² = N² - 2N - 1 ≡ -2N -1 (N²)
 
 		// large number test: WorlframAlpha test case
-		{NewPubkey(tt.B10("66563913295148834609789506")),
+		{newPk,
 			tt.B10("11659564086467828628"),
 			tt.B10("57089538512338875950"),
 			tt.B10("1487259371808822575685230766372478858208831958946972")},
@@ -771,7 +781,8 @@ func TestMul(t *testing.T) {
 
 // encrypt() is provided a nonce and must be deterministic
 func TestLittleEncryptDeterministic(t *testing.T) {
-	pk := NewPubkey(N)
+	pk, err := NewPubkey(N)
+	require.NoError(t, err)
 	r, err := crypto.Rand(pk.N)
 	tt.AssertNoError(t, err)
 
@@ -794,7 +805,8 @@ func TestLittleEncryptDeterministic(t *testing.T) {
 
 // Tests the restrictions on input values for paillier.Encrypt
 func TestEncryptErrorConditions(t *testing.T) {
-	pk := NewPubkey(N)
+	pk, err := NewPubkey(N)
+	require.NoError(t, err)
 
 	var tests = []struct {
 		msg, r       *big.Int
@@ -829,13 +841,14 @@ func TestEncryptErrorConditions(t *testing.T) {
 
 	// Fail if N is nil
 	pk = &PublicKey{N: nil, N2: nil}
-	_, _, err := pk.Encrypt(crypto.One)
+	_, _, err = pk.Encrypt(crypto.One)
 	tt.AssertError(t, err, "arguments cannot be nil")
 }
 
 // Tests that each invocation of Encrypt() produces a distinct output
 func TestEncryptIsRandomized(t *testing.T) {
-	pk := NewPubkey(N)
+	pk, err := NewPubkey(N)
+	require.NoError(t, err)
 	msg := crypto.One
 
 	// Encrypt the same msg multiple times
@@ -856,7 +869,8 @@ func TestEncryptIsRandomized(t *testing.T) {
 // Small number tests of Encrypt()
 func TestEncryptKnownAnswers(t *testing.T) {
 	// N=3, NN=9
-	z9 := NewPubkey(big.NewInt(3))
+	z9, err := NewPubkey(big.NewInt(3))
+	require.NoError(t, err)
 
 	var tests = []struct {
 		m, r, expected *big.Int // m,r inputs
@@ -878,7 +892,8 @@ func TestEncryptKnownAnswers(t *testing.T) {
 
 // Encrypt should succeed over a range of arbitrary, valid messages
 func TestEncryptSucceeds(t *testing.T) {
-	pk := NewPubkey(N)
+	pk, err := NewPubkey(N)
+	require.NoError(t, err)
 	iterations := 100
 	for i := 0; i < iterations; i++ {
 		msg, _ := crypto.Rand(pk.N)
@@ -890,7 +905,8 @@ func TestEncryptSucceeds(t *testing.T) {
 
 // Tests the restrictions on input values for paillier.Decrypt
 func TestDecryptErrorConditions(t *testing.T) {
-	pk := NewPubkey(N)
+	pk, err := NewPubkey(N)
+	require.NoError(t, err)
 	// A fake secret key, but good enough to test parameter validation
 	sk := &SecretKey{*pk, NplusOne, NplusOne, NplusOne}
 
@@ -932,7 +948,7 @@ func TestDecryptErrorConditions(t *testing.T) {
 		Totient:   nil,
 		U:         nil,
 	}
-	_, err := sk.Decrypt(crypto.One)
+	_, err = sk.Decrypt(crypto.One)
 	tt.AssertSomeError(t, err)
 
 	// N = 0 is pub key
@@ -959,7 +975,8 @@ func TestEncryptDecryptRoundTrip(t *testing.T) {
 	// Create sk, pk for testing
 	sk, err := NewSecretKey(p, q)
 	tt.AssertNoError(t, err)
-	pk := NewPubkey(n)
+	pk, err := NewPubkey(n)
+	require.NoError(t, err)
 
 	// Valid msgs ∈ Z_N
 	msgs := []*big.Int{
@@ -985,15 +1002,16 @@ func TestEncryptDecryptRoundTrip(t *testing.T) {
 
 func TestSerializePublicKeyWorks(t *testing.T) {
 	n := tt.B10("16241940578082201531943448855852277578391761356628379864603641922876623601321625229339135653813019543205064366507109899018615521640687222340376734033815591736764469510811142260074144789284382858541066390183237904579674336717818949214144339382239132186500111594251680147962383065732964214151653795512167674648653475620307856642151695559944756719719799945193072239010815330021803557074201060705849949820706127488164694762724694756011467249889383401729777382247223470577114290663770295230883950621358271613200219512401437571399087878832070221157976750549142719310423012055140771277730139053532825828483343855582012877641")
-	pk := NewPubkey(n)
+	pk, err := NewPubkey(n)
+	require.NoError(t, err)
 
 	data, err := pk.MarshalJSON()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	pk2 := new(PublicKey)
-	assert.NoError(t, pk2.UnmarshalJSON(data))
-	assert.Equal(t, pk2, pk)
-	assert.NoError(t, pk2.UnmarshalJSON([]byte(`{"N":1251}`)))
+	require.NoError(t, pk2.UnmarshalJSON(data))
+	require.Equal(t, pk2, pk)
+	require.NoError(t, pk2.UnmarshalJSON([]byte(`{"N":1251}`)))
 }
 
 func TestSerializePublicKeyIgnoreFields(t *testing.T) {
@@ -1005,7 +1023,7 @@ func TestSerializePublicKeyIgnoreFields(t *testing.T) {
 	}
 	pk := new(PublicKey)
 	for _, test := range tests {
-		assert.NoError(t, pk.UnmarshalJSON(test))
+		require.NoError(t, pk.UnmarshalJSON(test))
 	}
 }
 
@@ -1013,14 +1031,14 @@ func TestSerializeSecretKeyWorks(t *testing.T) {
 	p := tt.B10("133788347333574532510542341875219452703250094560184213896952738579939377079849213618116996737030817731544214409221015150233522821287955673536671953914660520267670984696713816508768479853621956967492030516224494353641551367310541202655075859386716364585825364092974073148178887544704793573033779774765431460367")
 	q := tt.B10("121400263190232595456200749546561304956161672968687911935494950378721768184159069938532869288284686583150658925255722159156454219960265942696166947144912738151554579878178746701374346180640493532962639632666540478486867810588884360492830920363713588684509182704981665082591486786717530494254613085570321507623")
 	sk, err := NewSecretKey(p, q)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
 	data, err := sk.MarshalJSON()
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	sk2 := new(SecretKey)
-	assert.NoError(t, sk2.UnmarshalJSON(data))
-	assert.Equal(t, sk2, sk)
-	assert.NoError(t, sk2.UnmarshalJSON([]byte(`{"N":2,"Totient":1,"U":1,"Lambda":1}`)))
+	require.NoError(t, sk2.UnmarshalJSON(data))
+	require.Equal(t, sk2, sk)
+	require.NoError(t, sk2.UnmarshalJSON([]byte(`{"N":2,"Totient":1,"U":1,"Lambda":1}`)))
 }
 
 func TestSerializeSecretKeyIgnoreFields(t *testing.T) {
@@ -1033,7 +1051,7 @@ func TestSerializeSecretKeyIgnoreFields(t *testing.T) {
 	}
 	sk := new(SecretKey)
 	for _, test := range tests {
-		assert.NoError(t, sk.UnmarshalJSON(test))
+		require.NoError(t, sk.UnmarshalJSON(test))
 	}
 }
 

@@ -9,13 +9,13 @@ package gennaro2p
 import (
 	"crypto/elliptic"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/coinbase/kryptology/pkg/sharing/v1"
 	"reflect"
 	"testing"
 
+	"github.com/coinbase/kryptology/pkg/core/curves"
+	v1 "github.com/coinbase/kryptology/pkg/sharing/v1"
+
 	"github.com/btcsuite/btcd/btcec"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -37,7 +37,7 @@ func BenchmarkDkg(b *testing.B) {
 
 	for i := 0; i < b.N; i++ {
 		_, _, err := dkg()
-		assert.NoError(b, err)
+		require.NoError(b, err)
 	}
 }
 
@@ -102,16 +102,16 @@ func TestDkg(t *testing.T) {
 
 	// Now run tests
 	t.Run("produce the same public key", func(t *testing.T) {
-		assert.Equal(t, clientResult.PublicKey, serverResult.PublicKey)
+		require.Equal(t, clientResult.PublicKey, serverResult.PublicKey)
 	})
 	t.Run("produce identical public shares", func(t *testing.T) {
-		assert.True(t, reflect.DeepEqual(clientResult.PublicShares, serverResult.PublicShares))
+		require.True(t, reflect.DeepEqual(clientResult.PublicShares, serverResult.PublicShares))
 	})
 	t.Run("produce distinct secret shares", func(t *testing.T) {
-		assert.NotEqual(t, clientResult.SecretShare, serverResult.SecretShare)
+		require.NotEqual(t, clientResult.SecretShare, serverResult.SecretShare)
 	})
 	t.Run("produce distinct secret shares", func(t *testing.T) {
-		assert.NotEqual(t, clientResult.SecretShare, serverResult.SecretShare)
+		require.NotEqual(t, clientResult.SecretShare, serverResult.SecretShare)
 	})
 	t.Run("shares sum to expected public key", func(t *testing.T) {
 		pubkey, err := reconstructPubkey(
@@ -119,7 +119,7 @@ func TestDkg(t *testing.T) {
 			serverResult.SecretShare,
 			curve)
 		require.NoError(t, err)
-		assert.Equal(t, serverResult.PublicKey, pubkey)
+		require.Equal(t, serverResult.PublicKey, pubkey)
 	})
 }
 
@@ -152,10 +152,10 @@ func TestNewBlindOnCurve(t *testing.T) {
 		require.NotNil(t, b)
 
 		// Valid point?
-		assert.True(t, b.IsOnCurve() && b.IsValid())
-		assert.True(t, b.IsValid())
-		assert.False(t, b.IsIdentity())
-		assert.False(t, b.IsBasePoint())
+		require.True(t, b.IsOnCurve() && b.IsValid())
+		require.True(t, b.IsValid())
+		require.False(t, b.IsIdentity())
+		require.False(t, b.IsBasePoint())
 	}
 }
 
@@ -173,7 +173,7 @@ func TestNewBlindProvidesDistinctPoints(t *testing.T) {
 
 		// We shouldn't see the same point twice
 		ok := seen[txt]
-		assert.False(t, ok)
+		require.False(t, ok)
 
 		// store
 		seen[txt] = true

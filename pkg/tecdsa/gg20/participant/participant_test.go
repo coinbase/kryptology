@@ -18,10 +18,10 @@ import (
 
 	"github.com/coinbase/kryptology/pkg/core"
 	"github.com/coinbase/kryptology/pkg/paillier"
-	"github.com/stretchr/testify/assert"
 
-	"github.com/btcsuite/btcd/btcec"
 	"github.com/coinbase/kryptology/internal"
+	"github.com/btcsuite/btcd/btcec"
+	"github.com/stretchr/testify/require"
 )
 
 func TestConvertToAdditiveWorks(t *testing.T) {
@@ -343,20 +343,20 @@ func TestNormalizeSK256(t *testing.T) {
 	}
 	for i := 0; i < 500; i++ {
 		s, err := core.Rand(qDiv2)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		sNorm := signer.normalizeS(s)
 
-		assert.Equal(t, s, sNorm)
+		require.Equal(t, s, sNorm)
 	}
 	for i := 0; i < 500; i++ {
 		s, err := core.Rand(qDiv2)
 		s.Add(s, qDiv2)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		sNorm := signer.normalizeS(s)
 
-		assert.NotEqual(t, s, sNorm)
+		require.NotEqual(t, s, sNorm)
 	}
 }
 
@@ -369,16 +369,16 @@ func TestNormalizeSK256Identity(t *testing.T) {
 	signer.Curve = curve
 	for i := 0; i < 1000; i++ {
 		msg, err := core.Rand(curve.N)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		sk, err := btcec.NewPrivateKey(curve)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		sig, err := sk.Sign(msg.Bytes())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		sNorm := signer.normalizeS(sig.S)
 
-		assert.Equal(t, sig.S, sNorm)
+		require.Equal(t, sig.S, sNorm)
 	}
 }
 
@@ -389,15 +389,15 @@ func TestNormalizeSP256(t *testing.T) {
 	}
 	signer.Curve = p256
 	sk, err := ecdsa.GenerateKey(p256, rand.Reader)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	for i := 0; i < 1000; i++ {
 		msg, err := core.Rand(p256.Params().N)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 		r, s, err := ecdsa.Sign(rand.Reader, sk, msg.Bytes())
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		newS := signer.normalizeS(s)
-		assert.True(t, ecdsa.Verify(&sk.PublicKey, msg.Bytes(), r, newS))
+		require.True(t, ecdsa.Verify(&sk.PublicKey, msg.Bytes(), r, newS))
 	}
 }
 
@@ -405,16 +405,19 @@ func TestSerializeParticipantData(t *testing.T) {
 	participants := 5
 	curve := btcec.S256()
 	ecdsaPk, sharesMap, err := dealer.NewDealerShares(curve, 3, uint32(participants), nil)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	pubSharesMap, err := dealer.PreparePublicShares(sharesMap)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	paillierKeys := make(map[uint32]*paillier.SecretKey, participants)
 	encryptKeys := make(map[uint32]*paillier.PublicKey, participants)
 	for i, k := range genPrimesArray(participants) {
 		id := uint32(i + 1)
 		paillierKeys[id], err = paillier.NewSecretKey(k.p, k.q)
-		encryptKeys[id] = paillier.NewPubkey(paillierKeys[id].PublicKey.N)
-		assert.NoError(t, err)
+		require.NoError(t, err)
+		encryptKey, err := paillier.NewPubkey(paillierKeys[id].PublicKey.N)
+		require.NoError(t, err)
+		encryptKeys[id] = encryptKey
+		require.NoError(t, err)
 	}
 
 	keyGenType := dealer.TrustedDealerKeyGenType{
@@ -435,16 +438,16 @@ func TestSerializeParticipantData(t *testing.T) {
 		p.SecretKeyShare = sharesMap[id]
 
 		data, err := json.Marshal(p)
-		assert.NoError(t, err)
+		require.NoError(t, err)
 
 		p2 := new(dealer.ParticipantData)
-		assert.NoError(t, json.Unmarshal(data, p2))
-		assert.Equal(t, p.Id, p2.Id)
-		assert.Equal(t, p.DecryptKey, p2.DecryptKey)
-		assert.Equal(t, p.SecretKeyShare, p2.SecretKeyShare)
-		assert.Equal(t, p.KeyGenType, p2.KeyGenType)
-		assert.Equal(t, p.EcdsaPublicKey, p2.EcdsaPublicKey)
-		assert.Equal(t, p.EncryptKeys, p2.EncryptKeys)
-		assert.Equal(t, p.PublicShares, p2.PublicShares)
+		require.NoError(t, json.Unmarshal(data, p2))
+		require.Equal(t, p.Id, p2.Id)
+		require.Equal(t, p.DecryptKey, p2.DecryptKey)
+		require.Equal(t, p.SecretKeyShare, p2.SecretKeyShare)
+		require.Equal(t, p.KeyGenType, p2.KeyGenType)
+		require.Equal(t, p.EcdsaPublicKey, p2.EcdsaPublicKey)
+		require.Equal(t, p.EncryptKeys, p2.EncryptKeys)
+		require.Equal(t, p.PublicShares, p2.PublicShares)
 	}
 }

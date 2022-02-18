@@ -4,6 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
+// Package dealer is an implementation of the `dealer` mode of https://eprint.iacr.org/2020/540.pdf
 package dealer
 
 import (

@@ -4,12 +4,10 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-/*
-Package finitefield provides a finite field type (Field) that wraps big.Int operations and verifies that all
-mutations to the value are done within the field.
-
-This implementation IS NOT constant time as it leverages math/big for big number operations.
-*/
+// Package finitefield provides a finite field type (Field) that wraps big.Int operations and verifies that all
+// mutations to the value are done within the field.
+//
+// This implementation IS NOT constant time as it leverages math/big for big number operations.
 package finitefield
 
 import (

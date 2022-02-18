@@ -11,10 +11,10 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/btcsuite/btcd/btcec"
 	tt "github.com/coinbase/kryptology/internal"
 	mod "github.com/coinbase/kryptology/pkg/core"
-	"github.com/stretchr/testify/assert"
+	"github.com/btcsuite/btcd/btcec"
+	"github.com/stretchr/testify/require"
 )
 
 // To test ProveCompositeDL, the input must satisfy the following relationship
@@ -302,15 +302,15 @@ func TestMarshalJsonCdlProof(t *testing.T) {
 	}
 
 	testJSON, err := json.Marshal(test)
-	assert.NoError(t, err)
-	assert.NotNil(t, testJSON)
+	require.NoError(t, err)
+	require.NotNil(t, testJSON)
 
 	unmarshaled := new(CdlProof)
 	err = json.Unmarshal(testJSON, unmarshaled)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.Equal(t, test.u, unmarshaled.u)
-	assert.Equal(t, test.s, unmarshaled.s)
+	require.Equal(t, test.u, unmarshaled.u)
+	require.Equal(t, test.s, unmarshaled.s)
 }
 
 // Set SafePrimes P, Q to 100-bit length instead of 1024-bit length to test small modulus.

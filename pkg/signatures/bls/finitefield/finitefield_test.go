@@ -12,7 +12,6 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
 )
 
@@ -38,7 +37,7 @@ func zero() *big.Int {
 }
 
 func assertElementZero(t *testing.T, e *Element) {
-	assert.Equal(t, zero().Bytes(), e.Bytes())
+	require.Equal(t, zero().Bytes(), e.Bytes())
 }
 
 type binaryOperation func(*Element) *Element
@@ -47,7 +46,7 @@ func assertUnequalFieldsPanic(t *testing.T, b binaryOperation) {
 	altField := New(big.NewInt(23))
 	altElement := altField.NewElement(one)
 
-	assert.PanicsWithValue(
+	require.PanicsWithValue(
 		t,
 		"fields must match for valid binary operation",
 		func() { b(altElement) },
@@ -55,55 +54,55 @@ func assertUnequalFieldsPanic(t *testing.T, b binaryOperation) {
 }
 
 func TestModulus(t *testing.T) {
-	assert.True(t, modulusOk)
+	require.True(t, modulusOk)
 }
 
 func TestNew(t *testing.T) {
-	assert.PanicsWithValue(
+	require.PanicsWithValue(
 		t,
 		fmt.Sprintf("modulus: %x is not a prime", oneBelowModulus),
 		func() { New(oneBelowModulus) },
 	)
-	assert.NotPanics(
+	require.NotPanics(
 		t,
 		func() { New(modulus) },
 	)
 }
 
 func TestNewElement(t *testing.T) {
-	assert.PanicsWithValue(
+	require.PanicsWithValue(
 		t,
 		fmt.Sprintf("value: %x is not within field: %x", modulus, field.Modulus),
 		func() { newElement(field, modulus) },
 	)
-	assert.NotPanics(
+	require.NotPanics(
 		t,
 		func() { newElement(field, oneBelowModulus) },
 	)
 }
 
 func TestIsValid(t *testing.T) {
-	assert.False(t, field.IsValid(zero().Neg(one)))
-	assert.False(t, field.IsValid(modulus))
-	assert.False(t, field.IsValid(oneAboveModulus))
-	assert.True(t, field.IsValid(oneBelowModulus))
+	require.False(t, field.IsValid(zero().Neg(one)))
+	require.False(t, field.IsValid(modulus))
+	require.False(t, field.IsValid(oneAboveModulus))
+	require.True(t, field.IsValid(oneBelowModulus))
 }
 
 func TestFieldNewElement(t *testing.T) {
 	element := field.NewElement(oneBelowModulus)
 
-	assert.Equal(t, oneBelowModulus, element.value)
-	assert.Equal(t, field, element.Field)
+	require.Equal(t, oneBelowModulus, element.value)
+	require.Equal(t, field, element.Field)
 }
 
 func TestZero(t *testing.T) {
-	assert.Equal(t, zero(), field.Zero().value)
-	assert.Equal(t, field, field.Zero().Field)
+	require.Equal(t, zero(), field.Zero().value)
+	require.Equal(t, field, field.Zero().Field)
 }
 
 func TestOne(t *testing.T) {
-	assert.Equal(t, field.One().value, one)
-	assert.Equal(t, field.One().Field, field)
+	require.Equal(t, field.One().value, one)
+	require.Equal(t, field.One().Field, field)
 }
 
 func TestRandomElement(t *testing.T) {
@@ -114,29 +113,29 @@ func TestRandomElement(t *testing.T) {
 	randomElement3, err := field.RandomElement(new(buggedReader))
 	require.Error(t, err)
 
-	assert.Equal(t, field, randomElement1.Field)
-	assert.Equal(t, field, randomElement2.Field)
-	assert.NotEqual(t, randomElement1.value, randomElement2.value)
-	assert.Nil(t, randomElement3)
+	require.Equal(t, field, randomElement1.Field)
+	require.Equal(t, field, randomElement2.Field)
+	require.NotEqual(t, randomElement1.value, randomElement2.value)
+	require.Nil(t, randomElement3)
 }
 
 func TestElementFromBytes(t *testing.T) {
 	element := field.ElementFromBytes(oneBelowModulus.Bytes())
 
-	assert.Equal(t, field, element.Field)
-	assert.Equal(t, oneBelowModulus, element.value)
+	require.Equal(t, field, element.Field)
+	require.Equal(t, oneBelowModulus, element.value)
 }
 
 func TestReducedElementFromBytes(t *testing.T) {
 	element := field.ReducedElementFromBytes(oneBelowModulus.Bytes())
 
-	assert.Equal(t, field, element.Field)
-	assert.Equal(t, oneBelowModulus, element.value)
+	require.Equal(t, field, element.Field)
+	require.Equal(t, oneBelowModulus, element.value)
 
 	element = field.ReducedElementFromBytes(oneAboveModulus.Bytes())
 
-	assert.Equal(t, field, element.Field)
-	assert.Equal(t, one, element.value)
+	require.Equal(t, field, element.Field)
+	require.Equal(t, one, element.value)
 }
 
 func TestAdd(t *testing.T) {
@@ -145,11 +144,11 @@ func TestAdd(t *testing.T) {
 	element3 := field.NewElement(oneBelowModulus)
 	element4 := &Element{field, modulus}
 
-	assert.Equal(t, element2, element1.Add(element1))
-	assert.Equal(t, big.NewInt(3), element1.Add(element2).value)
-	assert.Equal(t, big.NewInt(3), element2.Add(element1).value)
-	assert.Equal(t, one, element1.Add(element4).value)
-	assert.Equal(t, one, element3.Add(element2).value)
+	require.Equal(t, element2, element1.Add(element1))
+	require.Equal(t, big.NewInt(3), element1.Add(element2).value)
+	require.Equal(t, big.NewInt(3), element2.Add(element1).value)
+	require.Equal(t, one, element1.Add(element4).value)
+	require.Equal(t, one, element3.Add(element2).value)
 	assertElementZero(t, element1.Add(element3))
 	assertUnequalFieldsPanic(t, element1.Add)
 }
@@ -161,12 +160,12 @@ func TestSub(t *testing.T) {
 	element4 := &Element{field, modulus}
 
 	assertElementZero(t, element1.Sub(element1))
-	assert.Equal(t, element3, element1.Sub(element2))
-	assert.Equal(t, element1, element2.Sub(element1))
-	assert.Equal(t, element1, element1.Sub(element4))
-	assert.Equal(t, element3, element4.Sub(element1))
-	assert.Equal(t, element1, element4.Sub(element3))
-	assert.Equal(t, element3, element3.Sub(element4))
+	require.Equal(t, element3, element1.Sub(element2))
+	require.Equal(t, element1, element2.Sub(element1))
+	require.Equal(t, element1, element1.Sub(element4))
+	require.Equal(t, element3, element4.Sub(element1))
+	require.Equal(t, element1, element4.Sub(element3))
+	require.Equal(t, element3, element3.Sub(element4))
 	assertUnequalFieldsPanic(t, element1.Sub)
 }
 
@@ -183,10 +182,10 @@ func TestMul(t *testing.T) {
 
 	assertElementZero(t, element1.Mul(element4))
 	assertElementZero(t, element4.Mul(element1))
-	assert.Equal(t, element3, element1.Mul(element3))
-	assert.Equal(t, element3, element3.Mul(element1))
-	assert.Equal(t, expectedProduct, element3.Mul(element2).value)
-	assert.Equal(t, expectedProduct, element2.Mul(element3).value)
+	require.Equal(t, element3, element1.Mul(element3))
+	require.Equal(t, element3, element3.Mul(element1))
+	require.Equal(t, expectedProduct, element3.Mul(element2).value)
+	require.Equal(t, expectedProduct, element2.Mul(element3).value)
 	assertUnequalFieldsPanic(t, element1.Mul)
 }
 
@@ -207,10 +206,10 @@ func TestDiv(t *testing.T) {
 	require.True(t, ok)
 
 	assertElementZero(t, element4.Div(element3))
-	assert.Equal(t, element3, element3.Div(element1))
-	assert.Equal(t, expectedQuotient1, element3.Div(element2).value)
-	assert.Equal(t, expectedQuotient2, element2.Div(element3).value)
-	assert.Panics(t, func() { element3.Div(element4) })
+	require.Equal(t, element3, element3.Div(element1))
+	require.Equal(t, expectedQuotient1, element3.Div(element2).value)
+	require.Equal(t, expectedQuotient2, element2.Div(element3).value)
+	require.Panics(t, func() { element3.Div(element4) })
 	assertUnequalFieldsPanic(t, element1.Div)
 }
 
@@ -221,22 +220,22 @@ func TestIsEqual(t *testing.T) {
 	altField := New(big.NewInt(23))
 	altElement1 := altField.NewElement(one)
 
-	assert.False(t, element1.IsEqual(element2))
-	assert.True(t, element1.IsEqual(element3))
-	assert.True(t, element1.IsEqual(element1))
-	assert.False(t, element1.IsEqual(altElement1))
+	require.False(t, element1.IsEqual(element2))
+	require.True(t, element1.IsEqual(element3))
+	require.True(t, element1.IsEqual(element1))
+	require.False(t, element1.IsEqual(altElement1))
 }
 
 func TestBigInt(t *testing.T) {
 	element := field.NewElement(oneBelowModulus)
 
-	assert.Equal(t, oneBelowModulus, element.BigInt())
+	require.Equal(t, oneBelowModulus, element.BigInt())
 }
 
 func TestBytes(t *testing.T) {
 	element := field.NewElement(oneBelowModulus)
 
-	assert.Equal(
+	require.Equal(
 		t,
 		[]byte{
 			0x10, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
@@ -252,9 +251,9 @@ func TestClone(t *testing.T) {
 	element := field.NewElement(oneBelowModulus)
 	clone := element.Clone()
 
-	assert.Equal(t, clone, element)
+	require.Equal(t, clone, element)
 
 	clone.value.Add(one, one)
 
-	assert.NotEqual(t, clone, element)
+	require.NotEqual(t, clone, element)
 }

@@ -9,12 +9,12 @@ package ted25519
 import (
 	"crypto/rand"
 	"encoding/hex"
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/coinbase/kryptology/pkg/sharing/v1"
-	"github.com/stretchr/testify/assert"
-	"github.com/stretchr/testify/require"
 	"math/big"
 	"testing"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
+	v1 "github.com/coinbase/kryptology/pkg/sharing/v1"
+	"github.com/stretchr/testify/require"
 )
 
 const expectedSeedHex = "9d61b19deffd5a60ba844af492ec2cc44449c5697b326919703bac031cae7f60"
@@ -71,25 +71,25 @@ func TestThresholdSign_invalid_secrets(t *testing.T) {
 	require.NoError(t, err)
 	noncePub := curves.ED25519().Point.Generator().Mul(nScalar)
 
-	assert.PanicsWithValue(t, "ed25519: bad key share length: 0",
+	require.PanicsWithValue(t, "ed25519: bad key share length: 0",
 		func() {
 			ThresholdSign(make([]byte, 0), pub.ToAffineCompressed(), message, nonce, noncePub.ToAffineCompressed())
 		},
 	)
 
-	assert.PanicsWithValue(t, "ed25519: bad key share length: 33",
+	require.PanicsWithValue(t, "ed25519: bad key share length: 33",
 		func() {
 			ThresholdSign(make([]byte, 33), pub.ToAffineCompressed(), message, nonce, noncePub.ToAffineCompressed())
 		},
 	)
 
-	assert.PanicsWithValue(t, "ed25519: bad nonce share length: 0",
+	require.PanicsWithValue(t, "ed25519: bad nonce share length: 0",
 		func() {
 			ThresholdSign(secret, pub.ToAffineCompressed(), message, make([]byte, 0), noncePub.ToAffineCompressed())
 		},
 	)
 
-	assert.PanicsWithValue(t, "ed25519: bad nonce share length: 33",
+	require.PanicsWithValue(t, "ed25519: bad nonce share length: 33",
 		func() {
 			ThresholdSign(secret, pub.ToAffineCompressed(), message, make([]byte, 33), noncePub.ToAffineCompressed())
 		},

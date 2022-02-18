@@ -188,8 +188,8 @@ func TestParticipantRound3Works(t *testing.T) {
 		X:     x,
 		Y:     y,
 	}
-	assert.True(t, tmp.Equals(p1.verificationKey))
-	assert.True(t, tmp.Equals(p2.verificationKey))
+	require.True(t, tmp.Equals(p1.verificationKey))
+	require.True(t, tmp.Equals(p2.verificationKey))
 }
 
 // Test Gennaro Dkg Round3 Repeat Call
@@ -338,7 +338,7 @@ func TestParticipant2BadInput(t *testing.T) {
 
 	// Run round 2
 	_, err := p1.Round2(bcast, p2p1)
-	assert.Error(t, err)
+	require.Error(t, err)
 }
 
 func TestValidIDs(t *testing.T) {
@@ -360,9 +360,9 @@ func TestValidIDs(t *testing.T) {
 		t.Run(test.name, func(t *testing.T) {
 			err := validIds(test.in)
 			if test.expected == nil {
-				assert.NoError(t, err)
+				require.NoError(t, err)
 			} else {
-				assert.Error(t, err)
+				require.Error(t, err)
 			}
 		})
 	}
@@ -371,11 +371,11 @@ func TestValidIDs(t *testing.T) {
 // Test newParticipant with arbitrary IDs
 func TestParticipantArbitraryIds(t *testing.T) {
 	_, err := NewParticipant(3, 2, testGenerator, curves.NewK256Scalar(), 4)
-	assert.Error(t, err)
+	require.Error(t, err)
 	_, err = NewParticipant(0, 2, testGenerator, curves.NewK256Scalar(), 1)
-	assert.Error(t, err)
+	require.Error(t, err)
 	_, err = NewParticipant(2, 2, testGenerator, curves.NewK256Scalar(), 2, 3, 5)
-	assert.Error(t, err)
+	require.Error(t, err)
 	_, err = NewParticipant(1, 2, testGenerator, curves.NewK256Scalar(), 4)
-	assert.Error(t, err)
+	require.Error(t, err)
 }

@@ -7,11 +7,12 @@
 package frost
 
 import (
+	"testing"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	dkg "github.com/coinbase/kryptology/pkg/dkg/frost"
 	"github.com/coinbase/kryptology/pkg/sharing"
 	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 var (
@@ -263,11 +264,11 @@ func TestSignRound3Works(t *testing.T) {
 		round3Out1.C,
 	}
 	vk := signer1.verificationKey
-	ok, err := signer1.Verify(vk, msg, signature)
+	ok, err := Verify(signer1.curve, signer1.challengeDeriver, vk, msg, signature)
 	require.True(t, ok)
 	require.NoError(t, err)
 
-	ok, err = signer2.Verify(vk, msg, signature)
+	ok, err = Verify(signer2.curve, signer2.challengeDeriver, vk, msg, signature)
 	require.True(t, ok)
 	require.NoError(t, err)
 }

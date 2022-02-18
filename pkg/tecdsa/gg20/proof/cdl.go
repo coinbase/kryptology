@@ -3,7 +3,6 @@
 //
 // SPDX-License-Identifier: Apache-2.0
 //
-// Package proof contains the proof of knowledge of a discrete log modulo a composite (fig 16), i.e., ProveCompositeDL and VerifyCompositeDL
 
 package proof
 

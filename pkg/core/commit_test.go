@@ -11,7 +11,7 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 // An entry into our test table
@@ -348,14 +348,14 @@ func TestWitnessMarshalRoundTrip(t *testing.T) {
 
 	// Marhal and test
 	jsonBytes, err := json.Marshal(expected)
-	assert.NoError(t, err)
-	assert.NotNil(t, jsonBytes)
+	require.NoError(t, err)
+	require.NotNil(t, jsonBytes)
 
 	// Unmarshal and test
 	actual := &Witness{}
-	assert.NoError(t, json.Unmarshal(jsonBytes, actual))
-	assert.Equal(t, expected.Msg, actual.Msg)
-	assert.Equal(t, expected.r, actual.r)
+	require.NoError(t, json.Unmarshal(jsonBytes, actual))
+	require.Equal(t, expected.Msg, actual.Msg)
+	require.Equal(t, expected.r, actual.r)
 }
 
 // Tests that marshal-unmarshal is the identity function
@@ -364,11 +364,11 @@ func TestCommitmentMarshalRoundTrip(t *testing.T) {
 
 	// Marhal and test
 	jsonBytes, err := json.Marshal(expected)
-	assert.NoError(t, err)
-	assert.NotNil(t, jsonBytes)
+	require.NoError(t, err)
+	require.NotNil(t, jsonBytes)
 
 	// Unmarshal and test
 	actual := Commitment{}
-	assert.NoError(t, json.Unmarshal(jsonBytes, &actual))
-	assert.Equal(t, []byte(expected), []byte(actual))
+	require.NoError(t, json.Unmarshal(jsonBytes, &actual))
+	require.Equal(t, []byte(expected), []byte(actual))
 }

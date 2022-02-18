@@ -1,3 +1,5 @@
+This changelog is deprecated since the code now merged into the Kryptology monorepo.
+
 1.0.2
     - Bring library into compliance with Draft V4 as shown in the [diff](https://www.ietf.org/rfcdiff?url1=draft-irtf-cfrg-bls-signature-03&url2=draft-irtf-cfrg-bls-signature-04)
         - Hash `salt` before passing to HKDF

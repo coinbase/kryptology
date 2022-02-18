@@ -15,15 +15,15 @@ package v1
 import (
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestNewPoly(t *testing.T) {
 	secret := field.ElementFromBytes([]byte("test"))
 
 	poly, err := newPoly(secret, 4)
-	assert.Nil(t, err)
-	assert.NotNil(t, poly)
+	require.Nil(t, err)
+	require.NotNil(t, poly)
 
-	assert.Equal(t, poly.Coefficients[0], secret)
+	require.Equal(t, poly.Coefficients[0], secret)
 }

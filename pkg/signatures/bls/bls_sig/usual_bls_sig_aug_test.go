@@ -106,7 +106,7 @@ func TestAugSigningG2(t *testing.T) {
 		t.Errorf("Aug Verify failed")
 	}
 
-	ikm[0] ^= ikm[1]
+	ikm[0] += 1
 	if res, _ := bls.Verify(pk, ikm, sig); res {
 		t.Errorf("Aug Verify succeeded when it should've failed.")
 	}

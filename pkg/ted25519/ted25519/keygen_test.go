@@ -7,12 +7,12 @@
 package ted25519
 
 import (
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/coinbase/kryptology/pkg/sharing/v1"
 	"math/big"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/coinbase/kryptology/pkg/core/curves"
+	v1 "github.com/coinbase/kryptology/pkg/sharing/v1"
+
 	"github.com/stretchr/testify/require"
 )
 
@@ -22,24 +22,24 @@ func TestGenerateEd25519Key(t *testing.T) {
 	// Generate and verify correct number of shares are produced
 	pub, shares, _, err := GenerateSharedKey(&config)
 	require.NoError(t, err)
-	assert.Equal(t, config.N, len(shares))
+	require.Equal(t, config.N, len(shares))
 
 	// Verify reconstuction works for all permutations of shares
 	shareVec := make([]*KeyShare, 2)
 	shareVec[0] = shares[0]
 	shareVec[1] = shares[1]
 	secret1, err := Reconstruct(shareVec, &config)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	shareVec[0] = shares[1]
 	shareVec[1] = shares[2]
 	secret2, err := Reconstruct(shareVec, &config)
-	assert.Nil(t, err)
+	require.Nil(t, err)
 	shareVec[0] = shares[0]
 	shareVec[1] = shares[2]
 	secret3, err := Reconstruct(shareVec, &config)
-	assert.Nil(t, err)
-	assert.Equal(t, secret1, secret2)
-	assert.Equal(t, secret2, secret3)
+	require.Nil(t, err)
+	require.Equal(t, secret1, secret2)
+	require.Equal(t, secret2, secret3)
 
 	// Need to reverse secret1
 	secret1 = reverseBytes(secret1)
@@ -51,19 +51,19 @@ func TestGenerateEd25519Key(t *testing.T) {
 	pubFromSeed := ed25519.Point.Generator().Mul(scalar1)
 
 	require.NoError(t, err)
-	assert.Equal(t, pubFromSeed.ToAffineCompressed(), pub.Bytes())
+	require.Equal(t, pubFromSeed.ToAffineCompressed(), pub.Bytes())
 }
 
 func TestGenerateEd25519KeyInvalidConfig(t *testing.T) {
 	invalidConfig := ShareConfiguration{T: 1, N: 1}
 	_, _, _, err := GenerateSharedKey(&invalidConfig)
-	assert.NotNil(t, err)
-	assert.Error(t, err)
+	require.NotNil(t, err)
+	require.Error(t, err)
 
 	invalidConfig = ShareConfiguration{T: 2, N: 1}
 	_, _, _, err = GenerateSharedKey(&invalidConfig)
-	assert.NotNil(t, err)
-	assert.Error(t, err)
+	require.NotNil(t, err)
+	require.Error(t, err)
 }
 
 func TestVerifyVSSEd25519(t *testing.T) {
@@ -74,8 +74,8 @@ func TestVerifyVSSEd25519(t *testing.T) {
 	pubKey2, shares2, commitments2, err := GenerateSharedKey(&config)
 	require.NoError(t, err)
 
-	assert.Equal(t, pubKey1.Bytes(), commitments1[0].ToAffineCompressed())
-	assert.Equal(t, pubKey2.Bytes(), commitments2[0].ToAffineCompressed())
+	require.Equal(t, pubKey1.Bytes(), commitments1[0].ToAffineCompressed())
+	require.Equal(t, pubKey2.Bytes(), commitments2[0].ToAffineCompressed())
 
 	for _, s := range shares1 {
 		ok, err := s.VerifyVSS(commitments1, &config)

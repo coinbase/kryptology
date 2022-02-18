@@ -8,20 +8,101 @@ package curves
 
 import (
 	"crypto/elliptic"
-	"crypto/sha256"
-	"crypto/subtle"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core"
+	"github.com/coinbase/kryptology/internal"
+	"github.com/coinbase/kryptology/pkg/core/curves/native"
+	p256n "github.com/coinbase/kryptology/pkg/core/curves/native/p256"
+	"github.com/coinbase/kryptology/pkg/core/curves/native/p256/fp"
+	"github.com/coinbase/kryptology/pkg/core/curves/native/p256/fq"
 	"io"
 	"math/big"
+	"sync"
 )
 
+var oldP256InitOnce sync.Once
+var oldP256 NistP256
+
+type NistP256 struct {
+	*elliptic.CurveParams
+}
+
+func oldP256InitAll() {
+	curve := elliptic.P256()
+	oldP256.CurveParams = curve.Params()
+	oldP256.P = curve.Params().P
+	oldP256.N = curve.Params().N
+	oldP256.Gx = curve.Params().Gx
+	oldP256.Gy = curve.Params().Gy
+	oldP256.B = curve.Params().B
+	oldP256.BitSize = curve.Params().BitSize
+	oldP256.Name = curve.Params().Name
+}
+
+func NistP256Curve() *NistP256 {
+	oldP256InitOnce.Do(oldP256InitAll)
+	return &oldP256
+}
+
+func (curve *NistP256) Params() *elliptic.CurveParams {
+	return curve.CurveParams
+}
+
+func (curve *NistP256) IsOnCurve(x, y *big.Int) bool {
+	_, err := p256n.P256PointNew().SetBigInt(x, y)
+	return err == nil
+}
+
+func (curve *NistP256) Add(x1, y1, x2, y2 *big.Int) (*big.Int, *big.Int) {
+	p1, err := p256n.P256PointNew().SetBigInt(x1, y1)
+	if err != nil {
+		return nil, nil
+	}
+	p2, err := p256n.P256PointNew().SetBigInt(x2, y2)
+	if err != nil {
+		return nil, nil
+	}
+	return p1.Add(p1, p2).BigInt()
+}
+
+func (curve *NistP256) Double(x1, y1 *big.Int) (*big.Int, *big.Int) {
+	p1, err := p256n.P256PointNew().SetBigInt(x1, y1)
+	if err != nil {
+		return nil, nil
+	}
+	return p1.Double(p1).BigInt()
+}
+
+func (curve *NistP256) ScalarMul(Bx, By *big.Int, k []byte) (*big.Int, *big.Int) {
+	p1, err := p256n.P256PointNew().SetBigInt(Bx, By)
+	if err != nil {
+		return nil, nil
+	}
+	var bytes [32]byte
+	copy(bytes[:], internal.ReverseScalarBytes(k))
+	s, err := fq.P256FqNew().SetBytes(&bytes)
+	if err != nil {
+		return nil, nil
+	}
+	return p1.Mul(p1, s).BigInt()
+}
+
+func (curve *NistP256) ScalarBaseMult(k []byte) (*big.Int, *big.Int) {
+	var bytes [32]byte
+	copy(bytes[:], internal.ReverseScalarBytes(k))
+	s, err := fq.P256FqNew().SetBytes(&bytes)
+	if err != nil {
+		return nil, nil
+	}
+	p1 := p256n.P256PointNew().Generator()
+	return p1.Mul(p1, s).BigInt()
+}
+
 type ScalarP256 struct {
-	value *big.Int
+	value *native.Field
 }
 
 type PointP256 struct {
-	x, y *big.Int
+	value *native.EllipticPoint
 }
 
 func (s *ScalarP256) Random(reader io.Reader) Scalar {
@@ -34,51 +115,52 @@ func (s *ScalarP256) Random(reader io.Reader) Scalar {
 }
 
 func (s *ScalarP256) Hash(bytes []byte) Scalar {
-	xmd, err := expandMsgXmd(sha256.New(), bytes, []byte("P256_XMD:SHA-256_SSWU_RO_"), 48)
-	if err != nil {
-		return nil
-	}
-	v := new(big.Int).SetBytes(xmd)
+	dst := []byte("P256_XMD:SHA-256_SSWU_RO_")
+	xmd := native.ExpandMsgXmd(native.EllipticPointHasherSha256(), bytes, dst, 48)
+	var t [64]byte
+	copy(t[:48], internal.ReverseScalarBytes(xmd))
+
 	return &ScalarP256{
-		value: v.Mod(v, elliptic.P256().Params().N),
+		value: fq.P256FqNew().SetBytesWide(&t),
 	}
 }
 
 func (s *ScalarP256) Zero() Scalar {
 	return &ScalarP256{
-		value: big.NewInt(0),
+		value: fq.P256FqNew().SetZero(),
 	}
 }
 
 func (s *ScalarP256) One() Scalar {
 	return &ScalarP256{
-		value: big.NewInt(1),
+		value: fq.P256FqNew().SetOne(),
 	}
 }
 
 func (s *ScalarP256) IsZero() bool {
-	return subtle.ConstantTimeCompare(s.value.Bytes(), []byte{}) == 1
+	return s.value.IsZero() == 1
 }
 
 func (s *ScalarP256) IsOne() bool {
-	return subtle.ConstantTimeCompare(s.value.Bytes(), []byte{1}) == 1
+	return s.value.IsOne() == 1
 }
 
 func (s *ScalarP256) IsOdd() bool {
-	return s.value.Bit(0) == 1
+	return s.value.Bytes()[0]&1 == 1
 }
 
 func (s *ScalarP256) IsEven() bool {
-	return s.value.Bit(0) == 0
+	return s.value.Bytes()[0]&1 == 0
 }
 
 func (s *ScalarP256) New(value int) Scalar {
+	t := fq.P256FqNew()
 	v := big.NewInt(int64(value))
 	if value < 0 {
-		v.Mod(v, elliptic.P256().Params().N)
+		v.Mod(v, t.Params.BiModulus)
 	}
 	return &ScalarP256{
-		value: v,
+		value: t.SetBigInt(v),
 	}
 }
 
@@ -93,41 +175,49 @@ func (s *ScalarP256) Cmp(rhs Scalar) int {
 
 func (s *ScalarP256) Square() Scalar {
 	return &ScalarP256{
-		value: new(big.Int).Exp(s.value, big.NewInt(2), elliptic.P256().Params().N),
+		value: fq.P256FqNew().Square(s.value),
 	}
 }
 
 func (s *ScalarP256) Double() Scalar {
-	v := new(big.Int).Add(s.value, s.value)
 	return &ScalarP256{
-		value: v.Mod(v, elliptic.P256().Params().N),
+		value: fq.P256FqNew().Double(s.value),
 	}
 }
 
 func (s *ScalarP256) Invert() (Scalar, error) {
+	value, wasInverted := fq.P256FqNew().Invert(s.value)
+	if !wasInverted {
+		return nil, fmt.Errorf("inverse doesn't exist")
+	}
 	return &ScalarP256{
-		value: new(big.Int).ModInverse(s.value, elliptic.P256().Params().N),
+		value,
 	}, nil
 }
 
 func (s *ScalarP256) Sqrt() (Scalar, error) {
+	value, wasSquare := fq.P256FqNew().Sqrt(s.value)
+	if !wasSquare {
+		return nil, fmt.Errorf("not a square")
+	}
 	return &ScalarP256{
-		value: new(big.Int).ModSqrt(s.value, elliptic.P256().Params().N),
+		value,
 	}, nil
 }
 
 func (s *ScalarP256) Cube() Scalar {
+	value := fq.P256FqNew().Mul(s.value, s.value)
+	value.Mul(value, s.value)
 	return &ScalarP256{
-		value: new(big.Int).Exp(s.value, big.NewInt(3), elliptic.P256().Params().N),
+		value,
 	}
 }
 
 func (s *ScalarP256) Add(rhs Scalar) Scalar {
 	r, ok := rhs.(*ScalarP256)
 	if ok {
-		v := new(big.Int).Add(s.value, r.value)
 		return &ScalarP256{
-			value: v.Mod(v, elliptic.P256().Params().N),
+			value: fq.P256FqNew().Add(s.value, r.value),
 		}
 	} else {
 		return nil
@@ -137,9 +227,8 @@ func (s *ScalarP256) Add(rhs Scalar) Scalar {
 func (s *ScalarP256) Sub(rhs Scalar) Scalar {
 	r, ok := rhs.(*ScalarP256)
 	if ok {
-		v := new(big.Int).Sub(s.value, r.value)
 		return &ScalarP256{
-			value: v.Mod(v, elliptic.P256().Params().N),
+			value: fq.P256FqNew().Sub(s.value, r.value),
 		}
 	} else {
 		return nil
@@ -149,9 +238,8 @@ func (s *ScalarP256) Sub(rhs Scalar) Scalar {
 func (s *ScalarP256) Mul(rhs Scalar) Scalar {
 	r, ok := rhs.(*ScalarP256)
 	if ok {
-		v := new(big.Int).Mul(s.value, r.value)
 		return &ScalarP256{
-			value: v.Mod(v, elliptic.P256().Params().N),
+			value: fq.P256FqNew().Mul(s.value, r.value),
 		}
 	} else {
 		return nil
@@ -163,67 +251,67 @@ func (s *ScalarP256) MulAdd(y, z Scalar) Scalar {
 }
 
 func (s *ScalarP256) Div(rhs Scalar) Scalar {
-	n := elliptic.P256().Params().N
 	r, ok := rhs.(*ScalarP256)
 	if ok {
-		v := new(big.Int).ModInverse(r.value, n)
-		v.Mul(v, s.value)
-		return &ScalarP256{
-			value: v.Mod(v, n),
+		v, wasInverted := fq.P256FqNew().Invert(r.value)
+		if !wasInverted {
+			return nil
 		}
+		v.Mul(v, s.value)
+		return &ScalarP256{value: v}
 	} else {
 		return nil
 	}
 }
 
 func (s *ScalarP256) Neg() Scalar {
-	z := new(big.Int).Neg(s.value)
 	return &ScalarP256{
-		value: z.Mod(z, elliptic.P256().Params().N),
+		value: fq.P256FqNew().Neg(s.value),
 	}
 }
 
 func (s *ScalarP256) SetBigInt(v *big.Int) (Scalar, error) {
 	if v == nil {
-		return nil, fmt.Errorf("invalid value")
+		return nil, fmt.Errorf("'v' cannot be nil")
 	}
-	t := new(big.Int).Mod(v, elliptic.P256().Params().N)
-	if t.Cmp(v) != 0 {
-		return nil, fmt.Errorf("invalid value")
-	}
+	value := fq.P256FqNew().SetBigInt(v)
 	return &ScalarP256{
-		value: t,
+		value,
 	}, nil
 }
 
 func (s *ScalarP256) BigInt() *big.Int {
-	return new(big.Int).Set(s.value)
+	return s.value.BigInt()
 }
 
 func (s *ScalarP256) Bytes() []byte {
-	var out [32]byte
-	return s.value.FillBytes(out[:])
+	t := s.value.Bytes()
+	return internal.ReverseScalarBytes(t[:])
 }
 
 func (s *ScalarP256) SetBytes(bytes []byte) (Scalar, error) {
-	value := new(big.Int).SetBytes(bytes)
-	t := new(big.Int).Mod(value, elliptic.P256().Params().N)
-	if t.Cmp(value) != 0 {
-		return nil, fmt.Errorf("invalid byte sequence")
+	if len(bytes) != 32 {
+		return nil, fmt.Errorf("invalid length")
+	}
+	var seq [32]byte
+	copy(seq[:], internal.ReverseScalarBytes(bytes))
+	value, err := fq.P256FqNew().SetBytes(&seq)
+	if err != nil {
+		return nil, err
 	}
 	return &ScalarP256{
-		value: t,
+		value,
 	}, nil
 }
 
 func (s *ScalarP256) SetBytesWide(bytes []byte) (Scalar, error) {
-	if len(bytes) < 32 || len(bytes) > 128 {
-		return nil, fmt.Errorf("invalid byte sequence")
+	if len(bytes) != 64 {
+		return nil, fmt.Errorf("invalid length")
 	}
-	value := new(big.Int).SetBytes(bytes)
-	value.Mod(value, elliptic.P256().Params().N)
+	var seq [64]byte
+	copy(seq[:], bytes)
 	return &ScalarP256{
-		value,
+		value: fq.P256FqNew().SetBytesWide(&seq),
 	}, nil
 }
 
@@ -233,7 +321,7 @@ func (s *ScalarP256) Point() Point {
 
 func (s *ScalarP256) Clone() Scalar {
 	return &ScalarP256{
-		value: new(big.Int).Set(s.value),
+		value: fq.P256FqNew().Set(s.value),
 	}
 }
 
@@ -295,61 +383,43 @@ func (p *PointP256) Random(reader io.Reader) Point {
 }
 
 func (p *PointP256) Hash(bytes []byte) Point {
-	curve := elliptic.P256().Params()
+	value, err := p256n.P256PointNew().Hash(bytes, native.EllipticPointHasherSha256())
 
-	var domain = []byte("P256_XMD:SHA-256_SSWU_RO_")
-	uniformBytes, _ := expandMsgXmd(sha256.New(), bytes, domain, 96)
-
-	u0 := new(big.Int).SetBytes(uniformBytes[:48])
-	u1 := new(big.Int).SetBytes(uniformBytes[48:])
-
-	u0.Mod(u0, curve.P)
-	u1.Mod(u1, curve.P)
-
-	ssParams := p256SswuParams()
-	q0x, q0y := osswu3mod4(u0, ssParams)
-	q1x, q1y := osswu3mod4(u1, ssParams)
-
-	// Since P-256 does not require the isogeny map just add the points
-	x, y := curve.Add(q0x, q0y, q1x, q1y)
-
-	return &PointP256{
-		x, y,
+	// TODO: change hash to return an error also
+	if err != nil {
+		return nil
 	}
+
+	return &PointP256{value}
 }
 
 func (p *PointP256) Identity() Point {
 	return &PointP256{
-		x: big.NewInt(0), y: big.NewInt(0),
+		value: p256n.P256PointNew().Identity(),
 	}
 }
 
 func (p *PointP256) Generator() Point {
-	curve := elliptic.P256().Params()
 	return &PointP256{
-		x: new(big.Int).Set(curve.Gx),
-		y: new(big.Int).Set(curve.Gy),
+		value: p256n.P256PointNew().Generator(),
 	}
 }
 
 func (p *PointP256) IsIdentity() bool {
-	x := core.ConstantTimeEqByte(p.x, core.Zero)
-	y := core.ConstantTimeEqByte(p.y, core.Zero)
-	return (x & y) == 1
+	return p.value.IsIdentity()
 }
 
 func (p *PointP256) IsNegative() bool {
-	return p.y.Bit(0) == 1
+	return p.value.GetY().Value[0]&1 == 1
 }
 
 func (p *PointP256) IsOnCurve() bool {
-	return elliptic.P256().IsOnCurve(p.x, p.y)
+	return p.value.IsOnCurve()
 }
 
 func (p *PointP256) Double() Point {
-	curve := elliptic.P256()
-	x, y := curve.Double(p.x, p.y)
-	return &PointP256{x, y}
+	value := p256n.P256PointNew().Double(p.value)
+	return &PointP256{value}
 }
 
 func (p *PointP256) Scalar() Scalar {
@@ -357,9 +427,8 @@ func (p *PointP256) Scalar() Scalar {
 }
 
 func (p *PointP256) Neg() Point {
-	y := new(big.Int).Sub(elliptic.P256().Params().P, p.y)
-	y.Mod(y, elliptic.P256().Params().P)
-	return &PointP256{x: p.x, y: y}
+	value := p256n.P256PointNew().Neg(p.value)
+	return &PointP256{value}
 }
 
 func (p *PointP256) Add(rhs Point) Point {
@@ -368,8 +437,8 @@ func (p *PointP256) Add(rhs Point) Point {
 	}
 	r, ok := rhs.(*PointP256)
 	if ok {
-		x, y := elliptic.P256().Add(p.x, p.y, r.x, r.y)
-		return &PointP256{x, y}
+		value := p256n.P256PointNew().Add(p.value, r.value)
+		return &PointP256{value}
 	} else {
 		return nil
 	}
@@ -379,10 +448,10 @@ func (p *PointP256) Sub(rhs Point) Point {
 	if rhs == nil {
 		return nil
 	}
-	r, ok := rhs.Neg().(*PointP256)
+	r, ok := rhs.(*PointP256)
 	if ok {
-		x, y := elliptic.P256().Add(p.x, p.y, r.x, r.y)
-		return &PointP256{x, y}
+		value := p256n.P256PointNew().Sub(p.value, r.value)
+		return &PointP256{value}
 	} else {
 		return nil
 	}
@@ -394,8 +463,8 @@ func (p *PointP256) Mul(rhs Scalar) Point {
 	}
 	r, ok := rhs.(*ScalarP256)
 	if ok {
-		x, y := elliptic.P256().ScalarMult(p.x, p.y, r.value.Bytes())
-		return &PointP256{x, y}
+		value := p256n.P256PointNew().Mul(p.value, r.value)
+		return &PointP256{value}
 	} else {
 		return nil
 	}
@@ -404,45 +473,46 @@ func (p *PointP256) Mul(rhs Scalar) Point {
 func (p *PointP256) Equal(rhs Point) bool {
 	r, ok := rhs.(*PointP256)
 	if ok {
-		x := core.ConstantTimeEqByte(p.x, r.x)
-		y := core.ConstantTimeEqByte(p.y, r.y)
-		return (x & y) == 1
+		return p.value.Equal(r.value) == 1
 	} else {
 		return false
 	}
 }
 
 func (p *PointP256) Set(x, y *big.Int) (Point, error) {
-	// check is identity or on curve
-	xx := subtle.ConstantTimeCompare(x.Bytes(), []byte{})
-	yy := subtle.ConstantTimeCompare(y.Bytes(), []byte{})
-	// Checks are constant time
-	onCurve := elliptic.P256().IsOnCurve(x, y)
-	if !onCurve && (xx&yy) != 1 {
-		return nil, fmt.Errorf("invalid coordinates")
+	value, err := p256n.P256PointNew().SetBigInt(x, y)
+	if err != nil {
+		return nil, err
 	}
-	x = new(big.Int).Set(x)
-	y = new(big.Int).Set(y)
-	return &PointP256{x, y}, nil
+	return &PointP256{value}, nil
 }
 
 func (p *PointP256) ToAffineCompressed() []byte {
 	var x [33]byte
 	x[0] = byte(2)
-	x[0] |= byte(p.y.Bit(0))
-	p.x.FillBytes(x[1:])
+
+	t := p256n.P256PointNew().ToAffine(p.value)
+
+	x[0] |= t.Y.Bytes()[0] & 1
+
+	xBytes := t.X.Bytes()
+	copy(x[1:], internal.ReverseScalarBytes(xBytes[:]))
 	return x[:]
 }
 
 func (p *PointP256) ToAffineUncompressed() []byte {
 	var out [65]byte
 	out[0] = byte(4)
-	p.x.FillBytes(out[1:33])
-	p.y.FillBytes(out[33:])
+	t := p256n.P256PointNew().ToAffine(p.value)
+	arr := t.X.Bytes()
+	copy(out[1:33], internal.ReverseScalarBytes(arr[:]))
+	arr = t.Y.Bytes()
+	copy(out[33:], internal.ReverseScalarBytes(arr[:]))
 	return out[:]
 }
 
 func (p *PointP256) FromAffineCompressed(bytes []byte) (Point, error) {
+	var raw [native.FieldBytes]byte
 	if len(bytes) != 33 {
 		return nil, fmt.Errorf("invalid byte sequence")
 	}
@@ -452,36 +522,55 @@ func (p *PointP256) FromAffineCompressed(bytes []byte) (Point, error) {
 	}
 	sign &= 0x1
 
-	x := new(big.Int).SetBytes(bytes[1:])
-	rhs := rhsP256(x, elliptic.P256().Params())
+	copy(raw[:], internal.ReverseScalarBytes(bytes[1:]))
+	x, err := fp.P256FpNew().SetBytes(&raw)
+	if err != nil {
+		return nil, err
+	}
+
+	value := p256n.P256PointNew().Identity()
+	rhs := fp.P256FpNew()
+	p.value.Arithmetic.RhsEq(rhs, x)
 	// test that rhs is quadratic residue
 	// if not, then this Point is at infinity
-	y := new(big.Int).ModSqrt(rhs, elliptic.P256().Params().P)
-	if y != nil {
+	y, wasQr := fp.P256FpNew().Sqrt(rhs)
+	if wasQr {
 		// fix the sign
-		if int(y.Bit(0)) != sign {
+		sigY := int(y.Bytes()[0] & 1)
+		if sigY != sign {
 			y.Neg(y)
-			y.Mod(y, elliptic.P256().Params().P)
 		}
-	} else {
-		x = new(big.Int)
-		y = new(big.Int)
+		value.X = x
+		value.Y = y
+		value.Z.SetOne()
 	}
-	return &PointP256{
-		x, y,
-	}, nil
+	return &PointP256{value}, nil
 }
 
 func (p *PointP256) FromAffineUncompressed(bytes []byte) (Point, error) {
+	var arr [native.FieldBytes]byte
 	if len(bytes) != 65 {
 		return nil, fmt.Errorf("invalid byte sequence")
 	}
 	if bytes[0] != 4 {
 		return nil, fmt.Errorf("invalid sign byte")
 	}
-	x := new(big.Int).SetBytes(bytes[1:33])
-	y := new(big.Int).SetBytes(bytes[33:])
-	return &PointP256{x, y}, nil
+
+	copy(arr[:], internal.ReverseScalarBytes(bytes[1:33]))
+	x, err := fp.P256FpNew().SetBytes(&arr)
+	if err != nil {
+		return nil, err
+	}
+	copy(arr[:], internal.ReverseScalarBytes(bytes[33:]))
+	y, err := fp.P256FpNew().SetBytes(&arr)
+	if err != nil {
+		return nil, err
+	}
+	value := p256n.P256PointNew()
+	value.X = x
+	value.Y = y
+	value.Z.SetOne()
+	return &PointP256{value}, nil
 }
 
 func (p *PointP256) CurveName() string {
@@ -489,7 +578,15 @@ func (p *PointP256) CurveName() string {
 }
 
 func (p *PointP256) SumOfProducts(points []Point, scalars []Scalar) Point {
-	nScalars := make([]*big.Int, len(scalars))
+	nPoints := make([]*native.EllipticPoint, len(points))
+	nScalars := make([]*native.Field, len(scalars))
+	for i, pt := range points {
+		ptv, ok := pt.(*PointP256)
+		if !ok {
+			return nil
+		}
+		nPoints[i] = ptv.value
+	}
 	for i, sc := range scalars {
 		s, ok := sc.(*ScalarP256)
 		if !ok {
@@ -497,15 +594,20 @@ func (p *PointP256) SumOfProducts(points []Point, scalars []Scalar) Point {
 		}
 		nScalars[i] = s.value
 	}
-	return sumOfProductsPippenger(points, nScalars)
+	value := p256n.P256PointNew()
+	_, err := value.SumOfProducts(nPoints, nScalars)
+	if err != nil {
+		return nil
+	}
+	return &PointP256{value}
 }
 
-func (p *PointP256) X() *big.Int {
-	return new(big.Int).Set(p.x)
+func (p *PointP256) X() *native.Field {
+	return p.value.GetX()
 }
 
-func (p *PointP256) Y() *big.Int {
-	return new(big.Int).Set(p.y)
+func (p *PointP256) Y() *native.Field {
+	return p.value.GetY()
 }
 
 func (p *PointP256) Params() *elliptic.CurveParams {
@@ -525,8 +627,7 @@ func (p *PointP256) UnmarshalBinary(input []byte) error {
 	if !ok {
 		return fmt.Errorf("invalid point")
 	}
-	p.x = ppt.x
-	p.y = ppt.y
+	p.value = ppt.value
 	return nil
 }
 
@@ -543,8 +644,7 @@ func (p *PointP256) UnmarshalText(input []byte) error {
 	if !ok {
 		return fmt.Errorf("invalid point")
 	}
-	p.x = ppt.x
-	p.y = ppt.y
+	p.value = ppt.value
 	return nil
 }
 
@@ -561,44 +661,6 @@ func (p *PointP256) UnmarshalJSON(input []byte) error {
 	if !ok {
 		return fmt.Errorf("invalid type")
 	}
-	p.x = P.x
-	p.y = P.y
+	p.value = P.value
 	return nil
-}
-
-// Take from https://datatracker.ietf.org/doc/html/draft-irtf-cfrg-hash-to-curve-11#section-8.2
-func p256SswuParams() *sswuParams {
-	params := elliptic.P256().Params()
-
-	// c1 = (q - 3) / 4
-	c1 := new(big.Int).Set(params.P)
-	c1.Sub(c1, big.NewInt(3))
-	c1.Rsh(c1, 2)
-
-	a := big.NewInt(-3)
-	a.Mod(a, params.P)
-	b := new(big.Int).Set(params.B)
-	z := big.NewInt(-10)
-	z.Mod(z, params.P)
-	// sqrt(-Z^3)
-	zTmp := new(big.Int).Exp(z, big.NewInt(3), nil)
-	zTmp = zTmp.Neg(zTmp)
-	zTmp.Mod(zTmp, params.P)
-	c2 := new(big.Int).ModSqrt(zTmp, params.P)
-
-	return &sswuParams{
-		params, c1, c2, a, b, z,
-	}
-}
-
-// rhs of the curve equation
-func rhsP256(x *big.Int, params *elliptic.CurveParams) *big.Int {
-	f := NewField(params.P)
-	r := f.NewElement(x)
-	r2 := r.Mul(r)
-
-	// x^3-3x+B
-	a := r.Mul(f.NewElement(big.NewInt(3)))
-	r = r2.Mul(r)
-	return r.Add(a.Neg()).Add(f.NewElement(params.B)).Value
 }

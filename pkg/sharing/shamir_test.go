@@ -10,42 +10,42 @@ import (
 	"bytes"
 	crand "crypto/rand"
 	"encoding/json"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"testing"
 
-	"github.com/stretchr/testify/assert"
+	"github.com/coinbase/kryptology/pkg/core/curves"
+
 	"github.com/stretchr/testify/require"
 )
 
 func TestShamirSplitInvalidArgs(t *testing.T) {
 	curve := curves.ED25519()
 	_, err := NewShamir(0, 0, curve)
-	assert.NotNil(t, err)
+	require.NotNil(t, err)
 	_, err = NewShamir(3, 2, curve)
-	assert.NotNil(t, err)
+	require.NotNil(t, err)
 	_, err = NewShamir(1, 10, curve)
-	assert.NotNil(t, err)
+	require.NotNil(t, err)
 	scheme, err := NewShamir(2, 3, curve)
-	assert.Nil(t, err)
-	assert.NotNil(t, scheme)
+	require.Nil(t, err)
+	require.NotNil(t, scheme)
 	_, err = scheme.Split(curve.NewScalar(), crand.Reader)
-	assert.NotNil(t, err)
+	require.NotNil(t, err)
 }
 
 func TestShamirCombineNoShares(t *testing.T) {
 	curve := curves.ED25519()
 	scheme, err := NewShamir(2, 3, curve)
-	assert.Nil(t, err)
-	assert.NotNil(t, scheme)
+	require.Nil(t, err)
+	require.NotNil(t, scheme)
 	_, err = scheme.Combine()
-	assert.NotNil(t, err)
+	require.NotNil(t, err)
 }
 
 func TestShamirCombineDuplicateShare(t *testing.T) {
 	curve := curves.ED25519()
 	scheme, err := NewShamir(2, 3, curve)
-	assert.Nil(t, err)
-	assert.NotNil(t, scheme)
+	require.Nil(t, err)
+	require.NotNil(t, scheme)
 	_, err = scheme.Combine([]*ShamirShare{
 		{
 			Id:    1,
@@ -56,14 +56,14 @@ func TestShamirCombineDuplicateShare(t *testing.T) {
 			Value: curve.NewScalar().New(3).Bytes(),
 		},
 	}...)
-	assert.NotNil(t, err)
+	require.NotNil(t, err)
 }
 
 func TestShamirCombineBadIdentifier(t *testing.T) {
 	curve := curves.ED25519()
 	scheme, err := NewShamir(2, 3, curve)
-	assert.Nil(t, err)
-	assert.NotNil(t, scheme)
+	require.Nil(t, err)
+	require.NotNil(t, scheme)
 	shares := []*ShamirShare{
 		{
 			Id:    0,
@@ -75,46 +75,46 @@ func TestShamirCombineBadIdentifier(t *testing.T) {
 		},
 	}
 	_, err = scheme.Combine(shares...)
-	assert.NotNil(t, err)
+	require.NotNil(t, err)
 	shares[0] = &ShamirShare{
 		Id:    4,
 		Value: curve.NewScalar().New(3).Bytes(),
 	}
 	_, err = scheme.Combine(shares...)
-	assert.NotNil(t, err)
+	require.NotNil(t, err)
 }
 
 func TestShamirCombineSingle(t *testing.T) {
 	curve := curves.ED25519()
 	scheme, err := NewShamir(2, 3, curve)
-	assert.Nil(t, err)
-	assert.NotNil(t, scheme)
+	require.Nil(t, err)
+	require.NotNil(t, scheme)
 
 	shares, err := scheme.Split(curve.NewScalar().Hash([]byte("test")), crand.Reader)
-	assert.Nil(t, err)
-	assert.NotNil(t, shares)
+	require.Nil(t, err)
+	require.NotNil(t, shares)
 	secret, err := scheme.Combine(shares...)
-	assert.Nil(t, err)
-	assert.Equal(t, secret, curve.NewScalar().Hash([]byte("test")))
+	require.Nil(t, err)
+	require.Equal(t, secret, curve.NewScalar().Hash([]byte("test")))
 }
 
 // Test ComputeL function to compute Lagrange coefficients.
 func TestShamirComputeL(t *testing.T) {
 	curve := curves.ED25519()
 	scheme, err := NewShamir(2, 2, curve)
-	assert.Nil(t, err)
-	assert.NotNil(t, scheme)
+	require.Nil(t, err)
+	require.NotNil(t, scheme)
 	secret := curve.Scalar.Hash([]byte("test"))
 	shares, err := scheme.Split(secret, crand.Reader)
-	assert.Nil(t, err)
-	assert.NotNil(t, shares)
+	require.Nil(t, err)
+	require.NotNil(t, shares)
 	identities := make([]uint32, 0)
 	for _, xi := range shares {
 		identities = append(identities, xi.Id)
 	}
 	lCoeffs, err := scheme.LagrangeCoeffs(identities)
-	assert.Nil(t, err)
-	assert.NotNil(t, lCoeffs)
+	require.Nil(t, err)
+	require.NotNil(t, lCoeffs)
 
 	// Checking we can reconstruct the same secret using Lagrange coefficients.
 	result := curve.NewScalar()
@@ -122,19 +122,19 @@ func TestShamirComputeL(t *testing.T) {
 		rc, _ := curve.Scalar.SetBytes(r.Value)
 		result = result.Add(rc.Mul(lCoeffs[r.Id]))
 	}
-	assert.Equal(t, result.Bytes(), secret.Bytes())
+	require.Equal(t, result.Bytes(), secret.Bytes())
 }
 
 func TestShamirAllCombinations(t *testing.T) {
 	curve := curves.ED25519()
 	scheme, err := NewShamir(3, 5, curve)
-	assert.Nil(t, err)
-	assert.NotNil(t, scheme)
+	require.Nil(t, err)
+	require.NotNil(t, scheme)
 
 	secret := curve.Scalar.Hash([]byte("test"))
 	shares, err := scheme.Split(secret, crand.Reader)
-	assert.Nil(t, err)
-	assert.NotNil(t, shares)
+	require.Nil(t, err)
+	require.NotNil(t, shares)
 	// There are 5*4*3 possible combinations
 	for i := 0; i < 5; i++ {
 		for j := 0; j < 5; j++ {
@@ -147,9 +147,9 @@ func TestShamirAllCombinations(t *testing.T) {
 				}
 
 				rSecret, err := scheme.Combine(shares[i], shares[j], shares[k])
-				assert.Nil(t, err)
-				assert.NotNil(t, rSecret)
-				assert.Equal(t, rSecret, secret)
+				require.Nil(t, err)
+				require.NotNil(t, rSecret)
+				require.Equal(t, rSecret, secret)
 			}
 		}
 	}
@@ -180,7 +180,7 @@ func TestMarshalJsonRoundTrip(t *testing.T) {
 		//out.Value = curve.NewScalar()
 		err = json.Unmarshal(input, &out)
 		require.NoError(t, err)
-		assert.Equal(t, in.Id, out.Id)
-		assert.Equal(t, bytes.Compare(in.Value, out.Value), 0)
+		require.Equal(t, in.Id, out.Id)
+		require.Equal(t, bytes.Compare(in.Value, out.Value), 0)
 	}
 }

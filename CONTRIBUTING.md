@@ -16,6 +16,11 @@ GitHub pull requests.
     - Localization
     - Recovery 
     - Deployability
+  
+# Code guidelines
+
+Use go style comments for all public functions, structs, and constants.
+Export only what is absolutely necessary.
 
 # The Commit Process
 
@@ -93,3 +98,89 @@ In general, providing the following information will increase the chances of the
 
 **Suggest a Fix** - if you can't fix the bug yourself, perhaps you can point to what might cause the problem (line of code or commit)
 
+## Referencing
+
+When contributing a new protocol or cryptosystem please include references, page numbers and equations.
+Document any deviations from the protocol and include an updated security proof if needed.
+
+## Hashing functions
+
+When using hash functions in protocols, use the following guidelines when
+
+32-byte output - SHA3-256
+\*-byte output - SHAKE-256
+
+Sigma protocols use [Merlin](https://merlin.cool/) transcripts.
+
+## Constant time
+
+We make every effort to make code cryptographically constant time. All contributions to cryptography related code
+should be constant time unless explicitly stated and why.
+
+Below are some algorithms for computing constant time operations that can be used and are meant to be examples.
+
+```go
+// conditionalMove returns x when i == 0 and y when i == 1
+func conditionalMove(x, y *[4]uint64, i int) {
+    b := uint64(-i)
+    x[0] ^= (x[0] ^ y[0]) & b
+    x[1] ^= (x[1] ^ y[1]) & b
+    x[2] ^= (x[2] ^ y[2]) & b
+    x[3] ^= (x[3] ^ y[3]) & b
+}
+```
+
+```go
+// conditionalNegate negates x if i == 1, otherwise x is untouched
+func conditionalNegate(x *[4]uint64, i int) {
+    b := uint64(-i)
+    x[0] = (x[0] ^ b) - b
+    x[1] = (x[1] ^ b) - b
+    x[2] = (x[2] ^ b) - b
+    x[3] = (x[3] ^ b) - b
+}
+```
+
+```go
+// conditionalAdd computes x+=y if i == 1, otherwise x is untouched
+func conditionalAdd(x, y *[4]uint64, i int) {
+    b := uint64(-i)
+    x[0] += y[0] & b
+    x[1] += y[1] & b
+    x[2] += y[2] & b
+    x[3] += y[3] & b
+}
+```
+
+```go
+// conditionalSub computes x-=y if i == 1, otherwise x is untouched
+func conditionalSub(x, y *[4]uint64, i int) {
+    b := uint64(-i)
+    x[0] -= y[0] & b
+    x[1] -= y[1] & b
+    x[2] -= y[2] & b
+    x[3] -= y[3] & b
+}
+```
+
+```go
+// isZero returns 1 if x is zero or 0 if non-zero
+func isZero(x *[4]uint64) int {
+    t := x[0]
+    t |= x[1]
+    t |= x[2]
+    t |= x[3]
+    return int(((int64(t) | int64(-t)) >> 63) + 1)
+}
+```
+
+```go
+// isNonZero returns 1 if x is non-zero, 0 otherwise
+func isNonZero(x *[4]uint64) int {
+    t := x[0]
+    t |= x[1]
+    t |= x[2]
+    t |= x[3]
+    return int(-((int64(t) | int64(-t)) >> 63))
+}
+```

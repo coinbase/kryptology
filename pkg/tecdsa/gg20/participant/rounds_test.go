@@ -10,20 +10,19 @@ import (
 	"crypto/ecdsa"
 	"crypto/elliptic"
 	"encoding/json"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"math/big"
 	"testing"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 
 	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
 	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/proof"
 	"github.com/stretchr/testify/require"
 
-	"github.com/stretchr/testify/assert"
-
-	"github.com/btcsuite/btcd/btcec"
 	tt "github.com/coinbase/kryptology/internal"
 	"github.com/coinbase/kryptology/pkg/core"
 	"github.com/coinbase/kryptology/pkg/paillier"
+	"github.com/btcsuite/btcd/btcec"
 )
 
 var (
@@ -365,7 +364,7 @@ func TestSignerSignRound2RepeatCall(t *testing.T) {
 		_, err = signers[1].SignRound2(otherSigners, otherP2PSend)
 		tt.AssertNoError(t, err)
 		_, err = signers[1].SignRound2(otherSigners, otherP2PSend)
-		assert.Error(t, err)
+		require.Error(t, err)
 	}
 }
 
@@ -515,16 +514,12 @@ func TestSignerSignRound5Works(t *testing.T) {
 		r1p2p := make(map[uint32]map[uint32]*Round1P2PSend, playerCnt)
 		for id, s := range signers {
 			round2In[id], r1p2p[id], err = s.SignRound1()
-			if !assert.NoError(t, err) {
-				t.FailNow()
-			}
+			require.NoError(t, err)
 		}
 
 		// Sign Round 2
 		err = signers[1].setCosigners([]uint32{1, 2, 3})
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 		p2p := make(map[uint32]map[uint32]*P2PSend)
 		if useDistributed {
 			_, err = signers[1].SignRound2(round2In, nil)
@@ -541,14 +536,10 @@ func TestSignerSignRound5Works(t *testing.T) {
 			p2p[1], err = signers[1].SignRound2(round2In, nil)
 		}
 
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 
 		err = signers[2].setCosigners([]uint32{1, 2, 3})
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 		if useDistributed {
 			_, err = signers[2].SignRound2(round2In, nil)
 			// check for required P2P round1 params
@@ -563,14 +554,10 @@ func TestSignerSignRound5Works(t *testing.T) {
 		} else {
 			p2p[2], err = signers[2].SignRound2(round2In, nil)
 		}
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 
 		err = signers[3].setCosigners([]uint32{1, 2, 3})
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 
 		if useDistributed {
 			_, err = signers[3].SignRound2(round2In, nil)
@@ -591,44 +578,30 @@ func TestSignerSignRound5Works(t *testing.T) {
 		// Sign Round 3
 		round3Bcast := make(map[uint32]*Round3Bcast, playerMin)
 		round3Bcast[1], err = signers[1].SignRound3(map[uint32]*P2PSend{2: p2p[2][1], 3: p2p[3][1]})
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 
 		round3Bcast[2], err = signers[2].SignRound3(map[uint32]*P2PSend{1: p2p[1][2], 3: p2p[3][2]})
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 
 		round3Bcast[3], err = signers[3].SignRound3(map[uint32]*P2PSend{1: p2p[1][3], 2: p2p[2][3]})
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 
 		// Sign Round 4
 		round4Bcast := make(map[uint32]*Round4Bcast, playerMin)
 		round4Bcast[1], err = signers[1].SignRound4(round3Bcast)
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 
 		round4Bcast[2], err = signers[2].SignRound4(round3Bcast)
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 
 		round4Bcast[3], err = signers[3].SignRound4(round3Bcast)
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 
 		// Sign Round 5
 		round5Bcast := make(map[uint32]*Round5Bcast, playerMin)
 		round5P2P := make(map[uint32]map[uint32]*Round5P2PSend, playerMin)
 		round5Bcast[1], round5P2P[1], err = signers[1].SignRound5(round4Bcast)
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 
 		if signers[1].state.Rbari == nil {
 			t.Errorf("Expected Rbari to be set but is nil")
@@ -644,14 +617,10 @@ func TestSignerSignRound5Works(t *testing.T) {
 		}
 
 		round5Bcast[2], round5P2P[2], err = signers[2].SignRound5(round4Bcast)
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 
 		round5Bcast[3], round5P2P[3], err = signers[3].SignRound5(round4Bcast)
-		if !assert.NoError(t, err) {
-			t.FailNow()
-		}
+		require.NoError(t, err)
 
 		if useDistributed {
 			require.True(t, len(round5P2P[1]) == 2)
@@ -673,7 +642,7 @@ func TestSignerSignRound6WorksP256(t *testing.T) {
 	curve := elliptic.P256()
 	msg := make([]byte, 32)
 	hash, err := core.Hash(msg, curve)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 	fullroundstest3Signers(t, curve, hash.Bytes(), ecdsaVerifier)
 }
 
@@ -813,21 +782,21 @@ func fullroundstest3Signers(t *testing.T, curve elliptic.Curve, msg []byte, veri
 		}
 		round6FullBcast := make([]*Round6FullBcast, playerMin)
 		round6FullBcast[0], err = signers[1].SignRound6Full(msg, map[uint32]*Round5Bcast{2: round5Bcast[2], 3: round5Bcast[3]}, r6P2pin)
-		assert.Nil(t, err)
+		require.Nil(t, err)
 		if useDistributed {
 			r6P2pin = make(map[uint32]*Round5P2PSend, playerMin)
 			r6P2pin[1] = r5P2p[1][2]
 			r6P2pin[3] = r5P2p[3][2]
 		}
 		round6FullBcast[1], err = signers[2].SignRound6Full(msg, map[uint32]*Round5Bcast{1: round5Bcast[1], 3: round5Bcast[3]}, r6P2pin)
-		assert.Nil(t, err)
+		require.Nil(t, err)
 		if useDistributed {
 			r6P2pin = make(map[uint32]*Round5P2PSend, playerMin)
 			r6P2pin[1] = r5P2p[1][3]
 			r6P2pin[2] = r5P2p[2][3]
 		}
 		round6FullBcast[2], err = signers[3].SignRound6Full(msg, map[uint32]*Round5Bcast{1: round5Bcast[1], 2: round5Bcast[2]}, r6P2pin)
-		assert.Nil(t, err)
+		require.Nil(t, err)
 		tt.AssertNoError(t, err)
 
 		sigs := make([]*curves.EcdsaSignature, 3)
@@ -861,15 +830,15 @@ func TestMarshalRound1BcastRoundTrip(t *testing.T) {
 
 	// Marshal and test
 	jsonBytes, err := json.Marshal(expected)
-	assert.NoError(t, err)
-	assert.NotNil(t, jsonBytes)
+	require.NoError(t, err)
+	require.NotNil(t, jsonBytes)
 
 	// Unmarshal and test
 	var actual Round1Bcast
 	err = json.Unmarshal(jsonBytes, &actual)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.Equal(t, expected, actual)
+	require.Equal(t, expected, actual)
 }
 
 // Ensures that marshal-unmarshal Round3Bcast is the identity function
@@ -879,14 +848,14 @@ func TestMarshalRound3BcastRoundTrip(t *testing.T) {
 	}
 	// Marshal and test
 	jsonBytes, err := json.Marshal(expected)
-	assert.NoError(t, err)
-	assert.NotNil(t, jsonBytes)
+	require.NoError(t, err)
+	require.NotNil(t, jsonBytes)
 
 	// Unmarshal and test
 	var actual Round3Bcast
 	err = json.Unmarshal(jsonBytes, &actual)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, actual)
+	require.NoError(t, err)
+	require.Equal(t, expected, actual)
 }
 
 // Ensures that marshal-unmarshal Round4Bcast is the identity function
@@ -899,13 +868,13 @@ func TestMarshalRound4BcastRoundTrip(t *testing.T) {
 	}
 	// Marhal and test
 	jsonBytes, err := json.Marshal(expected)
-	assert.NoError(t, err)
-	assert.NotNil(t, jsonBytes)
+	require.NoError(t, err)
+	require.NotNil(t, jsonBytes)
 
 	// Unmarshal and test
 	var actual Round4Bcast
-	assert.NoError(t, json.Unmarshal(jsonBytes, &actual))
-	assert.Equal(t, expected, actual)
+	require.NoError(t, json.Unmarshal(jsonBytes, &actual))
+	require.Equal(t, expected, actual)
 }
 
 // Ensures that marshal-unmarshal Round5Bcast is the identity function
@@ -921,15 +890,15 @@ func TestMarshalRound5BcastRoundTrip(t *testing.T) {
 
 	// Marshal and test
 	jsonBytes, err := json.Marshal(expected)
-	assert.NoError(t, err)
-	assert.NotNil(t, jsonBytes)
+	require.NoError(t, err)
+	require.NotNil(t, jsonBytes)
 
 	// Unmarshal and test
 	var actual Round5Bcast
 	err = json.Unmarshal(jsonBytes, &actual)
-	assert.NoError(t, err)
+	require.NoError(t, err)
 
-	assert.Equal(t, expected, actual)
+	require.Equal(t, expected, actual)
 }
 
 // Ensures that marshal-unmarshal Round3Bcast is the identity function
@@ -939,12 +908,12 @@ func TestMarshalRound6FullBcast(t *testing.T) {
 	}
 	// Marshal and test
 	jsonBytes, err := json.Marshal(expected)
-	assert.NoError(t, err)
-	assert.NotNil(t, jsonBytes)
+	require.NoError(t, err)
+	require.NotNil(t, jsonBytes)
 
 	// Unmarshal and test
 	var actual Round6FullBcast
 	err = json.Unmarshal(jsonBytes, &actual)
-	assert.NoError(t, err)
-	assert.Equal(t, expected, actual)
+	require.NoError(t, err)
+	require.Equal(t, expected, actual)
 }

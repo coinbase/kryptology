@@ -7,23 +7,24 @@
 package fq
 
 import (
-	"github.com/stretchr/testify/assert"
 	"math/big"
 	"math/rand"
 	"testing"
+
+	"github.com/stretchr/testify/require"
 )
 
 func TestFqSetOne(t *testing.T) {
 	fq := new(Fq).SetOne()
-	assert.NotNil(t, fq)
-	assert.True(t, fq.Equal(r))
+	require.NotNil(t, fq)
+	require.True(t, fq.Equal(r))
 }
 
 func TestFqSetUint64(t *testing.T) {
 	act := new(Fq).SetUint64(1 << 60)
-	assert.NotNil(t, act)
+	require.NotNil(t, act)
 	// Remember it will be in montgomery form
-	assert.Equal(t, int(act[0]), 0x4c46eb2100000001)
+	require.Equal(t, int(act[0]), 0x4c46eb2100000001)
 }
 
 func TestFqAdd(t *testing.T) {
@@ -31,8 +32,8 @@ func TestFqAdd(t *testing.T) {
 	rhs := new(Fq).SetOne()
 	exp := new(Fq).SetUint64(2)
 	res := new(Fq).Add(lhs, rhs)
-	assert.NotNil(t, res)
-	assert.True(t, res.Equal(exp))
+	require.NotNil(t, res)
+	require.True(t, res.Equal(exp))
 
 	// Fuzz test
 	for i := 0; i < 25; i++ {
@@ -45,8 +46,8 @@ func TestFqAdd(t *testing.T) {
 		exp.SetUint64(e)
 
 		a := new(Fq).Add(lhs, rhs)
-		assert.NotNil(t, a)
-		assert.Equal(t, exp, a)
+		require.NotNil(t, a)
+		require.Equal(t, exp, a)
 	}
 }
 
@@ -55,8 +56,8 @@ func TestFqSub(t *testing.T) {
 	rhs := new(Fq).SetOne()
 	exp := new(Fq).SetZero()
 	res := new(Fq).Sub(lhs, rhs)
-	assert.NotNil(t, res)
-	assert.True(t, res.Equal(exp))
+	require.NotNil(t, res)
+	require.True(t, res.Equal(exp))
 
 	// Fuzz test
 	for i := 0; i < 25; i++ {
@@ -72,8 +73,8 @@ func TestFqSub(t *testing.T) {
 		exp.SetUint64(e)
 
 		a := new(Fq).Sub(lhs, rhs)
-		assert.NotNil(t, a)
-		assert.Equal(t, exp, a)
+		require.NotNil(t, a)
+		require.Equal(t, exp, a)
 	}
 }
 
@@ -82,8 +83,8 @@ func TestFqMul(t *testing.T) {
 	rhs := new(Fq).SetOne()
 	exp := new(Fq).SetOne()
 	res := new(Fq).Mul(lhs, rhs)
-	assert.NotNil(t, res)
-	assert.True(t, res.Equal(exp))
+	require.NotNil(t, res)
+	require.True(t, res.Equal(exp))
 
 	// Fuzz test
 	for i := 0; i < 25; i++ {
@@ -96,36 +97,36 @@ func TestFqMul(t *testing.T) {
 		exp.SetUint64(e)
 
 		a := new(Fq).Mul(lhs, rhs)
-		assert.NotNil(t, a)
-		assert.Equal(t, exp, a)
+		require.NotNil(t, a)
+		require.Equal(t, exp, a)
 	}
 }
 
 func TestFqDouble(t *testing.T) {
 	a := new(Fq).SetUint64(2)
 	e := new(Fq).SetUint64(4)
-	assert.Equal(t, e, new(Fq).Double(a))
+	require.Equal(t, e, new(Fq).Double(a))
 
 	for i := 0; i < 25; i++ {
 		tv := rand.Uint32()
 		ttv := uint64(tv) * 2
 		a = new(Fq).SetUint64(uint64(tv))
 		e = new(Fq).SetUint64(ttv)
-		assert.Equal(t, e, new(Fq).Double(a))
+		require.Equal(t, e, new(Fq).Double(a))
 	}
 }
 
 func TestFqSquare(t *testing.T) {
 	a := new(Fq).SetUint64(4)
 	e := new(Fq).SetUint64(16)
-	assert.Equal(t, e, a.Square(a))
+	require.Equal(t, e, a.Square(a))
 
 	for i := 0; i < 25; i++ {
 		j := rand.Uint32()
 		exp := uint64(j) * uint64(j)
 		e.SetUint64(exp)
 		a.SetUint64(uint64(j))
-		assert.Equal(t, e, a.Square(a))
+		require.Equal(t, e, a.Square(a))
 	}
 }
 
@@ -133,17 +134,17 @@ func TestFqNeg(t *testing.T) {
 	a := new(Fq).SetOne()
 	a.Neg(a)
 	e := &Fq{0x311bac8400000004, 0x891a63f02652a376, 0, 0}
-	assert.Equal(t, e, a)
+	require.Equal(t, e, a)
 	a.Neg(generator)
 	e = &Fq{0xf58a5e9400000014, 0xad83f3b0bf9d314e, 0x2, 0x0}
-	assert.Equal(t, e, a)
+	require.Equal(t, e, a)
 }
 
 func TestFqExp(t *testing.T) {
 	e := new(Fq).SetUint64(8)
 	a := new(Fq).SetUint64(2)
 	by := new(Fq).SetUint64(3)
-	assert.Equal(t, e, a.Exp(a, by))
+	require.Equal(t, e, a.Exp(a, by))
 }
 
 func TestFqSqrt(t *testing.T) {
@@ -151,11 +152,11 @@ func TestFqSqrt(t *testing.T) {
 	t2 := new(Fq).Neg(t1)
 	t3 := new(Fq).Square(t1)
 	_, wasSquare := t3.Sqrt(t3)
-	assert.True(t, wasSquare)
-	assert.True(t, t1.Equal(t3) || t2.Equal(t3))
+	require.True(t, wasSquare)
+	require.True(t, t1.Equal(t3) || t2.Equal(t3))
 	t1.SetUint64(5)
 	_, wasSquare = new(Fq).Sqrt(t1)
-	assert.False(t, wasSquare)
+	require.False(t, wasSquare)
 }
 
 func TestFqInvert(t *testing.T) {
@@ -163,72 +164,72 @@ func TestFqInvert(t *testing.T) {
 	fiat_pasta_fq_to_montgomery((*fiat_pasta_fq_montgomery_domain_field_element)(twoInv), (*fiat_pasta_fq_non_montgomery_domain_field_element)(twoInv))
 	two := new(Fq).SetUint64(2)
 	a, inverted := new(Fq).Invert(two)
-	assert.True(t, inverted)
-	assert.Equal(t, a, twoInv)
+	require.True(t, inverted)
+	require.Equal(t, a, twoInv)
 
 	rootOfUnity := &Fq{0xa70e2c1102b6d05f, 0x9bb97ea3c106f049, 0x9e5c4dfd492ae26e, 0x2de6a9b8746d3f58}
 	fiat_pasta_fq_to_montgomery((*fiat_pasta_fq_montgomery_domain_field_element)(rootOfUnity), (*fiat_pasta_fq_non_montgomery_domain_field_element)(rootOfUnity))
 	rootOfUnityInv := &Fq{0x57eecda0a84b6836, 0x4ad38b9084b8a80c, 0xf4c8f353124086c1, 0x2235e1a7415bf936}
 	fiat_pasta_fq_to_montgomery((*fiat_pasta_fq_montgomery_domain_field_element)(rootOfUnityInv), (*fiat_pasta_fq_non_montgomery_domain_field_element)(rootOfUnityInv))
 	a, inverted = new(Fq).Invert(rootOfUnity)
-	assert.True(t, inverted)
-	assert.Equal(t, a, rootOfUnityInv)
+	require.True(t, inverted)
+	require.Equal(t, a, rootOfUnityInv)
 
 	lhs := new(Fq).SetUint64(9)
 	rhs := new(Fq).SetUint64(3)
 	rhsInv, inverted := new(Fq).Invert(rhs)
-	assert.True(t, inverted)
-	assert.Equal(t, rhs, new(Fq).Mul(lhs, rhsInv))
+	require.True(t, inverted)
+	require.Equal(t, rhs, new(Fq).Mul(lhs, rhsInv))
 
 	rhs.SetZero()
 	_, inverted = new(Fq).Invert(rhs)
-	assert.False(t, inverted)
+	require.False(t, inverted)
 }
 
 func TestFqCMove(t *testing.T) {
 	t1 := new(Fq).SetUint64(5)
 	t2 := new(Fq).SetUint64(10)
-	assert.Equal(t, t1, new(Fq).CMove(t1, t2, 0))
-	assert.Equal(t, t2, new(Fq).CMove(t1, t2, 1))
+	require.Equal(t, t1, new(Fq).CMove(t1, t2, 0))
+	require.Equal(t, t2, new(Fq).CMove(t1, t2, 1))
 }
 
 func TestFqBytes(t *testing.T) {
 	t1 := new(Fq).SetUint64(99)
 	seq := t1.Bytes()
 	t2, err := new(Fq).SetBytes(&seq)
-	assert.NoError(t, err)
-	assert.Equal(t, t1, t2)
+	require.NoError(t, err)
+	require.Equal(t, t1, t2)
 
 	for i := 0; i < 25; i++ {
 		t1.SetUint64(rand.Uint64())
 		seq = t1.Bytes()
 		_, err = t2.SetBytes(&seq)
-		assert.NoError(t, err)
-		assert.Equal(t, t1, t2)
+		require.NoError(t, err)
+		require.Equal(t, t1, t2)
 	}
 }
 
 func TestFqBigInt(t *testing.T) {
 	t1 := new(Fq).SetBigInt(big.NewInt(9999))
 	t2 := new(Fq).SetBigInt(t1.BigInt())
-	assert.Equal(t, t1, t2)
+	require.Equal(t, t1, t2)
 
 	e := &Fq{0x7bb1416dea3d6ae3, 0x62f9108a340aa525, 0x303b3f30fcaa477f, 0x11c9ef5422d80a4d}
 	b := new(big.Int).SetBytes([]byte{9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9, 9})
 	t1.SetBigInt(b)
-	assert.Equal(t, e, t1)
+	require.Equal(t, e, t1)
 	e[0] = 0x1095a9b315c2951e
 	e[1] = 0xbf4d8871d58a03b8
 	e[2] = 0xcfc4c0cf0355b880
 	e[3] = 0x2e3610abdd27f5b2
 	b.Neg(b)
 	t1.SetBigInt(b)
-	assert.Equal(t, e, t1)
+	require.Equal(t, e, t1)
 }
 
 func TestFqSetBool(t *testing.T) {
-	assert.Equal(t, new(Fq).SetOne(), new(Fq).SetBool(true))
-	assert.Equal(t, new(Fq).SetZero(), new(Fq).SetBool(false))
+	require.Equal(t, new(Fq).SetOne(), new(Fq).SetBool(true))
+	require.Equal(t, new(Fq).SetZero(), new(Fq).SetBool(false))
 }
 
 func TestFqSetBytesWide(t *testing.T) {
@@ -244,5 +245,5 @@ func TestFqSetBytesWide(t *testing.T) {
 		0x27, 0x5f, 0x85, 0x06, 0x8d, 0x99, 0xa4, 0x75,
 		0xc0, 0x2c, 0x71, 0x69, 0x9e, 0x58, 0xea, 0x52,
 	})
-	assert.Equal(t, e, a)
+	require.Equal(t, e, a)
 }
