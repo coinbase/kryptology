@@ -237,6 +237,20 @@ func (b SigAug) PartialSign(sks *SecretKeyShare, pk *PublicKey, msg []byte) (*Pa
 	return sks.partialSign(bytes, b.dst)
 }
 
+// Computes a signature in G1 with a prepended public key that is not necessary derived from the secret key
+func (b SigAug) PrependSign(sk *SecretKey, msg []byte, pk *PublicKey) (*Signature, error) {
+	if len(msg) == 0 {
+		return nil, fmt.Errorf("message cannot be empty or nil")
+	}
+
+	bytes, err := pk.MarshalBinary()
+	if err != nil {
+		return nil, fmt.Errorf("MarshalBinary failed")
+	}
+	bytes = append(bytes, msg...)
+	return sk.createSignature(bytes, b.dst)
+}
+
 // CombineSignatures takes partial signatures to yield a completed signature
 func (b SigAug) CombineSignatures(sigs ...*PartialSignature) (*Signature, error) {
 	return combineSigs(sigs)

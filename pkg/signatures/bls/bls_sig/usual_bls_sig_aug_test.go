@@ -332,6 +332,33 @@ func TestAugPartialSign(t *testing.T) {
 	}
 }
 
+func TestAugPrependSign(t *testing.T) {
+	ikm := make([]byte, 32)
+	readRand(ikm, t)
+	bls := NewSigAug()
+	pk1, sk1, err := bls.KeygenWithSeed(ikm)
+	pk2, _, err := bls.KeygenWithSeed(ikm)
+	if err != nil {
+		t.Errorf("Aug KeyGen failed")
+	}
+
+	readRand(ikm, t)
+	sig, err := bls.PrependSign(sk1, ikm, pk2)
+
+	if res, _ := bls.Verify(pk1, ikm, sig); !res {
+		t.Errorf("Aug Verify failed")
+	}
+
+	if res, _ := bls.Verify(pk2, ikm, sig); !res {
+		t.Errorf("Aug Verify failed")
+	}
+
+	ikm[0] += 1
+	if res, _ := bls.Verify(pk1, ikm, sig); res {
+		t.Errorf("Aug Verify succeeded when it should've failed.")
+	}
+}
+
 // Ensure that mixed partial signatures from distinct origins create invalid composite signatures
 func TestAugPartialMixupShares(t *testing.T) {
 	total := uint(5)
@@ -408,5 +435,35 @@ func TestAugPartialSignNilMessage(t *testing.T) {
 	_, err = bls.PartialSign(sks[0], pk, nil)
 	if err == nil {
 		t.Errorf("Expected partial sign of nil message to fail")
+	}
+}
+
+func TestAugPrependSignEmptyMessage(t *testing.T) {
+	bls := NewSigAug()
+	_, sk, err := bls.Keygen()
+	pk, _, err := bls.Keygen()
+	if err != nil {
+		t.Errorf("Aug KeyGen failed")
+	}
+
+	// Sign a nil message
+	_, err = bls.PrependSign(sk, nil, pk)
+	if err == nil {
+		t.Errorf("Expected sign of nil message to fail")
+	}
+}
+
+func TestAugPrependSignNilMessage(t *testing.T) {
+	bls := NewSigAug()
+	_, sk, err := bls.Keygen()
+	pk, _, err := bls.Keygen()
+	if err != nil {
+		t.Errorf("Aug KeyGen failed")
+	}
+
+	// Sign an empty message
+	_, err = bls.PrependSign(sk, []byte{}, pk)
+	if err == nil {
+		t.Errorf("Expected sign of empty message to fail")
 	}
 }
