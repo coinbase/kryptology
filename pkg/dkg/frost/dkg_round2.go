@@ -8,6 +8,7 @@ package frost
 
 import (
 	"fmt"
+
 	"github.com/coinbase/kryptology/internal"
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/sharing"

@@ -8,12 +8,13 @@ package v1
 
 import (
 	"crypto/elliptic"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"math/big"
 	"sync"
 
 	ed "filippo.io/edwards25519"
+
 	"github.com/coinbase/kryptology/internal"
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 var ed25519Initonce sync.Once

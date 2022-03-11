@@ -8,8 +8,9 @@ package sharing
 
 import (
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"io"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 // Pedersen Verifiable Secret Sharing Scheme

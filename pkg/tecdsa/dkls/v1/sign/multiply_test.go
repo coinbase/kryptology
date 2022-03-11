@@ -10,13 +10,12 @@ import (
 	"crypto/rand"
 	"testing"
 
-	"github.com/coinbase/kryptology/pkg/ot/extension/kos"
-	"github.com/coinbase/kryptology/pkg/ot/ottest"
+	"github.com/stretchr/testify/require"
 
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/ot/base/simplest"
-
-	"github.com/stretchr/testify/require"
+	"github.com/coinbase/kryptology/pkg/ot/extension/kos"
+	"github.com/coinbase/kryptology/pkg/ot/ottest"
 )
 
 func TestMultiply(t *testing.T) {
@@ -45,5 +44,5 @@ func TestMultiply(t *testing.T) {
 
 	product := alpha.Mul(beta)
 	sum := sender.outputAdditiveShare.Add(receiver.outputAdditiveShare)
-	require.Zero(t, product.Cmp(sum))
+	require.Equal(t, product, sum)
 }

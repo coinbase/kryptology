@@ -8,6 +8,7 @@ package frost
 
 import (
 	"crypto/sha512"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 

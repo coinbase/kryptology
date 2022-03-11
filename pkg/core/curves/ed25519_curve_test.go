@@ -13,8 +13,9 @@ import (
 	"testing"
 
 	ed "filippo.io/edwards25519"
-	"github.com/coinbase/kryptology/internal"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/internal"
 )
 
 func TestScalarEd25519Random(t *testing.T) {

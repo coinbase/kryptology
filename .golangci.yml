@@ -1,0 +1,586 @@
+run:
+  tests: true
+  timeout: 5m
+  build-tags:
+    - integration
+  skip-dirs:
+    - gen/
+
+output:
+  format: colored-line-number
+  sort-results: true
+
+# https://golangci-lint.run/usage/linters
+linters:
+  disable-all: true
+  fast: false
+  enable:
+    # Simple linter to check that your code does not contain non-ASCII identifiers
+    # - asciicheck
+    # Finds unused code
+    - deadcode
+    # Checks assignments with too many blank identifiers (e.g. x, , , _, := f())
+    - dogsled
+    # Tool for code clone detection
+    # TODO: Enable this later
+    # - dupl
+    # check for two durations multiplied together
+    - durationcheck
+    # Errcheck is a program for checking for unchecked errors in go programs. These unchecked errors can be critical bugs in some cases
+    - errcheck
+    # errorlint is a linter for that can be used to find code that will cause problems with the error wrapping scheme introduced in Go 1.13.
+    - errorlint
+    # check exhaustiveness of enum switch statements
+    - exhaustive
+    # checks for pointers to enclosing loop variables
+    - exportloopref
+    # # Forbids identifiers
+    # - forbidigo
+    # # finds forced type assertions
+    # - forcetypeassert
+    # Gci control golang package import order and make it always deterministic.
+    - gci
+    # # Checks that no init functions are present in Go code
+    # - gochecknoinits
+    # # Finds repeated strings that could be replaced by a constant
+    # - goconst
+    # #  Provides many diagnostics that check for bugs, performance and style issues. Extensible without recompilation through dynamic rules. Dynamic rules are written declaratively with AST patterns, filters, report message and optional suggestion.
+    # - gocritic
+    # # Check if comments end in a period
+    # - godot
+    # # Golang linter to check the errors handling expressions
+    # - goerr113
+    # # Gofumpt checks whether code was gofumpt-ed.
+    # - gofumpt
+    # # An analyzer to detect magic numbers.
+    # - gomnd
+    # # Checks that printf-like functions are named with f at the end
+    # - goprintffuncname
+    # # Inspects source code for security problems
+    # - gosec
+    # # Linter for Go source code that specializes in simplifying a code
+    # - gosimple
+    # # Vet examines Go source code and reports suspicious constructs, such as Printf calls whose arguments do not align with the format string
+    # - govet
+    # # Checks that your code uses short syntax for if-statements whenever possible
+    # - ifshort
+    # # Enforces consistent import aliases
+    # - importas
+    # # Detects when assignments to existing variables are not used
+    # - ineffassign
+    # # Finds slice declarations with non-zero initial length
+    # - makezero
+    # # Finds commonly misspelled English words in comments
+    # - misspell
+    # # Finds naked returns in functions greater than a specified function length
+    # - nakedret
+    # # Reports deeply nested if statements
+    # - nestif
+    # # Finds the code that returns nil even if it checks that the error is not nil.
+    # - nilerr
+    # # Reports ill-formed or insufficient nolint directives
+    # - nolintlint
+    # # Finds slice declarations that could potentially be preallocated
+    # - prealloc
+    # # find code that shadows one of Go's predeclared identifiers
+    # - predeclared
+    # # Fast, configurable, extensible, flexible, and beautiful linter for Go. Drop-in replacement of golint.
+    # - revive
+    # # Staticcheck is a go vet on steroids, applying a ton of static analysis checks
+    # - staticcheck
+    # # Finds unused struct fields
+    # - structcheck
+    # # linter that makes you use a separate _test package
+    # - testpackage
+    # # thelper detects golang test helpers without t.Helper() call and checks the consistency of test helpers
+    # - thelper
+    # # tparallel detects inappropriate usage of t.Parallel() method in your Go test codes
+    # - tparallel
+    # # Like the front-end of a Go compiler, parses and type-checks Go code
+    # - typecheck
+    # # Remove unnecessary type conversions
+    # - unconvert
+    # # Reports unused function parameters
+    # - unparam
+    # # Checks Go code for unused constants, variables, functions and types
+    # - unused
+    # # Finds unused global variables and constants
+    # - varcheck
+    # # wastedassign finds wasted assignment statements.
+    # - wastedassign
+    # # Tool for detection of leading and trailing whitespace
+    # - whitespace
+    # # Checks that errors returned from external packages are wrapped
+    # - wrapcheck
+
+linters-settings:
+  errcheck:
+#     # report about not checking of errors in type assertions: `a := b.(MyStruct)`;
+#     # default is false: such cases aren't reported by default.
+    check-type-assertions: true
+#     # report about assignment of errors to blank identifier: `num, _ := strconv.Atoi(numStr)`;
+#     # default is false: such cases aren't reported by default.
+    check-blank: false
+#   goconst:
+#     # minimal length of string constant, 3 by default
+#     min-len: 3
+#     # minimal occurrences count to trigger, 3 by default
+#     min-occurrences: 3
+#   gosimple:
+#     go: "1.17"
+#     checks: ["all"]
+#   predeclared:
+#     # include method names and field names (i.e., qualified names) in checks
+#     q: true
+#   staticcheck:
+#     go: "1.17"
+#     # https://staticcheck.io/docs/options#checks
+#     checks: ["all"]
+#   unused:
+#     go: "1.17"
+#   testpackage:
+#     # regexp pattern to skip files
+#     # We're skipping securechannel tests - and keep them as internal tests
+#     # because other wise we'd have to export a lot of unnecessary things out of
+#     # the package.
+#     skip-regexp: (groupchannel|peerchannel)_test\.go
+#   misspell:
+#     # Correct spellings using locale preferences for US or UK.
+#     # Default is to use a neutral variety of English.
+#     # Setting locale to US will correct the British spelling of 'colour' to 'color'.
+#     locale: US
+#     ignore-words:
+#       - cancelled
+#   godot:
+#     # comments to be checked: `declarations`, `toplevel`, or `all`
+#     scope: toplevel
+#     # list of regexps for excluding particular comment lines from check
+#     exclude:
+#     - '^ [=-_]+$'   # contain line comments eg '// ============'
+#     - '^ [A-Za-z-_]+$' # contains only a single word eg '// Cosigners'
+#     - '^ [A-Za-z-_]+ [A-Za-z-_]+$' # contains only two words eg '// Server Sage'
+#     - '[TODO|FIXME]:' # contains TODO or FIXME keywords
+#     - '[:]+' # contain a column eg. comments like '// Usage: ...' or comments containing an emoji
+#     # don't enforce comments starting with capital letters because the first word might be
+#     # referring to an argument within the function or alike
+#     capital: false
+#   whitespace:
+#     multi-if: true # Enforces newlines (or comments) after every multi-line if statement
+#     multi-func: false # Enforces newlines (or comments) after every multi-line function signature
+#   prealloc:
+#     # Report preallocation suggestions only on simple loops that have no returns/breaks/continues/gotos in them. true by default
+#     simple: true
+#     range-loops: true # Report preallocation suggestions on range loops, true by default
+#     for-loops: true # Report preallocation suggestions on for loops, false by default
+  errorlint:
+    # Check whether fmt.Errorf uses the %w verb for formatting errors. keep in mind that any errors wrapped by fmt.Errorf implicitly become part of the API as according to Hyrum's Law.
+    errorf: true
+    # Check for plain type assertions and type switches
+    asserts: true
+    # Check for plain error comparisons
+    comparison: true
+  exhaustive:
+    # indicates that switch statements are to be considered exhaustive if a
+    # 'default' case is present, even if all enum members aren't listed in the
+    # switch
+    default-signifies-exhaustive: false
+  gci:
+    # put imports beginning with prefix after 3rd-party packages;
+    # only support one prefix
+    # if not set, use goimports.local-prefixes
+    local-prefixes: github.com
+#   gofumpt:
+#     # Choose whether or not to use the extra rules that are disabled
+#     # by default
+#     # list of rules: https://github.com/mvdan/gofumpt
+#     extra-rules: true
+#   forbidigo:
+#     # Forbid the following identifiers (identifiers are written using regexp):
+#     forbid:
+#       - 'fmt\.Print.*'
+#       - 'pubkey'
+#       - 'privkey'
+#     # Exclude godoc examples from forbidigo checks.  Default is true.
+#     exclude_godoc_examples: true
+  dogsled:
+    # checks assignments with too many blank identifiers; default is 2
+    max-blank-identifiers: 3
+#   gomnd: # Detection methods of magic numbers
+#     # the list of enabled checks, see https://github.com/tommy-muehle/go-mnd/#checks for description.
+#     checks: argument,case,condition,operation,return,assign
+#     ignored-numbers:
+#       - '2' # We often use 2 in the context of two-party stuff (e.g. DKLs18)
+#       - '10' # Parsing integers in base 10 is common
+#       - '64' # Parsing integers into 64 bit integers
+#   dupl:
+#     # tokens count to trigger issue, 150 by default
+#     threshold: 150
+#   revive:
+#     rules:
+#       # Disallows the usage of basic types in context.WithValue.
+#       - name: context-keys-type
+#       # Conventions around the naming of time variables.
+#       - name: time-naming
+#       # whitelist & blacklist of initialisms
+#       - name: var-naming
+#         arguments:
+#           # whitelist - we do not enforce consistent capitalization in naming of the following initialisms
+#           - ["ID"]
+#           # Blacklist - opposite of whitelist
+#           - ["KMS", "RSA", "HSM", "ECDH", "ECIES", "JSON", "URL", "PublicKey", "PrivateKey", "UUID", "HKDF", "TLS", "SQS", "SNS", "S2S"]
+#       # Reduces redundancies around variable declaration.
+#       - name: var-declaration
+#       # Warns when a public return is from unexported type.
+#       - name: unexported-return
+#       # Disallows blank imports
+#       - name: blank-imports
+#       # context.Context should be the first argument of a function.
+#       - name: context-as-argument
+#       # Forbids . imports.
+#       - name: dot-imports
+#       # The error return parameter should be last.
+#       - name: error-return
+#       # Conventions around error strings.
+#       - name: error-strings
+#       # Naming of error variables.
+#       - name: error-naming
+#       # Naming and commenting conventions on exported symbols.
+#       - name: exported
+#       # Redundant if when returning an error.
+#       - name: if-return
+#       # Use i++ and i-- instead of i += 1 and i -= 1.
+#       - name: increment-decrement
+#       # Package commenting conventions.
+#       - name: package-comments
+#       # Prevents redundant variables when iterating over a collection.
+#       - name: range
+#       # Conventions around the naming of receivers.
+#       - name: receiver-naming
+#       # Sets restriction for maximum Cyclomatic complexity.
+#       # TODO: enable this once all cyclomatic complexity todos are resolved
+#       # - name: cyclomatic
+#       #   arguments:
+#       #     - 13
+#       # Warns on empty code blocks
+#       - name: empty-block
+#       # Prevents redundant else statements (extends indent-error-flow)
+#       - name: superfluous-else
+#       # Warns on methods with names that differ only by capitalization
+#       - name: confusing-naming
+#       # Warns on getters that do not yield any result
+#       - name: get-return
+#       # Warns on assignments to function parameters
+#       - name: modifies-parameter
+#       # Suggests to name potentially confusing function results
+#       - name: confusing-results
+#       # Suggests removing or simplifying unnecessary statements
+#       - name: unnecessary-stmt
+#       # Checks common struct tags like json,xml,yaml
+#       - name: struct-tag
+#       # Warns on assignments to value-passed method receivers
+#       - name: modifies-value-receiver
+#       # Warns on constant logical expressions
+#       - name: constant-logical-expr
+#       # Suggests removing Boolean literals from logic expressions
+#       - name: bool-literal-in-expr
+#       # Warns on redefinitions of builtin identifiers
+#       - name: redefines-builtin-id
+#       # Warns if range value is used in a closure dispatched as goroutine
+#       - name: range-val-in-closure
+#       # Warns if address of range value is used dangerously
+#       - name: range-val-address
+#       # Warns on functions taking sync.WaitGroup as a by-value parameter
+#       - name: waitgroup-by-value
+#       # Warns on explicit call to the garbage collector
+#       - name: call-to-gc
+#       # Looks for packages that are imported two or more times
+#       - name: duplicated-imports
+#       # Spots identifiers that shadow an import
+#       - name: import-shadowing
+#       # Warns on bare returns
+#       - name: bare-return
+#       # Suggests to rename or remove unused method receivers
+#       - name: unused-receiver
+#       # Warns on suspicious casts from int to string
+#       - name: string-of-int
+#       # Spots if-then-else statements that can be refactored to simplify code reading
+#       - name: early-return
+#       # Warns on function calls that will lead to (direct) infinite recursion
+#       - name: unconditional-recursion
+#       # Spots if-then-else statements with identical then and else branches
+#       - name: identical-branches
+#       # Warns on some defer gotchas: https://blog.learngoprogramming.com/5-gotchas-of-defer-in-go-golang-part-iii-36a1ab3d6ef1
+#       - name: defer
+#         arguments:
+#           # call-chain:	even if deferring call-chains of the form foo()() is valid, it does not helps code understanding (only the last call is deferred)
+#           # loop: deferring inside loops can be misleading (deferred functions are not executed at the end of the loop iteration but of the current function) and it could lead to exhausting the execution stack
+#           # method-call: deferring a call to a method can lead to subtle bugs if the method does not have a pointer receiver
+#           # recover: calling recover outside a deferred function has no effect
+#           # return: returning values form a deferred function has no effect
+#           - ["call-chain", "method-call", "return"]
+#       # Warns on wrongly named un-exported symbols
+#       - name: unexported-naming
+#   govet:
+#     # report about shadowed variables
+#     check-shadowing: true
+#     disable-all: true
+#     enable: # run `go tool vet help` to see all analyzers
+#     # report mismatches between assembly files and Go declarations
+#     - asmdecl
+#     # check for common mistakes using the sync/atomic package
+#     - atomic
+#     # check for common mistakes involving boolean operators
+#     - bools
+#     # check that +build tags are well-formed and correctly located
+#     - buildtag
+#     # detect some violations of the cgo pointer passing rules
+#     - cgocall
+#     # check for unkeyed composite literals
+#     - composites
+#     # check for locks erroneously passed by value
+#     - copylocks
+#     # report passing non-pointer or non-error values to errors.As
+#     - errorsas
+#     # report assembly that clobbers the frame pointer before saving it
+#     - framepointer
+#     # detect impossible interface-to-interface type assertions
+#     - ifaceassert
+#     # check references to loop variables from within nested functions
+#     - loopclosure
+#     # check cancel func returned by context.WithCancel is called
+#     - lostcancel
+#     # check for useless comparisons between functions and nil
+#     - nilfunc
+#     # check consistency of Printf format strings and arguments
+#     - printf
+#     # check for shifts that equal or exceed the width of the integer
+#     - shift
+#     # check signature of methods of well-known interfaces
+#     - stdmethods
+#     # check for string(int) conversions
+#     - stringintconv
+#     # check that struct field tags conform to reflect.StructTag.Get
+#     - structtag
+#     # report calls to (*testing.T).Fatal from goroutines started by a test.
+#     - testinggoroutine
+#     # check for common mistaken usages of tests and examples
+#     - tests
+#     # report passing non-pointer or non-interface values to unmarshal
+#     - unmarshal
+#     # check for unreachable code
+#     - unreachable
+#     # check for invalid conversions of uintptr to unsafe.Pointer
+#     - unsafeptr
+#     # check for unused results of calls to some functions
+#     - unusedresult
+#   gocritic:
+#     # Which checks should be enabled; can't be combined with 'disabled-checks';
+#     # See https://go-critic.github.io/overview#checks-overview
+#     # To check which checks are enabled run `GL_DEBUG=gocritic golangci-lint run`
+#     # By default list o stable checks is used.
+#     enabled-checks:
+#       # Detects suspicious mutex lock/unlock operations
+#       - badLock
+#       # Detects suspicious regexp patterns
+#       - badRegexp
+#       # Detects suspicious duplicated arguments
+#       - dupArg
+#       # Detects duplicated branch bodies inside conditional statements
+#       - dupBranchBody
+#       # Detects suspicious duplicated sub-expressions
+#       - dupSubExpr
+#       # Detects unwanted dependencies on the evaluation order
+#       - evalOrder
+#       # Detects calls to exit/fatal inside functions that use defer
+#       - exitAfterDefer
+#       # Detects problems in filepath.Join() function calls
+#       - filepathJoin
+#       # Detects immediate dereferencing of `flag` package pointers
+#       - flagDeref
+#       # Detects suspicious flag names
+#       - flagName
+#       # Detects suspicious map literal keys
+#       - mapKey
+#       # Detects return statements those results evaluate to nil
+#       - nilValReturn
+#       # Detects octal literals passed to functions
+#       - octalLiteral
+#       # Detects various off-by-one kind of errors
+#       - offBy1
+#       # Detects suspicious regexp patterns
+#       - regexpPattern
+#       # Detects suspicious/confusing re-assignments
+#       - sloppyReassign
+#       # Detects suspicious sort.Slice calls
+#       - sortSlice
+#       # Detects potential truncation issues when comparing ints of different sizes
+#       - truncateCmp
+#       # Detects redundantly deferred calls
+#       - unnecessaryDefer
+#       # Detects conditions that are unsafe due to not being exhaustive
+#       - weakCond
+#       # Detects assignments that can be simplified by using assignment operators
+#       - assignOp
+#       # Detects bool expressions that can be simplified
+#       - boolExprSimplify
+#       # Detects capitalized names for local variables
+#       - captLocal
+#       # Detects commented-out imports
+#       - commentedOutImport
+#       # Detects when default case in switch isn't on 1st or last position
+#       - defaultCaseOrder
+#       # Detects deferred function literals that can be simplified
+#       - deferUnlambda
+#       # Detects comments that silence go lint complaints about doc-comment
+#       - docStub
+#       # Detects multiple imports of the same package under different aliases
+#       - dupImport
+#       # Detects fallthrough that can be avoided by using multi case values
+#       - emptyFallthrough
+#       # Detects empty string checks that can be written more idiomatically
+#       - emptyStringTest
+#       # Detects hex literals that have mixed case letter digits
+#       - hexLiteral
+#       # Detects non-assignment statements inside if/switch init clause
+#       - initClause
+#       # Detects method expression call that can be replaced with a method call
+#       - methodExprCall
+#       # Finds where nesting level could be reduced
+#       - nestingReduce
+#       # Detects immediate dereferencing of `new` expressions
+#       - newDeref
+#       # Detects if function parameters could be combined by type and suggest the way to do it
+#       - paramTypeCombine
+#       # Detects input and output parameters that have a type of pointer to referential type
+#       - ptrToRefParam
+#       # Detects `regexp.Compile*` that can be replaced with `regexp.MustCompile*`
+#       - regexpMust
+#       # Detects regexp patterns that can be simplified
+#       - regexpSimplify
+#       # Runs user-defined rules using ruleguard linter
+#       # TODO: enable later, to detect coordinator leaks any info at the network boundary
+#       # - ruleguard
+#       # Detects usage of `len` when result is obvious or doesn't make sense
+#       - sloppyLen
+#       # Detects redundant conversions between string and []byte
+#       - stringXbytes
+#       # Detects switch-over-bool statements that use explicit `true` tag value
+#       - switchTrue
+#       # Detects repeated type assertions and suggests to replace them with type switch statement
+#       - typeAssertChain
+#       # Detects method declarations preceding the type definition itself
+#       - typeDefFirst
+#       # Detects type switches that can benefit from type guard clause with variable
+#       - typeSwitchVar
+#       # Detects unneded parenthesis inside type expressions and suggests to remove them
+#       - typeUnparen
+#       # Detects dereference expressions that can be omitted
+#       - underef
+#       # Detects redundant statement labels
+#       - unlabelStmt
+#       # Detects function literals that can be simplified
+#       - unlambda
+#       # Detects unnecessary braced statement blocks
+#       - unnecessaryBlock
+#       # Detects slice expressions that can be simplified to sliced expression itself
+#       - unslice
+#       # Detects value swapping code that are not using parallel assignment
+#       - valSwap
+#       # Ensures that `//nolint` comments include an explanation
+#       - whyNoLint
+#       # Detects function calls that can be replaced with convenience wrappers
+#       - wrapperFunc
+#       # Detects Yoda style expressions and suggests to replace them eg. `return nil != ptr to` to `return ptr != nil`
+#       - yodaStyleExpr
+#       # Detects `append` chains to the same slice that can be done in a single `append` call
+#       - appendCombine
+#       # Detects unoptimal strings/bytes case-insensitive comparison
+#       - equalFold
+#       # Detects params that incur excessive amount of copying
+#       - hugeParam
+#       # Detects strings.Index calls that may cause unwanted allocs
+#       - indexAlloc
+#       # Detects expensive copies of `for` loop range expressions
+#       - rangeExprCopy
+#       # Detects loops that copy big objects during each iteration
+#       - rangeValCopy
+
+#     # Settings passed to gocritic.
+#     # The settings key is the name of a supported gocritic checker.
+#     # The list of supported checkers can be find in https://go-critic.github.io/overview.
+#     settings:
+#       captLocal: # must be valid enabled check name
+#         # whether to restrict checker to params only (default true)
+#         paramsOnly: true
+#       hugeParam:
+#         # size in bytes that makes the warning trigger (default 80)
+#         sizeThreshold: 80
+#       nestingReduce:
+#         # min number of statements inside a branch to trigger a warning (default 5)
+#         bodyWidth: 5
+#       rangeExprCopy:
+#         # size in bytes that makes the warning trigger (default 512)
+#         sizeThreshold: 512
+#         # whether to check test functions (default true)
+#         skipTestFuncs: true
+#       rangeValCopy:
+#         # size in bytes that makes the warning trigger (default 128)
+#         sizeThreshold: 128
+#         # whether to check test functions (default true)
+#         skipTestFuncs: true
+#       truncateCmp:
+#         # whether to skip int/uint/uintptr types (default true)
+#         skipArchDependent: true
+#       underef:
+#         # whether to skip (*x).method() calls where x is a pointer receiver (default true)
+#         skipRecvDeref: false
+#   wrapcheck:
+#     ignorePackageGlobs:
+#       - google.golang.org/grpc/status
+#       - github.com/coinbase/tex/internal/coordinator/common
+
+issues:
+  # Excluding configuration per-path, per-linter, per-text and per-source
+  exclude-rules:
+    # Exclude some linters from running on tests files.
+    - path: _test\.go
+      linters:
+    #     # We're disabling `goconst` in tests, because there are a lot of
+    #     # repeated non-constant strings in the tests that we don't want to
+    #     # change eg. `cosigner id` as the cosigner id etc.
+    #     - goconst
+    #     # We're only enabling `godot` for library and internal code to make documentation
+    #     # generation and/or text-editor's job prettier.
+    #     - godot
+    #     # It's unnecessary to have a hard wrapping requirement for tests.
+    #     - wrapcheck
+    #     # It's unnecessary to enforce errors are not defined dynamically
+    #     - goerr113
+    #     # Ignore revive results for tests because there a lot of conflicting
+    #     # suggestions eg. `var-naming` says we shouldn't use underscores in
+    #     # function names but that's a common pattern that we use.
+    #     - revive
+        # In tests we disable the check that prevents assigning errors to _
+        - errcheck
+        # unnecessary
+        - dogsled
+        # duplicate code detection tends to break the subtesting pattern that we use.
+        - dupl
+        # unnecessary
+        - errorlint
+
+  #   # Exclude some revive messages
+  #   - linters:
+  #       - revive
+  #     text: "var-naming: don't use ALL_CAPS in Go names; use CamelCase"
+
+  #   # We don't want to check whether statements like `x, err := ...` shadows `err`
+  #   - linters:
+  #       - govet
+  #     text: 'shadow: declaration of "err" shadows declaration at line'
+
+  # Maximum count of issues with the same text. Set to 0 to disable. Default is 3.
+  max-same-issues: 0
+  # Fix found issues (if it's supported by the linter). To prevent any problems
+  # with CI, this is disabled. Use `make lint-fix` instead.
+  fix: false

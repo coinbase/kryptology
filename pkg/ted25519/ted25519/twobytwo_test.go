@@ -13,8 +13,9 @@ package ted25519
 import (
 	"testing"
 
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 func AggregateSignatures(sig1, sig2 *PartialSignature) []byte {

@@ -12,9 +12,10 @@ import (
 	"math/rand"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/coinbase/kryptology/internal"
 	"github.com/coinbase/kryptology/pkg/core/curves/native"
-	"github.com/stretchr/testify/require"
 )
 
 func TestFqSetOne(t *testing.T) {

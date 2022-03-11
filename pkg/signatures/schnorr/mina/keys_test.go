@@ -9,8 +9,9 @@ package mina
 import (
 	"testing"
 
-	"github.com/coinbase/kryptology/pkg/core/curves/native/pasta/fq"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves/native/pasta/fq"
 )
 
 func TestNewKeys(t *testing.T) {

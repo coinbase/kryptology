@@ -10,7 +10,6 @@ require (
 	github.com/bwesterb/go-ristretto v1.2.0
 	github.com/consensys/gnark-crypto v0.5.3
 	github.com/gtank/merlin v0.1.1
-	github.com/nixberg/chacha-rng-go v0.1.0
 	github.com/pkg/errors v0.9.1
 	github.com/stretchr/testify v1.7.0
 	golang.org/x/crypto v0.0.0-20210711020723-a769d52b0f97

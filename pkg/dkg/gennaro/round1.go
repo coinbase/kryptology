@@ -8,11 +8,11 @@ package gennaro
 
 import (
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/sharing/v1"
 	"math/big"
 
 	"github.com/coinbase/kryptology/internal"
 	"github.com/coinbase/kryptology/pkg/core"
+	"github.com/coinbase/kryptology/pkg/sharing/v1"
 )
 
 // Round1Bcast are the values that are broadcast to all other participants

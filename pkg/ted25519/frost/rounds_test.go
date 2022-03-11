@@ -9,10 +9,11 @@ package frost
 import (
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	dkg "github.com/coinbase/kryptology/pkg/dkg/frost"
 	"github.com/coinbase/kryptology/pkg/sharing"
-	"github.com/stretchr/testify/require"
 )
 
 var (

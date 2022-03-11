@@ -8,13 +8,15 @@ package bbs
 
 import (
 	"fmt"
+	"io"
+	"sort"
+
+	"github.com/gtank/merlin"
+	"golang.org/x/crypto/sha3"
+
 	"github.com/coinbase/kryptology/internal"
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/signatures/common"
-	"github.com/gtank/merlin"
-	"golang.org/x/crypto/sha3"
-	"io"
-	"sort"
 )
 
 // BlindSignatureContext contains the data used for computing

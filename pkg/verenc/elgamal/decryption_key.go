@@ -10,11 +10,13 @@ import (
 	"crypto/aes"
 	"crypto/cipher"
 	"fmt"
+	"math/big"
+
 	"git.sr.ht/~sircmpwn/go-bare"
+
 	"github.com/coinbase/kryptology/internal"
 	"github.com/coinbase/kryptology/pkg/core"
 	"github.com/coinbase/kryptology/pkg/core/curves"
-	"math/big"
 )
 
 type decryptionKeyMarshal struct {

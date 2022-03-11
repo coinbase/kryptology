@@ -12,12 +12,14 @@ import (
 	"crypto/subtle"
 	"encoding/binary"
 	"fmt"
+	"io"
+
+	"github.com/btcsuite/btcutil/base58"
+	"golang.org/x/crypto/blake2b"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/core/curves/native/pasta/fp"
 	"github.com/coinbase/kryptology/pkg/core/curves/native/pasta/fq"
-	"github.com/btcsuite/btcutil/base58"
-	"golang.org/x/crypto/blake2b"
-	"io"
 )
 
 const version = 0xcb

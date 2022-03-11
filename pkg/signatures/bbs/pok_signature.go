@@ -8,10 +8,12 @@ package bbs
 
 import (
 	"fmt"
+	"io"
+
+	"github.com/gtank/merlin"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/signatures/common"
-	"github.com/gtank/merlin"
-	"io"
 )
 
 // PokSignature a.k.a. Proof of Knowledge of a Signature

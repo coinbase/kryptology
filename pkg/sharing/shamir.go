@@ -14,8 +14,9 @@ package sharing
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"io"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 type ShamirShare struct {

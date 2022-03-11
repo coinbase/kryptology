@@ -11,16 +11,14 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/coinbase/kryptology/pkg/core/curves"
-
-	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
-
-	crypto "github.com/coinbase/kryptology/pkg/core"
-	paillier "github.com/coinbase/kryptology/pkg/paillier"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/require"
 
 	tt "github.com/coinbase/kryptology/internal"
+	crypto "github.com/coinbase/kryptology/pkg/core"
+	"github.com/coinbase/kryptology/pkg/core/curves"
+	paillier "github.com/coinbase/kryptology/pkg/paillier"
+	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
 )
 
 func TestRange1Proof(t *testing.T) {
@@ -64,8 +62,8 @@ func TestRange1Proof(t *testing.T) {
 	}
 	for _, pp := range params {
 		pi, err := pp.Prove()
-		tt.AssertNoError(t, err)
-		tt.AssertNoError(t, pi.Verify(pp))
+		require.NoError(t, err)
+		require.NoError(t, pi.Verify(pp))
 	}
 }
 
@@ -86,7 +84,7 @@ func TestRange1ProofValuesTampered(t *testing.T) {
 	}
 	for _, pp := range params {
 		pi, err := pp.Prove()
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 
 		pi.s.Add(pi.s, crypto.One)
 		err = pi.Verify(pp)
@@ -122,7 +120,7 @@ func TestRange1ProofRandValue(t *testing.T) {
 
 	for _, pp := range params {
 		pi, err := pp.Prove()
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 
 		err = pi.Verify(pp)
 		if err == nil {
@@ -215,7 +213,7 @@ func TestRange2Proof(t *testing.T) {
 	}
 	for _, pp := range params {
 		pi, err := pp.Prove()
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 
 		vp := &verifyProof2Params{
 			curve:        pp.curve,
@@ -226,7 +224,7 @@ func TestRange2Proof(t *testing.T) {
 		}
 
 		err = pi.Verify(vp)
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 	}
 }
 
@@ -278,7 +276,7 @@ func TestRange2ProofValuesTampered(t *testing.T) {
 	}
 	for _, pp := range params {
 		pi, err := pp.Prove()
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 
 		vp := &verifyProof2Params{
 			curve:        pp.curve,
@@ -350,7 +348,7 @@ func TestRange2ProofRandValue(t *testing.T) {
 
 	for _, pp := range params {
 		pi, err := pp.Prove()
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 
 		vp := &verifyProof2Params{
 			curve:        pp.curve,
@@ -484,7 +482,7 @@ func TestRange2ProofWc(t *testing.T) {
 	}
 	for _, pp := range params {
 		pi, err := pp.ProveWc()
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 
 		vp := &verifyProof2Params{
 			curve:        pp.curve,
@@ -496,7 +494,7 @@ func TestRange2ProofWc(t *testing.T) {
 		}
 
 		err = pi.VerifyWc(vp)
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 	}
 }
 
@@ -1065,8 +1063,8 @@ func TestInc(t *testing.T) {
 	// Run all the tests!
 	for _, test := range tests {
 		actual, err := inc(test.alpha, test.beta, test.n)
-		tt.AssertNoError(t, err)
-		tt.AssertBigIntEq(t, test.expected, actual)
+		require.NoError(t, err)
+		require.Equal(t, test.expected, actual)
 	}
 }
 
@@ -1088,8 +1086,8 @@ func TestPedersen(t *testing.T) {
 	// Run all the tests!
 	for _, test := range tests {
 		actual, err := pedersen(test.g, test.h, test.alpha, test.beta, test.n)
-		tt.AssertNoError(t, err)
-		tt.AssertBigIntEq(t, test.expected, actual)
+		require.NoError(t, err)
+		require.Equal(t, test.expected, actual)
 	}
 }
 
@@ -1109,8 +1107,8 @@ func TestSchnorr(t *testing.T) {
 	// Run all the tests!
 	for _, test := range tests {
 		actual, err := schnorr(test.x, test.y, test.z)
-		tt.AssertNoError(t, err)
-		tt.AssertBigIntEq(t, test.expected, actual)
+		require.NoError(t, err)
+		require.Equal(t, test.expected, actual)
 	}
 }
 

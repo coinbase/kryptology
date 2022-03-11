@@ -11,8 +11,9 @@ import (
 	"log"
 	"os"
 
-	dkg "github.com/coinbase/kryptology/pkg/dkg/gennaro2p"
 	"github.com/pkg/errors"
+
+	dkg "github.com/coinbase/kryptology/pkg/dkg/gennaro2p"
 )
 
 type server struct {

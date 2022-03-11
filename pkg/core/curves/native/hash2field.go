@@ -1,8 +1,9 @@
 package native
 
 import (
-	"golang.org/x/crypto/sha3"
 	"hash"
+
+	"golang.org/x/crypto/sha3"
 )
 
 // OversizeDstSalt is the salt used to hash a dst over MaxDstLen

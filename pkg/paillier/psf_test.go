@@ -12,12 +12,12 @@ import (
 	"math/big"
 	"testing"
 
-	curves2 "github.com/coinbase/kryptology/pkg/core/curves"
+	"github.com/btcsuite/btcd/btcec"
+	"github.com/stretchr/testify/require"
 
 	"github.com/coinbase/kryptology/internal"
 	crypto "github.com/coinbase/kryptology/pkg/core"
-	"github.com/btcsuite/btcd/btcec"
-	"github.com/stretchr/testify/require"
+	curves2 "github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 var testPrimes = []*big.Int{
@@ -249,7 +249,7 @@ func TestPsfProof_MarshalJSON(t *testing.T) {
 	// Test for equality
 	require.Len(t, ([]*big.Int)(unmarshaled), len(([]*big.Int)(proof)))
 	for i := range proof {
-		internal.AssertBigIntEq(t, proof[i], unmarshaled[i])
+		require.Equal(t, proof[i], unmarshaled[i])
 	}
 }
 

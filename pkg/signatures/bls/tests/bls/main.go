@@ -12,9 +12,10 @@ import (
 	"encoding/json"
 	"flag"
 	"fmt"
-	bls "github.com/coinbase/kryptology/pkg/signatures/bls/bls_sig"
 	"io/ioutil"
 	"os"
+
+	bls "github.com/coinbase/kryptology/pkg/signatures/bls/bls_sig"
 )
 
 type signOp struct {

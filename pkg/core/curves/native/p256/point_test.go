@@ -2,12 +2,14 @@ package p256_test
 
 import (
 	"fmt"
+	"testing"
+
+	"github.com/stretchr/testify/require"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/core/curves/native"
 	"github.com/coinbase/kryptology/pkg/core/curves/native/p256"
 	"github.com/coinbase/kryptology/pkg/core/curves/native/p256/fp"
-	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestP256PointArithmetic_Double(t *testing.T) {

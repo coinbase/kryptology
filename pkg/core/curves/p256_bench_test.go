@@ -12,10 +12,11 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core"
 	"io"
 	"math/big"
 	"testing"
+
+	"github.com/coinbase/kryptology/pkg/core"
 )
 
 func BenchmarkP256(b *testing.B) {

@@ -8,8 +8,9 @@ package ted25519
 
 import (
 	"crypto/sha512"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"strconv"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 // GeAdd returns the sum of two public keys, a and b.

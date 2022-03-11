@@ -7,9 +7,11 @@
 package accumulator
 
 import (
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 func Test_Membership_Witness_New(t *testing.T) {
@@ -36,8 +38,8 @@ func Test_Membership_Witness_Marshal(t *testing.T) {
 	newMW := &MembershipWitness{}
 	err = newMW.UnmarshalBinary(data)
 	require.NoError(t, err)
-	require.Equal(t, mw.c, newMW.c)
-	require.Equal(t, mw.y, newMW.y)
+	require.True(t, mw.c.Equal(newMW.c))
+	require.Equal(t, 0, mw.y.Cmp(newMW.y))
 }
 
 func Test_Membership(t *testing.T) {

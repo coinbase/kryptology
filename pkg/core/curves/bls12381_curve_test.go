@@ -12,6 +12,8 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves/native/bls12381"
 )
 
 func TestScalarBls12381G1Random(t *testing.T) {
@@ -20,7 +22,7 @@ func TestScalarBls12381G1Random(t *testing.T) {
 	s, ok := sc.(*ScalarBls12381)
 	require.True(t, ok)
 	expected, _ := new(big.Int).SetString("1208bca85f538782d3941c7e805b239d181247a3c0ab58db6b1c8848804df8c8", 16)
-	require.Equal(t, s.Value, expected)
+	require.Equal(t, s.Value.BigInt(), expected)
 	// Try 10 random values
 	for i := 0; i < 10; i++ {
 		sc := bls12381g1.Scalar.Random(crand.Reader)
@@ -37,7 +39,7 @@ func TestScalarBls12381G1Hash(t *testing.T) {
 	s, ok := sc.(*ScalarBls12381)
 	require.True(t, ok)
 	expected, _ := new(big.Int).SetString("07ec86a2ab79613fc0294e058151ddc74db38b0cde95a4678eb91f1258f31b40", 16)
-	require.Equal(t, s.Value, expected)
+	require.Equal(t, s.Value.BigInt(), expected)
 }
 
 func TestScalarBls12381G1Zero(t *testing.T) {
@@ -126,7 +128,8 @@ func TestScalarBls12381G1Add(t *testing.T) {
 	require.NotNil(t, fifteen)
 	expected := bls12381G1.Scalar.New(15)
 	require.Equal(t, expected.Cmp(fifteen), 0)
-	n := new(big.Int).Set(g1.Q())
+	qq := bls12381.Bls12381FqNew()
+	n := new(big.Int).Set(qq.Params.BiModulus)
 	n.Sub(n, big.NewInt(3))
 
 	upper, err := bls12381G1.Scalar.SetBigInt(n)
@@ -140,7 +143,8 @@ func TestScalarBls12381G1Sub(t *testing.T) {
 	bls12381G1 := BLS12381G1()
 	nine := bls12381G1.Scalar.New(9)
 	six := bls12381G1.Scalar.New(6)
-	n := new(big.Int).Set(g1.Q())
+	qq := bls12381.Bls12381FqNew()
+	n := new(big.Int).Set(qq.Params.BiModulus)
 	n.Sub(n, big.NewInt(3))
 
 	expected, err := bls12381G1.Scalar.SetBigInt(n)
@@ -158,7 +162,8 @@ func TestScalarBls12381G1Mul(t *testing.T) {
 	six := bls12381G1.Scalar.New(6)
 	actual := nine.Mul(six)
 	require.Equal(t, actual.Cmp(bls12381G1.Scalar.New(54)), 0)
-	n := new(big.Int).Set(g1.Q())
+	qq := bls12381.Bls12381FqNew()
+	n := new(big.Int).Set(qq.Params.BiModulus)
 	n.Sub(n, big.NewInt(1))
 	upper, err := bls12381G1.Scalar.SetBigInt(n)
 	require.NoError(t, err)
@@ -258,7 +263,7 @@ func TestPointBls12381G2Generator(t *testing.T) {
 	sc := bls12381G2.Point.Generator()
 	s, ok := sc.(*PointBls12381G2)
 	require.True(t, ok)
-	require.True(t, g2.Equal(s.Value, g2.One()))
+	require.Equal(t, 1, s.Value.Equal(new(bls12381.G2).Generator()))
 }
 
 func TestPointBls12381G2Set(t *testing.T) {
@@ -266,7 +271,7 @@ func TestPointBls12381G2Set(t *testing.T) {
 	iden, err := bls12381G2.Point.Set(big.NewInt(0), big.NewInt(0))
 	require.NoError(t, err)
 	require.True(t, iden.IsIdentity())
-	generator := g2.ToBytes(g2.One())
+	generator := new(bls12381.G2).Generator().ToUncompressed()
 	_, err = bls12381G2.Point.Set(new(big.Int).SetBytes(generator[:96]), new(big.Int).SetBytes(generator[96:]))
 	require.NoError(t, err)
 }
@@ -395,8 +400,9 @@ func TestPointBls12381G1Generator(t *testing.T) {
 	bls12381G1 := BLS12381G1()
 	sc := bls12381G1.Point.Generator()
 	s, ok := sc.(*PointBls12381G1)
+	g := new(bls12381.G1).Generator()
 	require.True(t, ok)
-	require.True(t, g1.Equal(s.Value, g1.One()))
+	require.Equal(t, 1, s.Value.Equal(g))
 }
 
 func TestPointBls12381G1Set(t *testing.T) {
@@ -404,7 +410,7 @@ func TestPointBls12381G1Set(t *testing.T) {
 	iden, err := bls12381G1.Point.Set(big.NewInt(0), big.NewInt(0))
 	require.NoError(t, err)
 	require.True(t, iden.IsIdentity())
-	generator := g1.ToBytes(g1.One())
+	generator := new(bls12381.G1).Generator().ToUncompressed()
 	_, err = bls12381G1.Point.Set(new(big.Int).SetBytes(generator[:48]), new(big.Int).SetBytes(generator[48:]))
 	require.NoError(t, err)
 }

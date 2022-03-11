@@ -10,10 +10,9 @@ import (
 	"encoding/json"
 	"math/big"
 
-	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/proof"
-
 	"github.com/coinbase/kryptology/pkg/core"
 	"github.com/coinbase/kryptology/pkg/paillier"
+	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/proof"
 )
 
 // P2PSend is all the values that need to be sent to each player

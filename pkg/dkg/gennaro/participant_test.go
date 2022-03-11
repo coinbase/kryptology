@@ -7,13 +7,14 @@
 package gennaro
 
 import (
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"math/big"
 	"testing"
 
 	"github.com/btcsuite/btcd/btcec"
-	"github.com/coinbase/kryptology/internal"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/internal"
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 var testGenerator, _ = curves.NewScalarBaseMult(btcec.S256(), big.NewInt(3333))

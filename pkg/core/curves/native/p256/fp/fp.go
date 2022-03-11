@@ -7,9 +7,10 @@
 package fp
 
 import (
-	"github.com/coinbase/kryptology/pkg/core/curves/native"
 	"math/big"
 	"sync"
+
+	"github.com/coinbase/kryptology/pkg/core/curves/native"
 )
 
 var p256FpInitonce sync.Once
@@ -30,9 +31,8 @@ func p256FpParamsInit() {
 		R2:      [native.FieldLimbs]uint64{0x0000000000000003, 0xfffffffbffffffff, 0xfffffffffffffffe, 0x00000004fffffffd},
 		R3:      [native.FieldLimbs]uint64{0xfffffffd0000000a, 0xffffffedfffffff7, 0x00000005fffffffc, 0x0000001800000001},
 		Modulus: [native.FieldLimbs]uint64{0xffffffffffffffff, 0x00000000ffffffff, 0x0000000000000000, 0xffffffff00000001},
-		BiModulus: new(big.Int).SetBits([]big.Word{
-			0xffffffffffffffff, 0x00000000ffffffff, 0x0000000000000000, 0xffffffff00000001,
-		}),
+		BiModulus: new(big.Int).SetBytes([]byte{
+			0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff}),
 	}
 }
 

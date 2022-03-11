@@ -10,6 +10,7 @@ import (
 	"crypto/elliptic"
 	"encoding/binary"
 	"fmt"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 

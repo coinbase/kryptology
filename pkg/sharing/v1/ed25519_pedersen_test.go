@@ -11,11 +11,11 @@ import (
 	"math/big"
 	"testing"
 
-	core "github.com/coinbase/kryptology/pkg/core/curves"
+	"filippo.io/edwards25519"
 	"github.com/stretchr/testify/require"
 
-	"filippo.io/edwards25519"
 	"github.com/coinbase/kryptology/internal"
+	core "github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 var (

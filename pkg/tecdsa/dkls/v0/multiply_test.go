@@ -8,12 +8,13 @@ package v0
 
 import (
 	"crypto/rand"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"math/big"
 	"testing"
 
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 func TestMultiply(t *testing.T) {
@@ -61,6 +62,6 @@ func TestMultiply(t *testing.T) {
 	for i := 0; i < multiplicity; i++ {
 		product := params.Scalar.Mul(alpha[i], beta[i])
 		sum := params.Scalar.Add(sender.TA[i], receiver.TB[i])
-		require.Zero(t, product.Cmp(sum))
+		require.Equal(t, product, sum)
 	}
 }

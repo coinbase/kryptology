@@ -10,10 +10,10 @@ import (
 	"fmt"
 	"testing"
 
-	"github.com/coinbase/kryptology/pkg/core/curves"
-
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 func testDKG(alice *Alice, bob *Bob, alicePipe *pipeWrapper, bobPipe *pipeWrapper) error {

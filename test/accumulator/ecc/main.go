@@ -10,9 +10,10 @@ import (
 	"bufio"
 	"encoding/hex"
 	"fmt"
+	"os"
+
 	"github.com/coinbase/kryptology/pkg/accumulator"
 	"github.com/coinbase/kryptology/pkg/core/curves"
-	"os"
 )
 
 func main() {
@@ -139,7 +140,10 @@ func main() {
 	}
 	challenge := curve.Scalar.Hash(mpc.GetChallengeBytes())
 	proof := mpc.GenProof(challenge)
-	finalProof := proof.Finalize(acc, params, pk, challenge)
+	finalProof, err := proof.Finalize(acc, params, pk, challenge)
+	if err != nil {
+		panic(err)
+	}
 	proofBytes, err := proof.MarshalBinary()
 	if err != nil {
 		panic(err)

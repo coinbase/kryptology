@@ -11,10 +11,11 @@ import (
 	"math/big"
 	"testing"
 
-	tt "github.com/coinbase/kryptology/internal"
-	mod "github.com/coinbase/kryptology/pkg/core"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/require"
+
+	tt "github.com/coinbase/kryptology/internal"
+	mod "github.com/coinbase/kryptology/pkg/core"
 )
 
 // To test ProveCompositeDL, the input must satisfy the following relationship
@@ -74,7 +75,7 @@ func TestCdlProof(t *testing.T) {
 			N:     pp.N,
 		}
 		err = proof.Verify(cv)
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 	}
 }
 
@@ -190,7 +191,7 @@ func TestCdlProofRandValues(t *testing.T) {
 			N:     pp.N,
 		}
 		err = proof.Verify(cv)
-		tt.AssertSomeError(t, err)
+		require.Error(t, err)
 	}
 }
 

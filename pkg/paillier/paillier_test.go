@@ -14,10 +14,10 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	tt "github.com/coinbase/kryptology/internal"
 	crypto "github.com/coinbase/kryptology/pkg/core"
-
-	"github.com/stretchr/testify/require"
 )
 
 var (
@@ -191,7 +191,7 @@ func TestGenerateSafePrimesLong(t *testing.T) {
 
 func TestGenerateSafePrimesTooLow(t *testing.T) {
 	_, err := crypto.GenerateSafePrime(2)
-	tt.AssertSomeError(t, err)
+	require.Error(t, err)
 }
 
 type lcmTest struct {
@@ -404,8 +404,8 @@ func TestLKnownCases(t *testing.T) {
 
 	for _, test := range tests {
 		r, err := pk.l(test.in)
-		tt.AssertNoError(t, err)
-		tt.AssertBigIntEq(t, r, test.expected)
+		require.NoError(t, err)
+		require.Equal(t, r, test.expected)
 	}
 }
 
@@ -426,7 +426,7 @@ func TestLFailureCases(t *testing.T) {
 
 	for _, test := range tests {
 		_, err := pk.l(test)
-		tt.AssertSomeError(t, err)
+		require.Error(t, err)
 	}
 }
 
@@ -533,11 +533,11 @@ func TestKeyGen(t *testing.T) {
 		}
 
 		pub, sec, err := keyGenerator(f, test.bits)
-		tt.AssertNoError(t, err)
-		tt.AssertBigIntEq(t, pub.N, test.n)
-		tt.AssertBigIntEq(t, sec.Totient, test.totient)
-		tt.AssertBigIntEq(t, sec.Lambda, test.lambda)
-		tt.AssertBigIntEq(t, sec.U, test.u)
+		require.NoError(t, err)
+		require.Equal(t, pub.N, test.n)
+		require.Equal(t, sec.Totient, test.totient)
+		require.Equal(t, sec.Lambda, test.lambda)
+		require.Equal(t, sec.U, test.u)
 	}
 }
 
@@ -547,7 +547,7 @@ func TestKeyGeneratorErrorConditions(t *testing.T) {
 		return nil, fmt.Errorf("safeprime error")
 	}
 	_, _, err := keyGenerator(f, 1)
-	tt.AssertError(t, err, "safeprime error")
+	require.Contains(t, err.Error(), "safeprime error")
 
 	// Should fail if a gcd of p and q is zero.
 	val := int64(0)
@@ -557,7 +557,7 @@ func TestKeyGeneratorErrorConditions(t *testing.T) {
 		return b, nil
 	}
 	_, _, err = keyGenerator(oneF, 1)
-	tt.AssertError(t, err, "N cannot be 0")
+	require.Contains(t, err.Error(), "N cannot be 0")
 }
 
 func TestKeyGenSameInput(t *testing.T) {
@@ -571,13 +571,13 @@ func TestKeyGenSameInput(t *testing.T) {
 		return r, nil
 	}
 	pub1, sec1, err := keyGenerator(f, 32)
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 	pub2, sec2, err := keyGenerator(f, 32)
-	tt.AssertNoError(t, err)
-	tt.AssertBigIntEq(t, pub1.N, pub2.N)
-	tt.AssertBigIntEq(t, sec1.Lambda, sec2.Lambda)
-	tt.AssertBigIntEq(t, sec1.Totient, sec2.Totient)
-	tt.AssertBigIntEq(t, sec1.U, sec2.U)
+	require.NoError(t, err)
+	require.Equal(t, pub1.N, pub2.N)
+	require.Equal(t, sec1.Lambda, sec2.Lambda)
+	require.Equal(t, sec1.Totient, sec2.Totient)
+	require.Equal(t, sec1.U, sec2.U)
 }
 
 func TestNewKeysDistinct(t *testing.T) {
@@ -585,14 +585,14 @@ func TestNewKeysDistinct(t *testing.T) {
 		t.Skip("Skipping TestNewKeys")
 	}
 	pub1, sec1, err := NewKeys()
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 	pub2, sec2, err := NewKeys()
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 	// Ensure two fresh keys are distinct
-	tt.AssertBigIntNe(t, pub1.N, pub2.N)
-	tt.AssertBigIntNe(t, sec1.Totient, sec2.Totient)
-	tt.AssertBigIntNe(t, sec1.Lambda, sec2.Lambda)
-	tt.AssertBigIntNe(t, sec1.U, sec2.U)
+	require.NotEqual(t, pub1.N, pub2.N)
+	require.NotEqual(t, sec1.Totient, sec2.Totient)
+	require.NotEqual(t, sec1.Lambda, sec2.Lambda)
+	require.NotEqual(t, sec1.U, sec2.U)
 }
 
 // Tests the restrictions on input values for paillier.Add
@@ -633,9 +633,9 @@ func TestAddErrorConditions(t *testing.T) {
 	for _, test := range tests {
 		_, err := pk.Add(test.x, test.y)
 		if test.expectedPass {
-			tt.AssertNoError(t, err)
+			require.NoError(t, err)
 		} else {
-			tt.AssertSomeError(t, err)
+			require.Error(t, err)
 		}
 	}
 
@@ -679,8 +679,8 @@ func TestAdd(t *testing.T) {
 	// All the tests!
 	for _, test := range tests {
 		actual, err := test.pk.Add(test.x, test.y)
-		tt.AssertNoError(t, err)
-		tt.AssertBigIntEq(t, test.expected, actual)
+		require.NoError(t, err)
+		require.Zero(t, test.expected.Cmp(actual))
 	}
 }
 
@@ -721,9 +721,9 @@ func TestMulErrorConditions(t *testing.T) {
 	for _, test := range tests {
 		_, err := pk.Mul(test.x, test.y)
 		if test.expectedPass {
-			tt.AssertNoError(t, err)
+			require.NoError(t, err)
 		} else {
-			tt.AssertSomeError(t, err)
+			require.Error(t, err)
 		}
 	}
 }
@@ -774,8 +774,8 @@ func TestMul(t *testing.T) {
 	// All the tests!
 	for _, test := range tests {
 		actual, err := test.pk.Mul(test.a, test.c)
-		tt.AssertNoError(t, err)
-		tt.AssertBigIntEq(t, test.expected, actual)
+		require.NoError(t, err)
+		require.Zero(t, test.expected.Cmp(actual))
 	}
 }
 
@@ -784,23 +784,23 @@ func TestLittleEncryptDeterministic(t *testing.T) {
 	pk, err := NewPubkey(N)
 	require.NoError(t, err)
 	r, err := crypto.Rand(pk.N)
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 
 	msg, _ := crypto.Rand(pk.N)
 
 	// Encrypt the same msg/nonce multiple times
 	a0, err := pk.encrypt(msg, r)
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 
 	a1, err := pk.encrypt(msg, r)
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 
 	a2, err := pk.encrypt(msg, r)
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 
 	// ❄️ == bad; confirm results are identical
-	tt.AssertBigIntEq(t, a0, a1)
-	tt.AssertBigIntEq(t, a0, a2)
+	require.Equal(t, a0, a1)
+	require.Equal(t, a0, a2)
 }
 
 // Tests the restrictions on input values for paillier.Encrypt
@@ -833,16 +833,16 @@ func TestEncryptErrorConditions(t *testing.T) {
 	for _, test := range tests {
 		_, err := pk.encrypt(test.msg, test.r)
 		if test.expectedPass {
-			tt.AssertNoError(t, err)
+			require.NoError(t, err)
 		} else {
-			tt.AssertSomeError(t, err)
+			require.Error(t, err)
 		}
 	}
 
 	// Fail if N is nil
 	pk = &PublicKey{N: nil, N2: nil}
 	_, _, err = pk.Encrypt(crypto.One)
-	tt.AssertError(t, err, "arguments cannot be nil")
+	require.Contains(t, err.Error(), "arguments cannot be nil")
 }
 
 // Tests that each invocation of Encrypt() produces a distinct output
@@ -853,17 +853,17 @@ func TestEncryptIsRandomized(t *testing.T) {
 
 	// Encrypt the same msg multiple times
 	a0, _, err := pk.Encrypt(msg)
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 
 	a1, _, err := pk.Encrypt(msg)
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 
 	a2, _, err := pk.Encrypt(msg)
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 
 	// ❄️ ❄️ ❄️
-	tt.AssertBigIntNe(t, a0, a1)
-	tt.AssertBigIntNe(t, a0, a2)
+	require.NotEqual(t, a0, a1)
+	require.NotEqual(t, a0, a2)
 }
 
 // Small number tests of Encrypt()
@@ -885,8 +885,8 @@ func TestEncryptKnownAnswers(t *testing.T) {
 	// All the tests!
 	for _, test := range tests {
 		actual, err := z9.encrypt(test.m, test.r)
-		tt.AssertNoError(t, err)
-		tt.AssertBigIntEq(t, test.expected, actual)
+		require.NoError(t, err)
+		require.Zero(t, test.expected.Cmp(actual))
 	}
 }
 
@@ -898,8 +898,8 @@ func TestEncryptSucceeds(t *testing.T) {
 	for i := 0; i < iterations; i++ {
 		msg, _ := crypto.Rand(pk.N)
 		c, r, err := pk.Encrypt(msg)
-		tt.AssertNoError(t, err)
-		tt.AssertNotNil(t, c, r)
+		require.NoError(t, err)
+		require.NotNil(t, c, r)
 	}
 }
 
@@ -935,9 +935,9 @@ func TestDecryptErrorConditions(t *testing.T) {
 	for _, test := range tests {
 		_, err := sk.Decrypt(test.c)
 		if test.expectedPass {
-			tt.AssertNoError(t, err)
+			require.NoError(t, err)
 		} else {
-			tt.AssertSomeError(t, err)
+			require.Error(t, err)
 		}
 	}
 
@@ -949,7 +949,7 @@ func TestDecryptErrorConditions(t *testing.T) {
 		U:         nil,
 	}
 	_, err = sk.Decrypt(crypto.One)
-	tt.AssertSomeError(t, err)
+	require.Error(t, err)
 
 	// N = 0 is pub key
 	sk = &SecretKey{
@@ -959,7 +959,7 @@ func TestDecryptErrorConditions(t *testing.T) {
 		U:         nil,
 	}
 	_, err = sk.Decrypt(crypto.One)
-	tt.AssertError(t, err, "N cannot be 0")
+	require.Contains(t, err.Error(), "N cannot be 0")
 }
 
 // Decrypt·Encrypt is the identity function
@@ -974,7 +974,7 @@ func TestEncryptDecryptRoundTrip(t *testing.T) {
 
 	// Create sk, pk for testing
 	sk, err := NewSecretKey(p, q)
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 	pk, err := NewPubkey(n)
 	require.NoError(t, err)
 
@@ -990,13 +990,13 @@ func TestEncryptDecryptRoundTrip(t *testing.T) {
 	for _, m := range msgs {
 		// Encrypt,validate
 		c, _, err := pk.Encrypt(m)
-		tt.AssertNoError(t, err)
-		tt.AssertNotNil(t, c)
+		require.NoError(t, err)
+		require.NotNil(t, c)
 
 		// Decrypt-validate
 		actual, err := sk.Decrypt(c)
-		tt.AssertNoError(t, err)
-		tt.AssertBigIntEq(t, m, actual)
+		require.NoError(t, err)
+		require.Equal(t, m, actual)
 	}
 }
 
@@ -1057,10 +1057,10 @@ func TestSerializeSecretKeyIgnoreFields(t *testing.T) {
 
 func TestSerializationErrorConditions(t *testing.T) {
 	pk := new(PublicKey)
-	tt.AssertSomeError(t, pk.UnmarshalJSON([]byte(`invalid`)))
+	require.Error(t, pk.UnmarshalJSON([]byte(`invalid`)))
 
 	sk := new(SecretKey)
-	tt.AssertSomeError(t, sk.UnmarshalJSON([]byte(`invalid`)))
+	require.Error(t, sk.UnmarshalJSON([]byte(`invalid`)))
 }
 
 func TestNewSecretKeyErrorConditions(t *testing.T) {
@@ -1080,6 +1080,6 @@ func TestNewSecretKeyErrorConditions(t *testing.T) {
 	}
 	for _, arg := range testArgs {
 		_, err := NewSecretKey(arg.x, arg.y)
-		tt.AssertError(t, err, "arguments cannot be nil")
+		require.Contains(t, err.Error(), "arguments cannot be nil")
 	}
 }

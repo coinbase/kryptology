@@ -9,12 +9,11 @@ package participant
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"math/big"
 
-	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/proof"
-
 	"github.com/coinbase/kryptology/pkg/core"
+	"github.com/coinbase/kryptology/pkg/core/curves"
+	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/proof"
 )
 
 // Round6FullBcast are the values to be broadcast to the other players

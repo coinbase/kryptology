@@ -16,7 +16,7 @@ import (
 	"math/big"
 	"sync"
 
-	bls12381 "github.com/coinbase/kryptology/pkg/core/curves/native/bls12-381"
+	"github.com/coinbase/kryptology/pkg/core/curves/native/bls12381"
 )
 
 var (
@@ -505,7 +505,7 @@ func BLS12381G1() *Curve {
 func bls12381g1Init() {
 	bls12381g1 = Curve{
 		Scalar: &ScalarBls12381{
-			Value: new(big.Int),
+			Value: bls12381.Bls12381FqNew(),
 			point: new(PointBls12381G1),
 		},
 		Point: new(PointBls12381G1).Identity(),
@@ -522,7 +522,7 @@ func BLS12381G2() *Curve {
 func bls12381g2Init() {
 	bls12381g2 = Curve{
 		Scalar: &ScalarBls12381{
-			Value: new(big.Int),
+			Value: bls12381.Bls12381FqNew(),
 			point: new(PointBls12381G2),
 		},
 		Point: new(PointBls12381G2).Identity(),
@@ -533,17 +533,17 @@ func bls12381g2Init() {
 func BLS12381(preferredPoint Point) *PairingCurve {
 	return &PairingCurve{
 		Scalar: &ScalarBls12381{
-			Value: new(big.Int),
+			Value: bls12381.Bls12381FqNew(),
 			point: preferredPoint,
 		},
 		PointG1: &PointBls12381G1{
-			Value: g1.New(),
+			Value: new(bls12381.G1).Identity(),
 		},
 		PointG2: &PointBls12381G2{
-			Value: g2.New(),
+			Value: new(bls12381.G2).Identity(),
 		},
 		GT: &ScalarBls12381Gt{
-			Value: &bls12381.E{},
+			Value: new(bls12381.Gt).SetOne(),
 		},
 		Name: BLS12831Name,
 	}

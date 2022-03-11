@@ -10,10 +10,10 @@ import (
 	"math/big"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	v1 "github.com/coinbase/kryptology/pkg/sharing/v1"
-
-	"github.com/stretchr/testify/require"
 )
 
 func TestGenerateEd25519Key(t *testing.T) {

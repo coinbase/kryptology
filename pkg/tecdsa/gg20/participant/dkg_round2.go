@@ -8,11 +8,11 @@ package participant
 
 import (
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/sharing/v1"
 
 	"github.com/coinbase/kryptology/internal"
 	"github.com/coinbase/kryptology/pkg/core"
 	"github.com/coinbase/kryptology/pkg/paillier"
+	"github.com/coinbase/kryptology/pkg/sharing/v1"
 	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
 	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/proof"
 )

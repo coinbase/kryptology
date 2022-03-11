@@ -8,10 +8,11 @@ package v0
 
 import (
 	"crypto/elliptic"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"math/big"
 
 	"golang.org/x/crypto/sha3"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 const (

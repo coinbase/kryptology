@@ -9,7 +9,7 @@ package bls_sig
 import (
 	"testing"
 
-	bls12381 "github.com/coinbase/kryptology/pkg/core/curves/native/bls12-381"
+	"github.com/coinbase/kryptology/pkg/core/curves/native/bls12381"
 )
 
 func generateBasicSignatureG2(sk *SecretKey, msg []byte, t *testing.T) *Signature {
@@ -166,8 +166,7 @@ func TestBasicAggregateVerifyG2BadPks(t *testing.T) {
 	}
 
 	// Try a zero key to make sure it doesn't crash
-	g1 := bls12381.NewG1()
-	pkValue := g1.New()
+	pkValue := new(bls12381.G1).Identity()
 	pks[0] = &PublicKey{value: *pkValue}
 
 	if res, _ := bls.AggregateVerify(pks, msgs, sigs); res {
@@ -175,7 +174,7 @@ func TestBasicAggregateVerifyG2BadPks(t *testing.T) {
 	}
 
 	// Try with base generator
-	pkValue = g1.One()
+	pkValue.Generator()
 	pks[0] = &PublicKey{value: *pkValue}
 	if res, _ := bls.AggregateVerify(pks, msgs, sigs); res {
 		t.Errorf("Basic aggregateVerify succeeded with the base generator public key it should've failed")
@@ -197,8 +196,7 @@ func TestBasicAggregateVerifyG2BadSigs(t *testing.T) {
 	}
 
 	// Try a zero key to make sure it doesn't crash
-	g2 := bls12381.NewG2()
-	sigValue := g2.New()
+	sigValue := new(bls12381.G2).Identity()
 	sigs[0] = &Signature{Value: *sigValue}
 
 	if res, _ := bls.AggregateVerify(pks, msgs, sigs); res {
@@ -206,7 +204,7 @@ func TestBasicAggregateVerifyG2BadSigs(t *testing.T) {
 	}
 
 	// Try with base generator
-	sigValue = g2.One()
+	sigValue.Generator()
 	sigs[0] = &Signature{Value: *sigValue}
 	if res, _ := bls.AggregateVerify(pks, msgs, sigs); res {
 		t.Errorf("Basic aggregateVerify succeeded with the base generator signature it should've failed")
@@ -379,7 +377,7 @@ func TestIdentityPublicKey(t *testing.T) {
 	}
 	msg := []byte{0, 0, 0, 0}
 	sig, _ := bls.Sign(sk, msg)
-	pk := PublicKey{value: *bls12381.NewG1().Zero()}
+	pk := PublicKey{value: *new(bls12381.G1).Identity()}
 	if res, _ := bls.Verify(&pk, msg, sig); res {
 		t.Errorf("Verify succeeded when the public key is the identity.")
 	}

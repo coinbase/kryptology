@@ -11,14 +11,13 @@ import (
 	"encoding/json"
 	"testing"
 
-	"github.com/coinbase/kryptology/pkg/core/curves"
-
-	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
-
-	"github.com/coinbase/kryptology/pkg/core"
-	"github.com/coinbase/kryptology/pkg/paillier"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core"
+	"github.com/coinbase/kryptology/pkg/core/curves"
+	"github.com/coinbase/kryptology/pkg/paillier"
+	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
 )
 
 func BenchmarkDealingProofParams(b *testing.B) {
