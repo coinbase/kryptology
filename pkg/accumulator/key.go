@@ -7,8 +7,11 @@
 package accumulator
 
 import (
+	"errors"
 	"fmt"
+
 	"git.sr.ht/~sircmpwn/go-bare"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
@@ -234,6 +237,10 @@ func (pk *PublicKey) UnmarshalBinary(data []byte) error {
 	if err != nil {
 		return err
 	}
-	pk.value = value.(curves.PairingPoint)
+	var ok bool
+	pk.value, ok = value.(curves.PairingPoint)
+	if !ok {
+		return errors.New("can't convert to PairingPoint")
+	}
 	return nil
 }

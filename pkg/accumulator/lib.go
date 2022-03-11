@@ -8,8 +8,9 @@ package accumulator
 
 import (
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"math"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 // dad constructs two polynomials - dA(x) and dD(x)

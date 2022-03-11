@@ -11,15 +11,16 @@ import (
 	crand "crypto/rand"
 	"crypto/sha512"
 	"fmt"
-	"github.com/bwesterb/go-ristretto"
-	"github.com/coinbase/kryptology/pkg/core"
 	"io"
 	"math/big"
 
 	"filippo.io/edwards25519"
 	"github.com/btcsuite/btcd/btcec"
+	"github.com/bwesterb/go-ristretto"
+
 	"github.com/coinbase/kryptology/internal"
-	bls12381 "github.com/coinbase/kryptology/pkg/core/curves/native/bls12-381"
+	"github.com/coinbase/kryptology/pkg/core"
+	"github.com/coinbase/kryptology/pkg/core/curves/native/bls12381"
 )
 
 type EcScalar interface {
@@ -178,36 +179,36 @@ func NewBls12381Scalar() *Bls12381Scalar {
 }
 
 func (k Bls12381Scalar) Add(x, y *big.Int) *big.Int {
-	g1 := bls12381.NewG1()
-	v := new(big.Int).Add(x, y)
-	v.Mod(v, g1.Q())
-	return v
+	a := bls12381.Bls12381FqNew().SetBigInt(x)
+	b := bls12381.Bls12381FqNew().SetBigInt(y)
+	return a.Add(a, b).BigInt()
 }
 
 func (k Bls12381Scalar) Sub(x, y *big.Int) *big.Int {
-	g1 := bls12381.NewG1()
-	v := new(big.Int).Sub(x, y)
-	v.Mod(v, g1.Q())
-	return v
+	a := bls12381.Bls12381FqNew().SetBigInt(x)
+	b := bls12381.Bls12381FqNew().SetBigInt(y)
+	return a.Sub(a, b).BigInt()
 }
 
 func (k Bls12381Scalar) Neg(x *big.Int) *big.Int {
-	v := new(big.Int).Sub(bls12381.NewG1().Q(), x)
-	v.Mod(v, bls12381.NewG1().Q())
-	return v
+	a := bls12381.Bls12381FqNew().SetBigInt(x)
+	return a.Neg(a).BigInt()
 }
 
 func (k Bls12381Scalar) Mul(x, y *big.Int) *big.Int {
-	g1 := bls12381.NewG1()
-	v := new(big.Int).Mul(x, y)
-	v.Mod(v, g1.Q())
-	return v
+	a := bls12381.Bls12381FqNew().SetBigInt(x)
+	b := bls12381.Bls12381FqNew().SetBigInt(y)
+	return a.Mul(a, b).BigInt()
 }
 
 func (k Bls12381Scalar) Div(x, y *big.Int) *big.Int {
-	g1 := bls12381.NewG1()
-	t := new(big.Int).ModInverse(y, g1.Q())
-	return k.Mul(x, t)
+	c := bls12381.Bls12381FqNew()
+	a := bls12381.Bls12381FqNew().SetBigInt(x)
+	b := bls12381.Bls12381FqNew().SetBigInt(y)
+	_, wasInverted := c.Invert(b)
+	c.Mul(a, c)
+	tt := map[bool]int{false: 0, true: 1}
+	return a.CMove(a, c, tt[wasInverted]).BigInt()
 }
 
 func (k Bls12381Scalar) Hash(input []byte) *big.Int {
@@ -215,18 +216,11 @@ func (k Bls12381Scalar) Hash(input []byte) *big.Int {
 }
 
 func (k Bls12381Scalar) Random() (*big.Int, error) {
-	b := make([]byte, 48)
-	n, err := crand.Read(b)
-	if err != nil {
-		return nil, err
+	a := BLS12381G1().NewScalar().Random(crand.Reader)
+	if a == nil {
+		return nil, fmt.Errorf("invalid random value")
 	}
-	if n != 48 {
-		return nil, fmt.Errorf("insufficient bytes read")
-	}
-	v := new(big.Int).SetBytes(b)
-	g1 := bls12381.NewG1()
-	v.Mod(v, g1.Q())
-	return v, nil
+	return a.BigInt(), nil
 }
 
 func (k Bls12381Scalar) Bytes(x *big.Int) []byte {
@@ -236,8 +230,8 @@ func (k Bls12381Scalar) Bytes(x *big.Int) []byte {
 }
 
 func (k Bls12381Scalar) IsValid(x *big.Int) bool {
-	g1 := bls12381.NewG1()
-	return core.In(x, g1.Q()) == nil
+	a := bls12381.Bls12381FqNew().SetBigInt(x)
+	return a.BigInt().Cmp(x) == 0
 }
 
 // taken from https://datatracker.ietf.org/doc/html/rfc8032

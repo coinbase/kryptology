@@ -11,6 +11,7 @@ import (
 	"math/big"
 
 	"git.sr.ht/~sircmpwn/go-bare"
+
 	mod "github.com/coinbase/kryptology/pkg/core"
 )
 

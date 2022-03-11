@@ -7,6 +7,8 @@
 package bbs
 
 import (
+	"errors"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
@@ -33,9 +35,9 @@ type MessageGenerators struct {
 }
 
 // Init set the message generators to the default state
-func (msgg *MessageGenerators) Init(w *PublicKey, length int) *MessageGenerators {
+func (msgg *MessageGenerators) Init(w *PublicKey, length int) (*MessageGenerators, error) {
 	if length < 0 {
-		return nil
+		return nil, errors.New("length should be nonnegative")
 	}
 	msgg.length = length
 	for i := range msgg.state {
@@ -46,9 +48,13 @@ func (msgg *MessageGenerators) Init(w *PublicKey, length int) *MessageGenerators
 	msgg.state[198] = byte(length >> 16)
 	msgg.state[199] = byte(length >> 8)
 	msgg.state[200] = byte(length)
-	msgg.h0 = w.value.OtherGroup().Hash(msgg.state[:]).(curves.PairingPoint)
+	var ok bool
+	msgg.h0, ok = w.value.OtherGroup().Hash(msgg.state[:]).(curves.PairingPoint)
+	if !ok {
+		return nil, errors.New("incorrect type conversion")
+	}
 
-	return msgg
+	return msgg, nil
 }
 
 func (msgg MessageGenerators) Get(i int) curves.PairingPoint {
@@ -63,5 +69,9 @@ func (msgg MessageGenerators) Get(i int) curves.PairingPoint {
 	state[194] = byte(i >> 16)
 	state[195] = byte(i >> 8)
 	state[196] = byte(i)
-	return msgg.h0.Hash(msgg.state[:]).(curves.PairingPoint)
+	point, ok := msgg.h0.Hash(msgg.state[:]).(curves.PairingPoint)
+	if !ok {
+		return nil
+	}
+	return point
 }

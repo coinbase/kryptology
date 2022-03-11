@@ -9,14 +9,15 @@ package curves
 import (
 	"crypto/elliptic"
 	"fmt"
+	"io"
+	"math/big"
+	"sync"
+
 	"github.com/coinbase/kryptology/internal"
 	"github.com/coinbase/kryptology/pkg/core/curves/native"
 	p256n "github.com/coinbase/kryptology/pkg/core/curves/native/p256"
 	"github.com/coinbase/kryptology/pkg/core/curves/native/p256/fp"
 	"github.com/coinbase/kryptology/pkg/core/curves/native/p256/fq"
-	"io"
-	"math/big"
-	"sync"
 )
 
 var oldP256InitOnce sync.Once

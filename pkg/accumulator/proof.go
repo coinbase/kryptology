@@ -9,8 +9,11 @@ package accumulator
 import (
 	"bytes"
 	crand "crypto/rand"
+	"errors"
 	"fmt"
+
 	"git.sr.ht/~sircmpwn/go-bare"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
@@ -203,10 +206,22 @@ func (mpc *MembershipProofCommitting) New(
 	exp2Z := pp.z.Mul(exp2)
 
 	// Prepare
-	rYeCPrep := rYeC.(curves.PairingPoint)
-	g2Prep := g2.(curves.PairingPoint)
-	expZPrep := expZ.(curves.PairingPoint)
-	exp2ZPrep := exp2Z.(curves.PairingPoint)
+	rYeCPrep, ok := rYeC.(curves.PairingPoint)
+	if !ok {
+		return nil, errors.New("incorrect type conversion")
+	}
+	g2Prep, ok := g2.(curves.PairingPoint)
+	if !ok {
+		return nil, errors.New("incorrect type conversion")
+	}
+	expZPrep, ok := expZ.(curves.PairingPoint)
+	if !ok {
+		return nil, errors.New("incorrect type conversion")
+	}
+	exp2ZPrep, ok := exp2Z.(curves.PairingPoint)
+	if !ok {
+		return nil, errors.New("incorrect type conversion")
+	}
 	pkPrep := pk.value
 
 	// Pairing
@@ -311,7 +326,7 @@ type MembershipProof struct {
 }
 
 // Finalize computes values in the proof to be verified.
-func (mp *MembershipProof) Finalize(acc *Accumulator, pp *ProofParams, pk *PublicKey, challenge curves.Scalar) *MembershipProofFinal {
+func (mp *MembershipProof) Finalize(acc *Accumulator, pp *ProofParams, pk *PublicKey, challenge curves.Scalar) (*MembershipProofFinal, error) {
 	// R_σ = s_δ X + c T_σ
 	negTSigma := mp.tSigma
 	negTSigma = negTSigma.Neg()
@@ -369,9 +384,18 @@ func (mp *MembershipProof) Finalize(acc *Accumulator, pp *ProofParams, pk *Publi
 	rhs := cEc.Add(expZ2)
 
 	// Prepare
-	lhsPrep := lhs.(curves.PairingPoint)
-	g2Prep := g2.(curves.PairingPoint)
-	rhsPrep := rhs.(curves.PairingPoint)
+	lhsPrep, ok := lhs.(curves.PairingPoint)
+	if !ok {
+		return nil, errors.New("incorrect type conversion")
+	}
+	g2Prep, ok := g2.(curves.PairingPoint)
+	if !ok {
+		return nil, errors.New("incorrect type conversion")
+	}
+	rhsPrep, ok := rhs.(curves.PairingPoint)
+	if !ok {
+		return nil, errors.New("incorrect type conversion")
+	}
 	pkPrep := pk.value
 
 	// capRE
@@ -387,7 +411,7 @@ func (mp *MembershipProof) Finalize(acc *Accumulator, pp *ProofParams, pk *Publi
 		capRRho,
 		capRDeltaSigma,
 		capRDeltaRho,
-	}
+	}, nil
 }
 
 // MarshalBinary converts MembershipProof to bytes

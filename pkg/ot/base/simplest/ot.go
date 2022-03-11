@@ -22,13 +22,13 @@ import (
 	"crypto/rand"
 	"crypto/subtle"
 	"fmt"
-	"github.com/gtank/merlin"
 
+	"github.com/gtank/merlin"
+	"github.com/pkg/errors"
 	"golang.org/x/crypto/sha3"
 
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/zkp/schnorr"
-	"github.com/pkg/errors"
 )
 
 const (

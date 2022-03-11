@@ -1,10 +1,12 @@
 package k256_test
 
 import (
+	"testing"
+
+	"github.com/stretchr/testify/require"
+
 	"github.com/coinbase/kryptology/pkg/core/curves/native"
 	"github.com/coinbase/kryptology/pkg/core/curves/native/k256"
-	"github.com/stretchr/testify/require"
-	"testing"
 )
 
 func TestK256PointArithmetic_Hash(t *testing.T) {

@@ -7,8 +7,11 @@
 package accumulator
 
 import (
+	"errors"
 	"fmt"
+
 	"git.sr.ht/~sircmpwn/go-bare"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
@@ -54,14 +57,26 @@ func (mw MembershipWitness) Verify(pk *PublicKey, acc *Accumulator) error {
 	}
 
 	// Set -tildeP
-	g2 := pk.value.Generator().(curves.PairingPoint)
+	g2, ok := pk.value.Generator().(curves.PairingPoint)
+	if !ok {
+		return errors.New("incorrect type conversion")
+	}
 
 	// y*tildeP + tildeQ, tildeP is a G2 generator.
-	p := g2.Mul(mw.y).Add(pk.value).(curves.PairingPoint)
+	p, ok := g2.Mul(mw.y).Add(pk.value).(curves.PairingPoint)
+	if !ok {
+		return errors.New("incorrect type conversion")
+	}
 
 	// Prepare
-	witness := mw.c.(curves.PairingPoint)
-	v := acc.value.Neg().(curves.PairingPoint)
+	witness, ok := mw.c.(curves.PairingPoint)
+	if !ok {
+		return errors.New("incorrect type conversion")
+	}
+	v, ok := acc.value.Neg().(curves.PairingPoint)
+	if !ok {
+		return errors.New("incorrect type conversion")
+	}
 
 	// Check e(witness, y*tildeP + tildeQ) * e(-acc, tildeP) == Identity
 	result := p.MultiPairing(witness, p, v, g2)

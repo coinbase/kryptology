@@ -8,8 +8,9 @@ package common
 
 import (
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"io"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 const limit = 65535

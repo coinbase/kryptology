@@ -8,10 +8,10 @@ package participant
 
 import (
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"math/big"
 
 	"github.com/coinbase/kryptology/internal"
+	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/paillier"
 	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
 )

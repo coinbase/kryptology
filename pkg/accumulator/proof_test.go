@@ -7,9 +7,11 @@
 package accumulator
 
 import (
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 func TestProofParamsMarshal(t *testing.T) {
@@ -34,9 +36,9 @@ func TestProofParamsMarshal(t *testing.T) {
 	}
 	err = params2.UnmarshalBinary(bytes)
 	require.NoError(t, err)
-	require.Equal(t, params.x, params2.x)
-	require.Equal(t, params.y, params2.y)
-	require.Equal(t, params.z, params2.z)
+	require.True(t, params.x.Equal(params2.x))
+	require.True(t, params.y.Equal(params2.y))
+	require.True(t, params.z.Equal(params2.z))
 }
 
 func TestMembershipProof(t *testing.T) {
@@ -81,7 +83,8 @@ func TestMembershipProof(t *testing.T) {
 	require.NotNil(t, proof)
 	testProof(t, proof)
 
-	finalProof := proof.Finalize(acc, params, pk, challenge)
+	finalProof, err := proof.Finalize(acc, params, pk, challenge)
+	require.NoError(t, err)
 	require.NotNil(t, finalProof)
 	testFinalProof(t, finalProof)
 
@@ -121,7 +124,8 @@ func TestMembershipProof(t *testing.T) {
 	require.NotNil(t, newProof)
 	testProof(t, newProof)
 
-	newFinalProof := newProof.Finalize(acc, newParams, pk, challenge3)
+	newFinalProof, err := newProof.Finalize(acc, newParams, pk, challenge3)
+	require.NoError(t, err)
 	require.NotNil(t, newFinalProof)
 	testFinalProof(t, newFinalProof)
 

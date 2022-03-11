@@ -4,7 +4,7 @@
 // SPDX-License-Identifier: Apache-2.0
 //
 
-// NOTE that the bls curves are NOT constant time. There is an open issue to address it: https://github.com/coinbase/kryptology/issues/44
+// NOTE that the bls curves are NOT constant time. There is an open issue to address it: https://github.com/coinbase/kryptology/issues/233
 
 package curves
 
@@ -13,10 +13,13 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core"
-	bls12377 "github.com/consensys/gnark-crypto/ecc/bls12-377"
 	"io"
 	"math/big"
+
+	bls12377 "github.com/consensys/gnark-crypto/ecc/bls12-377"
+	"golang.org/x/crypto/sha3"
+
+	"github.com/coinbase/kryptology/pkg/core"
 )
 
 // See 'r' = https://eprint.iacr.org/2018/962.pdf Figure 16
@@ -939,9 +942,12 @@ func (s *ScalarBls12377Gt) Random(reader io.Reader) Scalar {
 }
 
 func (s *ScalarBls12377Gt) Hash(bytes []byte) Scalar {
-	reader := new(chachaReader)
-	err := reader.Seed(bytes)
+	reader := sha3.NewShake256()
+	n, err := reader.Write(bytes)
 	if err != nil {
+		return nil
+	}
+	if n != len(bytes) {
 		return nil
 	}
 	return s.Random(reader)

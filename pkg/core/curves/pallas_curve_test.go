@@ -10,9 +10,10 @@ import (
 	crand "crypto/rand"
 	"testing"
 
+	"github.com/stretchr/testify/require"
+
 	"github.com/coinbase/kryptology/pkg/core/curves/native/pasta/fp"
 	"github.com/coinbase/kryptology/pkg/core/curves/native/pasta/fq"
-	"github.com/stretchr/testify/require"
 )
 
 func TestPointPallasAddDoubleMul(t *testing.T) {

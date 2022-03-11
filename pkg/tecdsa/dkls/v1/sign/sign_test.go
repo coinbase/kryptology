@@ -8,15 +8,16 @@ package sign
 
 import (
 	"crypto/rand"
-	"github.com/coinbase/kryptology/pkg/tecdsa/dkls/v1/dkg"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/sha3"
 
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/ot/base/simplest"
 	"github.com/coinbase/kryptology/pkg/ot/extension/kos"
 	"github.com/coinbase/kryptology/pkg/ot/ottest"
-	"github.com/stretchr/testify/require"
-	"golang.org/x/crypto/sha3"
+	"github.com/coinbase/kryptology/pkg/tecdsa/dkls/v1/dkg"
 )
 
 func TestSign(t *testing.T) {

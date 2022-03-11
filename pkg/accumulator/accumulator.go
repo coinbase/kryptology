@@ -13,7 +13,9 @@ package accumulator
 
 import (
 	"fmt"
+
 	"git.sr.ht/~sircmpwn/go-bare"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 

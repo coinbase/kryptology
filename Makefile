@@ -58,6 +58,11 @@ lint:
 	${GO} vet ./...
 	golangci-lint run
 
+.PHONY: lint-fix
+lint-fix:
+	${GO} vet ./...
+	golangci-lint run --fix
+
 .PHONY: test
 test:
 	${GO} test -short ${TEST_CLAUSE} ./...

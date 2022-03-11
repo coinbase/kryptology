@@ -7,9 +7,11 @@
 package accumulator
 
 import (
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 func TestEvaluatePolyG1(t *testing.T) {

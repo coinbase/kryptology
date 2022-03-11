@@ -12,7 +12,7 @@ import (
 	"math/rand"
 	"testing"
 
-	bls12381 "github.com/coinbase/kryptology/pkg/core/curves/native/bls12-381"
+	"github.com/coinbase/kryptology/pkg/core/curves/native/bls12381"
 )
 
 const numAggregateG1 = 10
@@ -425,14 +425,12 @@ func TestSignatureG1FromBadBytes(t *testing.T) {
 }
 
 func TestBadSecretKeyG1(t *testing.T) {
-	x := new(big.Int)
-	sk := &SecretKey{value: *x}
+	sk := &SecretKey{value: bls12381.Bls12381FqNew()}
 	pk, err := sk.GetPublicKeyVt()
 	if err == nil {
 		t.Errorf("Expected GetPublicKeyVt to fail with 0 byte secret key but passed: %v", pk)
 	}
-	bls := bls12381.NewG2()
-	_ = sk.UnmarshalBinary(bls.Q().Bytes())
+	_ = sk.UnmarshalBinary(sk.value.Params.BiModulus.Bytes())
 	pk, err = sk.GetPublicKeyVt()
 	if err == nil {
 		t.Errorf("Expected GetPublicKeyVt to fail with secret key with Q but passed: %v", pk)
@@ -470,7 +468,7 @@ func TestProofOfPossessionG1FromBadKey(t *testing.T) {
 	ikm := make([]byte, 32)
 	value := new(big.Int)
 	value.SetBytes(ikm)
-	sk := SecretKey{value: *value}
+	sk := SecretKey{value: bls12381.Bls12381FqNew().SetBigInt(value)}
 	_, err := sk.createProofOfPossessionVt(blsSignaturePopVtDst)
 	if err == nil {
 		t.Errorf("createProofOfPossessionVt should've failed but succeeded.")

@@ -15,11 +15,13 @@ import (
 	"crypto"
 	"crypto/rand"
 	"encoding/hex"
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/stretchr/testify/require"
 	"os"
 	"strings"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 // sign.input.gz is a selection of test cases from

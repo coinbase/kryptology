@@ -9,9 +9,11 @@ package ted25519
 import (
 	"crypto/rand"
 	"crypto/sha256"
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"golang.org/x/crypto/hkdf"
 	"io"
+
+	"golang.org/x/crypto/hkdf"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 // NonceShare represents a share of a generated nonce.

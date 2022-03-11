@@ -9,8 +9,9 @@ package fp
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/coinbase/kryptology/internal"
 	"math/big"
+
+	"github.com/coinbase/kryptology/internal"
 )
 
 type Fp fiat_pasta_fp_montgomery_domain_field_element

@@ -9,11 +9,14 @@ package bbs
 import (
 	crand "crypto/rand"
 	"crypto/sha256"
+	"errors"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
+	"io"
+
 	"golang.org/x/crypto/hkdf"
 	"golang.org/x/crypto/sha3"
-	"io"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 // SecretKey is a BBS+ signing key
@@ -49,8 +52,8 @@ func NewSecretKey(curve *curves.PairingCurve) (*SecretKey, error) {
 	// Leaves key_info parameter as the default empty string
 	// and just adds parameter I2OSP(L, 2)
 	kdf := hkdf.New(sha256.New, ikm[:], salt, []byte{0, 48})
-	var okm [48]byte
-	read, err := kdf.Read(okm[:])
+	var okm [64]byte
+	read, err := kdf.Read(okm[:48])
 	if err != nil {
 		return nil, err
 	}
@@ -92,7 +95,11 @@ func (sk *SecretKey) UnmarshalBinary(in []byte) error {
 	if err != nil {
 		return err
 	}
-	sk.value = value.(curves.PairingScalar)
+	var ok bool
+	sk.value, ok = value.(curves.PairingScalar)
+	if !ok {
+		return errors.New("incorrect type conversion")
+	}
 	return nil
 }
 

@@ -3,12 +3,14 @@ package curves
 import (
 	crand "crypto/rand"
 	"crypto/sha256"
-	"github.com/coinbase/kryptology/internal"
-	mod "github.com/coinbase/kryptology/pkg/core"
-	"github.com/btcsuite/btcd/btcec"
 	"io"
 	"math/big"
 	"testing"
+
+	"github.com/btcsuite/btcd/btcec"
+
+	"github.com/coinbase/kryptology/internal"
+	mod "github.com/coinbase/kryptology/pkg/core"
 )
 
 func BenchmarkK256(b *testing.B) {

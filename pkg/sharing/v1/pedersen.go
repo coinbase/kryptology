@@ -10,10 +10,10 @@ import (
 	crand "crypto/rand"
 	"encoding/binary"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"math/big"
 
 	"github.com/coinbase/kryptology/internal"
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 // Pedersen Verifiable Secret Sharing Scheme

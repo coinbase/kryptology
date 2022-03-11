@@ -7,9 +7,10 @@
 package fq
 
 import (
-	"github.com/coinbase/kryptology/pkg/core/curves/native"
 	"math/big"
 	"sync"
+
+	"github.com/coinbase/kryptology/pkg/core/curves/native"
 )
 
 var p256FqInitonce sync.Once
@@ -30,8 +31,8 @@ func p256FqParamsInit() {
 		R2:      [native.FieldLimbs]uint64{0x83244c95be79eea2, 0x4699799c49bd6fa6, 0x2845b2392b6bec59, 0x66e12d94f3d95620},
 		R3:      [native.FieldLimbs]uint64{0xac8ebec90b65a624, 0x111f28ae0c0555c9, 0x2543b9246ba5e93f, 0x503a54e76407be65},
 		Modulus: [native.FieldLimbs]uint64{0xf3b9cac2fc632551, 0xbce6faada7179e84, 0xffffffffffffffff, 0xffffffff00000000},
-		BiModulus: new(big.Int).SetBits([]big.Word{
-			0xf3b9cac2fc632551, 0xbce6faada7179e84, 0xffffffffffffffff, 0xffffffff00000000,
+		BiModulus: new(big.Int).SetBytes([]byte{
+			0xff, 0xff, 0xff, 0xff, 0x00, 0x00, 0x00, 0x00, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xff, 0xbc, 0xe6, 0xfa, 0xad, 0xa7, 0x17, 0x9e, 0x84, 0xf3, 0xb9, 0xca, 0xc2, 0xfc, 0x63, 0x25, 0x51,
 		}),
 	}
 }

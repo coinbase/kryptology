@@ -4,12 +4,31 @@ import (
 	"crypto/rand"
 	"testing"
 
-	"github.com/coinbase/kryptology/pkg/ot/ottest"
+	"github.com/stretchr/testify/require"
 
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/ot/base/simplest"
-	"github.com/stretchr/testify/require"
+	"github.com/coinbase/kryptology/pkg/ot/ottest"
 )
+
+func TestBinaryMult(t *testing.T) {
+	for i := 0; i < 100; i++ {
+		temp := make([]byte, 32)
+		_, err := rand.Read(temp)
+		require.NoError(t, err)
+		expected := make([]byte, 32)
+		copy(expected, temp)
+		// this test is based on Fermat's little theorem.
+		// the multiplicative group of units of a finite field has order |F| - 1
+		// (in fact, it's necessarily cyclic; see e.g. https://math.stackexchange.com/a/59911, but this test doesn't rely on that fact)
+		// thus raising any element to the |F|th power should yield that element itself.
+		// this is a good test because it relies on subtle facts about the field structure, and will fail if anything goes wrong.
+		for j := 0; j < 256; j++ {
+			expected = binaryFieldMul(expected, expected)
+		}
+		require.Equal(t, temp, expected)
+	}
+}
 
 func TestCOTExtension(t *testing.T) {
 	curveInstances := []*curves.Curve{
@@ -49,9 +68,9 @@ func TestCOTExtension(t *testing.T) {
 			for k := 0; k < OtWidth; k++ {
 				temp := sender.OutputAdditiveShares[j][k].Add(receiver.OutputAdditiveShares[j][k])
 				if bit {
-					require.Zero(t, temp.Cmp(input[j][k]))
+					require.Equal(t, temp, input[j][k])
 				} else {
-					require.Zero(t, temp.Cmp(curve.Scalar.Zero()))
+					require.Equal(t, temp, curve.Scalar.Zero())
 				}
 			}
 		}
@@ -113,9 +132,9 @@ func TestCOTExtensionStreaming(t *testing.T) {
 		for k := 0; k < OtWidth; k++ {
 			temp := sender.OutputAdditiveShares[j][k].Add(receiver.OutputAdditiveShares[j][k])
 			if bit {
-				require.Zero(t, temp.Cmp(input[j][k]))
+				require.Equal(t, temp, input[j][k])
 			} else {
-				require.Zero(t, temp.Cmp(curve.Scalar.Zero()))
+				require.Equal(t, temp, curve.Scalar.Zero())
 			}
 		}
 	}

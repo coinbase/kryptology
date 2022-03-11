@@ -22,6 +22,9 @@ const (
 	// Dkls18Sign specifies the DKG protocol of the DKLs18 potocol.
 	Dkls18Sign = "DKLs18-Sign"
 
+	// Dkls18Refresh specifies the DKG protocol of the DKLs18 potocol.
+	Dkls18Refresh = "DKLs18-Refresh"
+
 	// versions will increment in 100 intervals, to leave room for adding other versions in between them if it is
 	// ever needed in the future.
 

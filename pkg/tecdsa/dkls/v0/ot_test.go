@@ -8,12 +8,13 @@ package v0
 
 import (
 	"crypto/rand"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"math/big"
 	"testing"
 
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 func TestSeedOT(t *testing.T) {
@@ -93,7 +94,7 @@ func TestCOTExtension(t *testing.T) {
 		bit := choice[j>>3]>>(j&0x07)&0x01 == 1
 		temp := params.Scalar.Add(sender.tA[j], receiver.tB[j])
 		if bit {
-			require.Zero(t, temp.Cmp(input[j]))
+			require.Equal(t, temp, input[j])
 		} else {
 			require.Zero(t, temp.Cmp(new(big.Int)))
 		}
@@ -103,7 +104,7 @@ func TestCOTExtension(t *testing.T) {
 		for k := 0; k < multiplicity; k++ {
 			temp := params.Scalar.Add(sender.tAOT[j][k], receiver.tBOT[j][k])
 			if bit {
-				require.Zero(t, temp.Cmp(inputOT[j][k]))
+				require.Equal(t, temp, inputOT[j][k])
 			} else {
 				require.Zero(t, temp.Cmp(new(big.Int)))
 			}

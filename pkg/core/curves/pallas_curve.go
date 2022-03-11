@@ -10,13 +10,16 @@ import (
 	"crypto/elliptic"
 	crand "crypto/rand"
 	"crypto/subtle"
+	"errors"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves/native/pasta/fp"
-	"github.com/coinbase/kryptology/pkg/core/curves/native/pasta/fq"
-	"golang.org/x/crypto/blake2b"
 	"io"
 	"math/big"
 	"sync"
+
+	"golang.org/x/crypto/blake2b"
+
+	"github.com/coinbase/kryptology/pkg/core/curves/native/pasta/fp"
+	"github.com/coinbase/kryptology/pkg/core/curves/native/pasta/fq"
 )
 
 var b = new(fp.Fp).SetUint64(5)
@@ -197,7 +200,10 @@ func (k PallasScalar) Bytes(x *big.Int) []byte {
 }
 
 func (k PallasScalar) Random() (*big.Int, error) {
-	s := new(ScalarPallas).Random(crand.Reader).(*ScalarPallas)
+	s, ok := new(ScalarPallas).Random(crand.Reader).(*ScalarPallas)
+	if !ok {
+		return nil, errors.New("incorrect type conversion")
+	}
 	return s.value.BigInt(), nil
 }
 

@@ -10,8 +10,9 @@ import (
 	crand "crypto/rand"
 	"testing"
 
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 func TestBlindSignatureContext(t *testing.T) {
@@ -21,7 +22,8 @@ func TestBlindSignatureContext(t *testing.T) {
 	require.NotNil(t, pk)
 	require.NotNil(t, sk)
 
-	generators := new(MessageGenerators).Init(pk, 4)
+	generators, err := new(MessageGenerators).Init(pk, 4)
+	require.NoError(t, err)
 	nonce := curve.Scalar.Random(crand.Reader)
 	msgs := make(map[int]curves.Scalar, 1)
 	msgs[0] = curve.Scalar.Hash([]byte("identifier"))
@@ -64,7 +66,8 @@ func TestBlindSignatureContextMarshalBinary(t *testing.T) {
 	require.NotNil(t, pk)
 	require.NotNil(t, sk)
 
-	generators := new(MessageGenerators).Init(pk, 4)
+	generators, err := new(MessageGenerators).Init(pk, 4)
+	require.NoError(t, err)
 	nonce := curve.Scalar.Random(crand.Reader)
 	msgs := make(map[int]curves.Scalar, 1)
 	msgs[0] = curve.Scalar.Hash([]byte("identifier"))

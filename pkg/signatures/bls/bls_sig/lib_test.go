@@ -12,6 +12,9 @@ import (
 	"encoding"
 	"math/big"
 	"testing"
+
+	"github.com/coinbase/kryptology/internal"
+	"github.com/coinbase/kryptology/pkg/core/curves/native/bls12381"
 )
 
 func genSecretKey(t *testing.T) *SecretKey {
@@ -78,11 +81,11 @@ func assertSecretKeyGen(seed, expected []byte, t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected Generate to succeed but failed")
 	}
-	actual := sk.value.Bytes()
+	actual, _ := sk.MarshalBinary()
 	if len(actual) != len(expected) {
 		t.Errorf("Length of Generate output is incorrect. Expected 32, found: %v\n", len(actual))
 	}
-	if !bytes.Equal(actual, expected) {
+	if !bytes.Equal(actual[:], expected) {
 		t.Errorf("SecretKey was not as expected")
 	}
 }
@@ -113,11 +116,13 @@ func TestMarshalLeadingZeroes(t *testing.T) {
 		{"two leading zeroes", []byte{00, 00, 59, 227, 218, 192, 145, 160, 167, 230, 64, 98, 3, 114, 245, 225, 226, 228, 64, 23, 23, 193, 231, 156, 172, 111, 251, 168, 246, 144, 86, 4}},
 	}
 	// Run all the tests!
+	ss := bls12381.Bls12381FqNew()
 	for _, test := range tests {
 		// Marshal
 		var k big.Int
 		k.SetBytes(test.in)
-		bytes, err := SecretKey{k}.MarshalBinary()
+		ss.SetBigInt(&k)
+		bytes, err := SecretKey{ss}.MarshalBinary()
 		if err != nil {
 			t.Errorf("%v", err)
 			continue
@@ -142,7 +147,7 @@ func TestMarshalLeadingZeroes(t *testing.T) {
 			}
 
 			// Test for correctness
-			if actual.value.Cmp(&k) != 0 {
+			if actual.value.Cmp(ss) != 0 {
 				t.Errorf("unmarshaled doens't match original value")
 			}
 		})
@@ -178,7 +183,8 @@ func TestSecretKeyToBytes(t *testing.T) {
 	if err != nil {
 		t.Errorf("Expected UnmarshalBinary to pass but failed: %v", err)
 	}
-	for i, b := range sk1.value.Bytes() {
+	out := sk1.value.Bytes()
+	for i, b := range internal.ReverseScalarBytes(out[:]) {
 		if skBytes[i] != b {
 			t.Errorf("Expected secret keys to be equal but are different at offset %d: %v != %v", i, skBytes[i], b)
 		}
@@ -196,7 +202,7 @@ func TestSecretKeyToBytes(t *testing.T) {
 // Verifies that the thresholdize creates the expected number
 // of shares
 func TestThresholdizeSecretKeyCountsCorrect(t *testing.T) {
-	sk := &SecretKey{value: *big.NewInt(248631463258962596)}
+	sk := &SecretKey{value: bls12381.Bls12381FqNew().SetBigInt(big.NewInt(248631463258962596))}
 	tests := []struct {
 		key           *SecretKey
 		t, n          uint
@@ -224,22 +230,22 @@ func TestThresholdizeSecretKeyCountsCorrect(t *testing.T) {
 	}
 
 	// Run all the tests!
-	for _, test := range tests {
+	for i, test := range tests {
 		shares, err := thresholdizeSecretKey(test.key, test.t, test.n)
 
 		// Check for errors
 		if test.expectedError && err == nil {
-			t.Errorf("expected an error but received nil. t=%v, n=%v, sk=%v", test.t, test.n, sk)
+			t.Errorf("%d - expected an error but received nil. t=%v, n=%v, sk=%v", i, test.t, test.n, sk)
 		}
 
 		// Check for errors
 		if !test.expectedError && err != nil {
-			t.Errorf("received unexpected error %v. t=%v, n=%v, sk=%v", err, test.t, test.n, sk)
+			t.Errorf("%d - received unexpected error %v. t=%v, n=%v, sk=%v", i, err, test.t, test.n, sk)
 		}
 
 		// Check the share count == n
 		if !test.expectedError && test.n != uint(len(shares)) {
-			t.Errorf("expected len(shares) = %v != %v (n)", len(shares), test.n)
+			t.Errorf("%d - expected len(shares) = %v != %v (n)", i, len(shares), test.n)
 		}
 	}
 }

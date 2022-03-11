@@ -21,12 +21,14 @@ import (
 	"bytes"
 	"crypto"
 	cryptorand "crypto/rand"
-	"filippo.io/edwards25519"
 	"fmt"
-	"github.com/coinbase/kryptology/internal"
-	"golang.org/x/crypto/sha3"
 	"io"
 	"strconv"
+
+	"filippo.io/edwards25519"
+	"golang.org/x/crypto/sha3"
+
+	"github.com/coinbase/kryptology/internal"
 )
 
 const (

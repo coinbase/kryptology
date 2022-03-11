@@ -8,13 +8,15 @@ package dealer
 
 import (
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/coinbase/kryptology/pkg/sharing/v1"
 	"math/big"
 	"testing"
 
-	tt "github.com/coinbase/kryptology/internal"
 	"github.com/btcsuite/btcd/btcec"
+	"github.com/stretchr/testify/require"
+
+	tt "github.com/coinbase/kryptology/internal"
+	"github.com/coinbase/kryptology/pkg/core/curves"
+	v1 "github.com/coinbase/kryptology/pkg/sharing/v1"
 )
 
 type proofParamsTest struct {
@@ -27,15 +29,15 @@ func TestProofParamsDistinct(t *testing.T) {
 		t.Skip("Skipping TestNewProofParams")
 	}
 	proofParams1, err := NewProofParams()
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 	proofParams2, err := NewProofParams()
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 	// Ensure two fresh params are distinct
-	tt.AssertBigIntNe(t, proofParams1.N, proofParams2.N)
-	tt.AssertBigIntNe(t, proofParams1.H1, proofParams2.H1)
-	tt.AssertBigIntNe(t, proofParams1.H2, proofParams2.H2)
-	tt.AssertBigIntNe(t, proofParams1.H1, proofParams2.H2)
-	tt.AssertBigIntNe(t, proofParams2.H1, proofParams1.H2)
+	require.NotEqual(t, proofParams1.N, proofParams2.N)
+	require.NotEqual(t, proofParams1.H1, proofParams2.H1)
+	require.NotEqual(t, proofParams1.H2, proofParams2.H2)
+	require.NotEqual(t, proofParams1.H1, proofParams2.H2)
+	require.NotEqual(t, proofParams2.H1, proofParams1.H2)
 }
 
 func TestNewProofParamsKnownInputs(t *testing.T) {
@@ -152,10 +154,10 @@ func TestNewProofParamsKnownInputs(t *testing.T) {
 		}
 
 		params, err := genProofParams(f, g, test.bits)
-		tt.AssertNoError(t, err)
-		tt.AssertBigIntEq(t, params.N, test.n)
-		tt.AssertBigIntEq(t, params.H1, test.h1)
-		tt.AssertBigIntEq(t, params.H2, test.h2)
+		require.NoError(t, err)
+		require.Equal(t, params.N, test.n)
+		require.Equal(t, params.H1, test.h1)
+		require.Equal(t, params.H2, test.h2)
 	}
 }
 
@@ -186,12 +188,12 @@ func TestSameResult(t *testing.T) {
 		return r, nil
 	}
 	params1, err := genProofParams(f, g, 32)
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 	params2, err := genProofParams(f, g, 32)
-	tt.AssertNoError(t, err)
-	tt.AssertBigIntEq(t, params1.N, params2.N)
-	tt.AssertBigIntEq(t, params1.H1, params2.H1)
-	tt.AssertBigIntEq(t, params1.H2, params2.H2)
+	require.NoError(t, err)
+	require.Equal(t, params1.N, params2.N)
+	require.Equal(t, params1.H1, params2.H1)
+	require.Equal(t, params1.H2, params2.H2)
 }
 
 func TestNewDealerShares(t *testing.T) {
@@ -202,7 +204,7 @@ func TestNewDealerShares(t *testing.T) {
 			var err error
 			if secretIsNil {
 				ikm, err = NewSecret(curve)
-				tt.AssertNoError(t, err)
+				require.NoError(t, err)
 			}
 			pk, sharesMap, err := NewDealerShares(curve, 2, 3, ikm)
 			if err != nil {
@@ -217,9 +219,9 @@ func TestNewDealerShares(t *testing.T) {
 
 			if secretIsNil {
 				derivedPublicKey, err := DerivePublicKey(curve, ikm)
-				tt.AssertNoError(t, err)
-				tt.AssertBigIntEq(t, pk.X, derivedPublicKey.X)
-				tt.AssertBigIntEq(t, pk.Y, derivedPublicKey.Y)
+				require.NoError(t, err)
+				require.Equal(t, pk.X, derivedPublicKey.X)
+				require.Equal(t, pk.Y, derivedPublicKey.Y)
 			}
 
 			if len(sharesMap) != 3 {
@@ -237,13 +239,13 @@ func TestNewDealerShares(t *testing.T) {
 					t.FailNow()
 				}
 				x, y := curve.ScalarMult(curve.Gx, curve.Gy, s.ShamirShare.Value.Bytes())
-				tt.AssertBigIntEq(t, x, s.Point.X)
-				tt.AssertBigIntEq(t, y, s.Point.Y)
+				require.Equal(t, x, s.Point.X)
+				require.Equal(t, y, s.Point.Y)
 			}
 
 			n := curves.NewField(curve.N)
 			combiner, err := v1.NewShamir(2, 3, n)
-			tt.AssertNoError(t, err)
+			require.NoError(t, err)
 
 			sShareArray := make([]*v1.ShamirShare, len(sharesMap))
 			for i, s := range sharesMap {
@@ -260,9 +262,9 @@ func TestNewDealerShares(t *testing.T) {
 				t.Errorf("Shares could not be recombined")
 			}
 			pkx, pky := curve.ScalarBaseMult(sk)
-			tt.AssertNotNil(t, pkx, pky)
-			tt.AssertBigIntEq(t, pkx, pk.X) // nolint
-			tt.AssertBigIntEq(t, pky, pk.Y) // nolint
+			require.NotNil(t, pkx, pky)
+			require.Equal(t, pkx, pk.X) // nolint
+			require.Equal(t, pky, pk.Y) // nolint
 
 		})
 	}
@@ -292,7 +294,7 @@ func TestPreparePublicShares(t *testing.T) {
 		t.Errorf("len(publicShares) != len(sharesMap): %d != %d", len(publicShares), len(sharesMap))
 	}
 	for i := range publicShares {
-		tt.AssertBigIntEq(t, publicShares[i].Point.X, sharesMap[i].Point.X)
-		tt.AssertBigIntEq(t, publicShares[i].Point.Y, sharesMap[i].Point.Y)
+		require.Equal(t, publicShares[i].Point.X, sharesMap[i].Point.X)
+		require.Equal(t, publicShares[i].Point.Y, sharesMap[i].Point.Y)
 	}
 }

@@ -9,13 +9,14 @@ package curves
 import (
 	"bytes"
 	"crypto/elliptic"
-	"github.com/coinbase/kryptology/pkg/core"
 	"math/big"
 	"testing"
 
 	"github.com/btcsuite/btcd/btcec"
-	tt "github.com/coinbase/kryptology/internal"
 	"github.com/stretchr/testify/require"
+
+	tt "github.com/coinbase/kryptology/internal"
+	"github.com/coinbase/kryptology/pkg/core"
 )
 
 func TestIsIdentity(t *testing.T) {

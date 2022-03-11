@@ -10,8 +10,9 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"math/big"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 type Schnorr struct {

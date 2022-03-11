@@ -13,16 +13,15 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/coinbase/kryptology/pkg/core/curves"
-
-	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
-	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/proof"
+	"github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/require"
 
 	tt "github.com/coinbase/kryptology/internal"
 	"github.com/coinbase/kryptology/pkg/core"
+	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/paillier"
-	"github.com/btcsuite/btcd/btcec"
+	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
+	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/proof"
 )
 
 var (
@@ -122,7 +121,7 @@ func setupSignersMap(t *testing.T, curve elliptic.Curve, playerThreshold, player
 	}
 
 	pk, sharesMap, err := dealer.NewDealerShares(curve, uint32(playerThreshold), uint32(playerCnt), nil)
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 
 	// TODO: After the map refactor, we should be able to delete arbitrary signers,
 	// however, for now, the signers' identifiers need to be predictable in array form
@@ -133,7 +132,7 @@ func setupSignersMap(t *testing.T, curve elliptic.Curve, playerThreshold, player
 
 	// Create public shares
 	pubSharesMap, err := dealer.PreparePublicShares(sharesMap)
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 
 	// Create player paillier pubkeys
 	playerKeysMap := make(map[uint32]*paillier.SecretKey, playerThreshold)
@@ -149,7 +148,7 @@ func setupSignersMap(t *testing.T, curve elliptic.Curve, playerThreshold, player
 	distributedProofParams := make(map[uint32]*dealer.ProofParams, playerCnt)
 	for i := range sharesMap {
 		playerKeysMap[i], err = paillier.NewSecretKey(primesArray[i-1].p, primesArray[i-1].q)
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 		pubkeys[i] = &playerKeysMap[i].PublicKey
 		if useDistributed {
 			pp := primesArray[int(i)+playerThreshold-1]
@@ -173,7 +172,7 @@ func setupSignersMap(t *testing.T, curve elliptic.Curve, playerThreshold, player
 	for i := range playerKeysMap {
 		p := Participant{*sharesMap[i], playerKeysMap[i]}
 		signersMap[i], err = p.PrepareToSign(pk, verify, curve, proofParams, pubSharesMap, pubkeys)
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 
 		signersMap[i].threshold = uint(playerThreshold)
 
@@ -249,9 +248,9 @@ func TestSignerSignRound1RepeatCall(t *testing.T) {
 	playerMin := 3
 	_, signers := setupSignersMap(t, curve, playerMin, playerCnt, false, dummyVerifier, false)
 	_, _, err := signers[1].SignRound1()
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 	_, _, err = signers[1].SignRound1()
-	tt.AssertSomeError(t, err)
+	require.Error(t, err)
 }
 
 func TestSignerSignRound2Works(t *testing.T) {
@@ -267,7 +266,7 @@ func TestSignerSignRound2Works(t *testing.T) {
 		p2pOut := make(map[uint32]map[uint32]*Round1P2PSend, playerMin)
 		for i, s := range signers {
 			signerOut[i], p2pOut[i], err = s.SignRound1()
-			tt.AssertNoError(t, err)
+			require.NoError(t, err)
 		}
 
 		// run signing round 2 with player index 0
@@ -347,13 +346,13 @@ func TestSignerSignRound2RepeatCall(t *testing.T) {
 	for _, useDistributed := range []bool{false, true} {
 		_, signers := setupSignersMap(t, curve, playerMin, playerCnt, false, dummyVerifier, useDistributed)
 		_, _, err := signers[1].SignRound1()
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 		out1, p2p1, err := signers[2].SignRound1()
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 		out2, p2p2, err := signers[3].SignRound1()
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 		otherSigners := make(map[uint32]*Round1Bcast)
 		otherP2PSend := make(map[uint32]*Round1P2PSend)
 		otherSigners[2] = out1
@@ -362,7 +361,7 @@ func TestSignerSignRound2RepeatCall(t *testing.T) {
 		otherP2PSend[3] = p2p2[1]
 
 		_, err = signers[1].SignRound2(otherSigners, otherP2PSend)
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 		_, err = signers[1].SignRound2(otherSigners, otherP2PSend)
 		require.Error(t, err)
 	}
@@ -411,14 +410,14 @@ func TestSignRound3(t *testing.T) {
 				t.Run("invalid signing round states are rejected", func(t *testing.T) {
 					s.Round = round
 					_, err := s.SignRound3(p2p)
-					tt.AssertSomeError(t, err)
+					require.Error(t, err)
 				})
 			}
 
 			// Sign
 			s.Round = 3
 			err := s.setCosigners([]uint32{1, 2, 3})
-			tt.AssertNoError(t, err)
+			require.NoError(t, err)
 
 			// signing round 3 completes without error
 			bcast, err := s.SignRound3(p2p)
@@ -428,12 +427,12 @@ func TestSignRound3(t *testing.T) {
 			}
 
 			t.Run("state vars are set", func(t *testing.T) {
-				tt.AssertNotNil(t, s.state.deltai)
-				tt.AssertNotNil(t, s.state.sigmai)
+				require.NotNil(t, s.state.deltai)
+				require.NotNil(t, s.state.sigmai)
 			})
 
 			t.Run("return value matches state", func(t *testing.T) {
-				tt.AssertBigIntEq(t, bcast.deltaElement, s.state.deltai)
+				require.Equal(t, bcast.deltaElement, s.state.deltai)
 			})
 
 			t.Run("round variable is updated", func(t *testing.T) {
@@ -478,7 +477,7 @@ func TestSignRound4(t *testing.T) {
 			t.Run("invalid signing round states are rejected", func(t *testing.T) {
 				s.Round = round
 				_, err := s.SignRound4(ones)
-				tt.AssertSomeError(t, err)
+				require.Error(t, err)
 			})
 		}
 
@@ -496,7 +495,7 @@ func TestSignRound4(t *testing.T) {
 		}
 
 		t.Run("state vars are set", func(t *testing.T) {
-			tt.AssertNotNil(t, s.state.delta)
+			require.NotNil(t, s.state.delta)
 		})
 	}
 }
@@ -634,7 +633,7 @@ func TestSignerSignRound6WorksK256(t *testing.T) {
 	curve := btcec.S256()
 	msg := make([]byte, 32)
 	hash, err := core.Hash(msg, curve)
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 	fullroundstest3Signers(t, curve, hash.Bytes(), k256Verifier)
 }
 
@@ -797,25 +796,25 @@ func fullroundstest3Signers(t *testing.T, curve elliptic.Curve, msg []byte, veri
 		}
 		round6FullBcast[2], err = signers[3].SignRound6Full(msg, map[uint32]*Round5Bcast{1: round5Bcast[1], 2: round5Bcast[2]}, r6P2pin)
 		require.Nil(t, err)
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 
 		sigs := make([]*curves.EcdsaSignature, 3)
 		sigs[0], err = signers[1].SignOutput(map[uint32]*Round6FullBcast{
 			2: round6FullBcast[1],
 			3: round6FullBcast[2],
 		})
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 
 		sigs[1], err = signers[2].SignOutput(map[uint32]*Round6FullBcast{
 			1: round6FullBcast[0],
 			3: round6FullBcast[2],
 		})
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 		sigs[2], err = signers[3].SignOutput(map[uint32]*Round6FullBcast{
 			1: round6FullBcast[0],
 			2: round6FullBcast[1],
 		})
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 	}
 }
 

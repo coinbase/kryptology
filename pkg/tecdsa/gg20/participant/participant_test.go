@@ -14,14 +14,13 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
-
-	"github.com/coinbase/kryptology/pkg/core"
-	"github.com/coinbase/kryptology/pkg/paillier"
-
-	"github.com/coinbase/kryptology/internal"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/internal"
+	"github.com/coinbase/kryptology/pkg/core"
+	"github.com/coinbase/kryptology/pkg/paillier"
+	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
 )
 
 func TestConvertToAdditiveWorks(t *testing.T) {
@@ -88,10 +87,10 @@ func TestConvertToAdditiveNotEnoughShares(t *testing.T) {
 	pi := Participant{Share: dealer.Share{}}
 
 	_, err = pi.convertToAdditive(curve, map[uint32]*dealer.PublicShare{})
-	internal.AssertSomeError(t, err)
+	require.Error(t, err)
 
 	_, err = pi.convertToAdditive(curve, map[uint32]*dealer.PublicShare{1: publicSharesMap[1]})
-	internal.AssertSomeError(t, err)
+	require.Error(t, err)
 }
 
 func TestConvertToAdditiveRecombine(t *testing.T) {
@@ -146,8 +145,8 @@ func TestConvertToAdditiveRecombine(t *testing.T) {
 					x, y = curve.Add(x, y, ps.Point.X, ps.Point.Y)
 				}
 
-				internal.AssertBigIntEq(t, pk.X, x)
-				internal.AssertBigIntEq(t, pk.Y, y)
+				require.Equal(t, pk.X, x)
+				require.Equal(t, pk.Y, y)
 			}
 		}
 	}
@@ -314,15 +313,14 @@ func TestVerifyStateMapCosigners(t *testing.T) {
 				cosigners = append(cosigners, id)
 			}
 			err := s.setCosigners(cosigners)
-			internal.AssertNoError(t, err)
-
+			require.NoError(t, err)
 			// func under test
 			err = s.verifyStateMap(1, test.testSigners)
 			// did we get the expected result?
 			if test.expectedOk {
-				internal.AssertNoError(t, err)
+				require.NoError(t, err)
 			} else {
-				internal.AssertSomeError(t, err)
+				require.Error(t, err)
 			}
 		})
 	}

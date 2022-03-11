@@ -5,6 +5,23 @@ All notable changes to this repo will be documented in this file.
 The format is based on [Keep a Changelog](http://keepachangelog.com/en/1.0.0/)
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## v1.8.0
+
+- BLS12-381 is now constant time.
+- BLS signatures use new CT-based version of the BLS12-381 curve.
+
+## v1.7.0
+
+### Fixed
+
+- Fix an issue in the serialization wrapper for DKLs18 and generalizes the choice of the hash function.
+
+## v1.6.1
+
+### Fixed
+
+- Fix an issue inherited from a transcription error in DKLs18, in which the KOS cOT extension subprotocol was implemented incorrectly.
+
 ## v1.6.0
 
 ### Add
@@ -14,6 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - New DKLs18 implementation that fixes the issues in v0.
     - This also refactors OT, OT Extension, and Schnorr ZKP to their own packages.
     - Furthermore, this generalizes the input curve type of the protocol.
+- Bulletproof IPP Prove and Verification functions.
 
 ### Fixed
 

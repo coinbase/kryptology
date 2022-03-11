@@ -12,12 +12,14 @@ import (
 	"crypto/sha256"
 	"crypto/subtle"
 	"fmt"
-	"math/big"
 
-	bls12381 "github.com/coinbase/kryptology/pkg/core/curves/native/bls12-381"
-	"github.com/coinbase/kryptology/pkg/signatures/bls/finitefield"
-	"github.com/coinbase/kryptology/pkg/signatures/bls/shamir"
 	"golang.org/x/crypto/hkdf"
+
+	"github.com/coinbase/kryptology/internal"
+	"github.com/coinbase/kryptology/pkg/core/curves"
+	"github.com/coinbase/kryptology/pkg/core/curves/native"
+	"github.com/coinbase/kryptology/pkg/core/curves/native/bls12381"
+	"github.com/coinbase/kryptology/pkg/sharing"
 )
 
 // Secret key in Fr
@@ -30,12 +32,10 @@ const SecretKeyShareSize = 33
 // See section 2.3 from https://tools.ietf.org/html/draft-irtf-cfrg-bls-signature-03
 const hkdfKeyGenSalt = "BLS-SIG-KEYGEN-SALT-"
 
-var blsEngine = bls12381.NewEngine()
-
 // Represents a value mod r where r is the curve order or
 // order of the subgroups in G1 and G2
 type SecretKey struct {
-	value big.Int
+	value *native.Field
 }
 
 func allRowsUnique(data [][]byte) bool {
@@ -84,26 +84,24 @@ func (sk SecretKey) Generate(ikm []byte) (*SecretKey, error) {
 	ikm = append(ikm, 0)
 	// Leaves key_info parameter as the default empty string
 	// and just adds parameter I2OSP(L, 2)
+	var okm [native.WideFieldBytes]byte
 	kdf := hkdf.New(sha256.New, ikm, salt, []byte{0, 48})
-	okm := make([]byte, 48)
-	read, err := kdf.Read(okm)
+	read, err := kdf.Read(okm[:48])
+	copy(okm[:48], internal.ReverseScalarBytes(okm[:48]))
 	if err != nil {
 		return nil, err
 	}
 	if read != 48 {
 		return nil, fmt.Errorf("failed to create private key")
 	}
-	x := new(big.Int).SetBytes(okm)
-	v := new(big.Int).Mod(x, blsEngine.G1.Q())
-	return &SecretKey{value: *v}, nil
+	v := bls12381.Bls12381FqNew().SetBytesWide(&okm)
+	return &SecretKey{value: v}, nil
 }
 
 // Serialize a secret key to raw bytes
 func (sk SecretKey) MarshalBinary() ([]byte, error) {
 	bytes := sk.value.Bytes()
-	padding := make([]byte, SecretKeySize-len(bytes))
-	bytes = append(padding, bytes...)
-	return bytes, nil
+	return internal.ReverseScalarBytes(bytes[:]), nil
 }
 
 // Deserialize a secret key from raw bytes
@@ -117,18 +115,29 @@ func (sk *SecretKey) UnmarshalBinary(data []byte) error {
 	if subtle.ConstantTimeCompare(data, zeros) == 1 {
 		return fmt.Errorf("secret key cannot be zero")
 	}
-	sk.value.SetBytes(data)
+	var bb [native.FieldBytes]byte
+	copy(bb[:], internal.ReverseScalarBytes(data))
+	value, err := bls12381.Bls12381FqNew().SetBytes(&bb)
+	if err != nil {
+		return err
+	}
+	sk.value = value
 	return nil
 }
 
 // SecretKeyShare is shamir share of a private key
 type SecretKeyShare struct {
-	value shamir.Share
+	identifier byte
+	value      []byte
 }
 
 // Serialize a secret key share to raw bytes
 func (sks SecretKeyShare) MarshalBinary() ([]byte, error) {
-	return sks.value.Bytes(), nil
+	var blob [SecretKeyShareSize]byte
+	l := len(sks.value)
+	copy(blob[:l], sks.value)
+	blob[l] = sks.identifier
+	return blob[:], nil
 }
 
 // Deserialize a secret key share from raw bytes
@@ -141,15 +150,16 @@ func (sks *SecretKeyShare) UnmarshalBinary(data []byte) error {
 	if subtle.ConstantTimeCompare(data, zeros) == 1 {
 		return fmt.Errorf("secret key share cannot be zero")
 	}
-	q := blsEngine.G1.Q()
-	sks.value = *shamir.ShareFromBytes(data, finitefield.New(q))
+	l := len(data)
+	sks.identifier = data[l-1]
+	copy(sks.value, data[:l])
 	return nil
 }
 
 // thresholdizeSecretKey splits a composite secret key such that
 // `threshold` partial signatures can be combined to form a composite signature
 func thresholdizeSecretKey(secretKey *SecretKey, threshold, total uint) ([]*SecretKeyShare, error) {
-	// Verify our parametes are acceptable.
+	// Verify our parameters are acceptable.
 	if secretKey == nil {
 		return nil, fmt.Errorf("secret key is nil")
 	}
@@ -166,27 +176,30 @@ func thresholdizeSecretKey(secretKey *SecretKey, threshold, total uint) ([]*Secr
 		return nil, fmt.Errorf("cannot have more than 255 shares")
 	}
 
-	// Marshal and split our secret key into shares
-	sk, err := secretKey.MarshalBinary()
+	curve := curves.BLS12381G1()
+	sss, err := sharing.NewShamir(uint32(threshold), uint32(total), curve)
 	if err != nil {
 		return nil, err
 	}
-	q := blsEngine.G1.Q()
-	shareSet, err := shamir.NewDealer(finitefield.New(q)).Split(sk, int(threshold), int(total))
+	secret, ok := curve.NewScalar().(*curves.ScalarBls12381)
+	if !ok {
+		return nil, fmt.Errorf("invalid curve")
+	}
+	secret.Value = secretKey.value
+	shares, err := sss.Split(secret, rand.Reader)
 	if err != nil {
 		return nil, err
 	}
-	shares := shareSet.Shares
-
 	// Verify we got the expected number of shares
 	if uint(len(shares)) != total {
-		return nil, fmt.Errorf("shamir.NewDealer return %v != %v shares", len(shares), total)
+		return nil, fmt.Errorf("%v != %v shares", len(shares), total)
 	}
 
 	// Package our shares
 	secrets := make([]*SecretKeyShare, len(shares))
 	for i, s := range shares {
-		sks := &SecretKeyShare{value: *s}
+		// users expect BigEndian
+		sks := &SecretKeyShare{identifier: byte(s.Id), value: s.Value}
 		secrets[i] = sks
 	}
 
