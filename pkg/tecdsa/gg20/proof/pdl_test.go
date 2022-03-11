@@ -11,15 +11,14 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/coinbase/kryptology/pkg/core/curves"
-
-	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
+	"github.com/btcsuite/btcd/btcec"
+	"github.com/stretchr/testify/require"
 
 	tt "github.com/coinbase/kryptology/internal"
 	crypto "github.com/coinbase/kryptology/pkg/core"
+	"github.com/coinbase/kryptology/pkg/core/curves"
 	paillier "github.com/coinbase/kryptology/pkg/paillier"
-	"github.com/btcsuite/btcd/btcec"
-	"github.com/stretchr/testify/require"
+	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
 )
 
 func makeNewPaillierPublicKey(t *testing.T, n *big.Int) *paillier.PublicKey {
@@ -136,7 +135,7 @@ func TestPdlProof(t *testing.T) {
 			C:            pp.C,
 		}
 		err = proof.Verify(pv)
-		tt.AssertNoError(t, err)
+		require.NoError(t, err)
 	}
 }
 
@@ -305,7 +304,7 @@ func TestPdlProofRandValues(t *testing.T) {
 			C:            pp.C,
 		}
 		err = proof.Verify(pv)
-		tt.AssertSomeError(t, err)
+		require.Error(t, err)
 	}
 }
 

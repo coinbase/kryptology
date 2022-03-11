@@ -11,10 +11,12 @@ import (
 	"crypto/cipher"
 	crand "crypto/rand"
 	"fmt"
+	"math/big"
+
 	"git.sr.ht/~sircmpwn/go-bare"
+
 	"github.com/coinbase/kryptology/pkg/core"
 	"github.com/coinbase/kryptology/pkg/core/curves"
-	"math/big"
 )
 
 type encryptionKeyMarshal struct {

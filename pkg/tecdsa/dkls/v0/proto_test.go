@@ -13,9 +13,10 @@ import (
 	"io/ioutil"
 	"testing"
 
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 // Runs a DKG on initialized Alice/Bob objects. Reports any errors encountered.
@@ -208,8 +209,8 @@ func TestSignColdStart(t *testing.T) {
 
 	// Sign
 	aErr, bErr := iteratedSign(alice, bob)
-	require.ErrorIs(t, aErr, io.EOF, "got err=%v", aErr)
-	require.ErrorIs(t, bErr, io.EOF, "got err=%v", bErr)
+	require.ErrorIs(t, aErr, io.EOF, "got err=%w", aErr)
+	require.ErrorIs(t, bErr, io.EOF, "got err=%w", bErr)
 
 	// Extract the result and verify the type
 	result, err := bob.Result()

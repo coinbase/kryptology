@@ -7,10 +7,13 @@
 package bbs
 
 import (
+	"errors"
 	"fmt"
+
+	"github.com/gtank/merlin"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/signatures/common"
-	"github.com/gtank/merlin"
 )
 
 // PokSignatureProof is the actual proof sent from a prover
@@ -100,9 +103,19 @@ func (pok *PokSignatureProof) UnmarshalBinary(in []byte) error {
 		}
 	}
 
-	pok.aPrime = aPrime.(curves.PairingPoint)
-	pok.aBar = aBar.(curves.PairingPoint)
-	pok.d = d.(curves.PairingPoint)
+	var ok bool
+	pok.aPrime, ok = aPrime.(curves.PairingPoint)
+	if !ok {
+		return errors.New("incorrect type conversion")
+	}
+	pok.aBar, ok = aBar.(curves.PairingPoint)
+	if !ok {
+		return errors.New("incorrect type conversion")
+	}
+	pok.d, ok = d.(curves.PairingPoint)
+	if !ok {
+		return errors.New("incorrect type conversion")
+	}
 	pok.proof1[0] = proof1i0
 	pok.proof1[1] = proof1i1
 	pok.proof2 = proof2

@@ -9,7 +9,7 @@ go get github.com/coinbase/kryptology
 
 Pin a specific release of this library:
 ```$xslt
-go get github.com/coinbase/kryptology@v1.0.0
+go get github.com/coinbase/kryptology@v1.6.0
 ```
 
 ## Documentation
@@ -22,7 +22,7 @@ the following url in your browser.
 http://localhost:6060/pkg/github.com/coinbase/kryptology/
 
 ## Developer Setup
-**Prerequisites**: `golang 1.16`, `make`
+**Prerequisites**: `golang 1.17`, `make`
 
 ```$xslt
 git clone git@github.com/coinbase/kryptology.git && make 

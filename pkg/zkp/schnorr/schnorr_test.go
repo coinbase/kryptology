@@ -3,10 +3,12 @@ package schnorr
 import (
 	"crypto/rand"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
+	"testing"
+
 	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/sha3"
-	"testing"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 func TestZKPOverMultipleCurves(t *testing.T) {

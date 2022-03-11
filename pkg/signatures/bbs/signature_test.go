@@ -9,8 +9,9 @@ package bbs
 import (
 	"testing"
 
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 func TestSignatureWorks(t *testing.T) {
@@ -23,7 +24,8 @@ func TestSignatureWorks(t *testing.T) {
 	}
 	pk, sk, err := NewKeys(curve)
 	require.NoError(t, err)
-	generators := new(MessageGenerators).Init(pk, 4)
+	generators, err := new(MessageGenerators).Init(pk, 4)
+	require.NoError(t, err)
 
 	sig, err := sk.Sign(generators, msgs)
 	require.NoError(t, err)
@@ -41,7 +43,8 @@ func TestSignatureIncorrectMessages(t *testing.T) {
 	}
 	pk, sk, err := NewKeys(curve)
 	require.NoError(t, err)
-	generators := new(MessageGenerators).Init(pk, 4)
+	generators, err := new(MessageGenerators).Init(pk, 4)
+	require.NoError(t, err)
 
 	sig, err := sk.Sign(generators, msgs)
 	require.NoError(t, err)
@@ -60,7 +63,8 @@ func TestSignatureMarshalBinary(t *testing.T) {
 	}
 	pk, sk, err := NewKeys(curve)
 	require.NoError(t, err)
-	generators := new(MessageGenerators).Init(pk, 4)
+	generators, err := new(MessageGenerators).Init(pk, 4)
+	require.NoError(t, err)
 
 	sig, err := sk.Sign(generators, msgs)
 	require.NoError(t, err)

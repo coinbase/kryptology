@@ -13,13 +13,14 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	crypto "github.com/coinbase/kryptology/pkg/core/curves"
 	"log"
 	"os"
 
 	"github.com/btcsuite/btcd/btcec"
-	"github.com/coinbase/kryptology/pkg/dkg/gennaro2p"
 	"github.com/pkg/errors"
+
+	crypto "github.com/coinbase/kryptology/pkg/core/curves"
+	"github.com/coinbase/kryptology/pkg/dkg/gennaro2p"
 )
 
 const (

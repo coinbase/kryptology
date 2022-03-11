@@ -14,13 +14,12 @@ import (
 	"crypto/elliptic"
 	"encoding/json"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"math/big"
 
-	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
-
 	crypto "github.com/coinbase/kryptology/pkg/core"
+	"github.com/coinbase/kryptology/pkg/core/curves"
 	paillier "github.com/coinbase/kryptology/pkg/paillier"
+	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
 )
 
 // PdlProofParams encapsulates the parameters for ProvePDL in
@@ -188,19 +187,19 @@ func (p PdlProof) Verify(pv *PdlVerifyParams) error {
 	// Steps 3 & 4
 	uHat, err := p.uHatConstruct(pv)
 	if err != nil {
-		return fmt.Errorf("u hat construction error: %s", err)
+		return fmt.Errorf("u hat construction error: %w", err)
 	}
 
 	// step 5
 	vHat, err := p.vHatConstruct(pv)
 	if err != nil {
-		return fmt.Errorf("v hat construction error: %s", err)
+		return fmt.Errorf("v hat construction error: %w", err)
 	}
 
 	// step 6
 	wHat, err := p.wHatConstruct(pv)
 	if err != nil {
-		return fmt.Errorf("w hat construction error: %s", err)
+		return fmt.Errorf("w hat construction error: %w", err)
 	}
 
 	// step 7

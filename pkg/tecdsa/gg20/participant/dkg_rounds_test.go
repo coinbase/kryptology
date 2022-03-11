@@ -8,18 +8,19 @@ package participant
 
 import (
 	"crypto/elliptic"
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/coinbase/kryptology/pkg/sharing/v1"
 	"math/big"
 	"testing"
 
-	tt "github.com/coinbase/kryptology/internal"
-	"github.com/coinbase/kryptology/pkg/core"
-	"github.com/coinbase/kryptology/pkg/paillier"
-	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
-	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/proof"
 	"github.com/btcsuite/btcd/btcec"
 	"github.com/stretchr/testify/require"
+
+	tt "github.com/coinbase/kryptology/internal"
+	"github.com/coinbase/kryptology/pkg/core"
+	"github.com/coinbase/kryptology/pkg/core/curves"
+	"github.com/coinbase/kryptology/pkg/paillier"
+	v1 "github.com/coinbase/kryptology/pkg/sharing/v1"
+	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
+	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/proof"
 )
 
 func setupDkgRound3ParticipantMap(curve elliptic.Curve, t, n int) map[uint32]*DkgParticipant {
@@ -258,7 +259,7 @@ func TestDkgRound1Works(t *testing.T) {
 
 	// Run DKG round 1
 	dkgParticipantOut, err := dkgParticipant.DkgRound1(uint32(threshold), uint32(total))
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 
 	// Checking DkgParticipant's items and stored values
 	if dkgParticipant.Curve == nil {
@@ -285,9 +286,9 @@ func TestDkgRound1Works(t *testing.T) {
 		t.Errorf("dkgstate Pk is nil")
 	}
 
-	tt.AssertNotNil(t, dkgParticipant.state.N)
-	tt.AssertNotNil(t, dkgParticipant.state.H1)
-	tt.AssertNotNil(t, dkgParticipant.state.H2)
+	require.NotNil(t, dkgParticipant.state.N)
+	require.NotNil(t, dkgParticipant.state.H1)
+	require.NotNil(t, dkgParticipant.state.H2)
 
 	if dkgParticipant.state.V == nil {
 		t.Errorf("dkgstate V is nil")
@@ -314,9 +315,9 @@ func TestDkgRound1Works(t *testing.T) {
 		t.Errorf("DkgRound1Bcast Pki is nil")
 	}
 
-	tt.AssertNotNil(t, dkgParticipantOut.H1i)
-	tt.AssertNotNil(t, dkgParticipantOut.H2i)
-	tt.AssertNotNil(t, dkgParticipantOut.Ni)
+	require.NotNil(t, dkgParticipantOut.H1i)
+	require.NotNil(t, dkgParticipantOut.H2i)
+	require.NotNil(t, dkgParticipantOut.Ni)
 
 	if dkgParticipantOut.Proof1i == nil {
 		t.Errorf("DkgRound1Bcast Proof1i is nil")
@@ -347,9 +348,9 @@ func TestDkgRound1RepeatCall(t *testing.T) {
 
 	// Test repeat call
 	_, err := dkgParticipant.DkgRound1(uint32(threshold), uint32(total))
-	tt.AssertNoError(t, err)
+	require.NoError(t, err)
 	_, err = dkgParticipant.DkgRound1(uint32(threshold), uint32(total))
-	tt.AssertSomeError(t, err)
+	require.Error(t, err)
 }
 
 /*
@@ -606,7 +607,7 @@ func TestDkgRound2Tampered(t *testing.T) {
 	// Tampering player 2 on Ni
 	dpOutputs[2].Ni.Add(dpOutputs[2].Ni, core.One)
 	_, _, err := participant.DkgRound2(dpOutputs)
-	tt.AssertSomeError(t, err)
+	require.Error(t, err)
 
 	// Restore player 2
 	dpOutputs[2].Ni.Sub(dpOutputs[2].Ni, core.One)
@@ -615,7 +616,7 @@ func TestDkgRound2Tampered(t *testing.T) {
 	// Tamper player 3 on Ni
 	dpOutputs[3].Ni.Add(dpOutputs[3].Ni, core.One)
 	_, _, err = participant.DkgRound2(dpOutputs)
-	tt.AssertSomeError(t, err)
+	require.Error(t, err)
 
 	// Restore player 3
 	dpOutputs[3].Ni.Sub(dpOutputs[3].Ni, core.One)
@@ -624,7 +625,7 @@ func TestDkgRound2Tampered(t *testing.T) {
 	// Tamper player 2 on h1
 	dpOutputs[2].H1i.Add(dpOutputs[2].H1i, core.One)
 	_, _, err = participant.DkgRound2(dpOutputs)
-	tt.AssertSomeError(t, err)
+	require.Error(t, err)
 }
 
 // Test repeat call of DKG round 2

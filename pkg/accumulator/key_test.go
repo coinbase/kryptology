@@ -7,9 +7,11 @@
 package accumulator
 
 import (
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 func TestSecretKeyMarshal(t *testing.T) {
@@ -39,7 +41,7 @@ func TestPublicKeyMarshal(t *testing.T) {
 	pk2 := &PublicKey{}
 	err = pk2.UnmarshalBinary(pkBytes)
 	require.NoError(t, err)
-	require.Equal(t, pk.value, pk2.value)
+	require.True(t, pk.value.Equal(pk2.value))
 }
 
 func TestBatch(t *testing.T) {
@@ -68,7 +70,7 @@ func TestBatch(t *testing.T) {
 	require.Equal(t, acc.ToAffineCompressed(), g1.ToAffineCompressed())
 
 	acc2 := g1.Mul(result)
-	require.Equal(t, acc2, g1)
+	require.True(t, acc2.Equal(g1))
 }
 
 func TestCoefficient(t *testing.T) {

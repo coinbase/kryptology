@@ -8,7 +8,9 @@
 package bbs
 
 import (
+	"errors"
 	"fmt"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
@@ -54,7 +56,11 @@ func (sig *Signature) UnmarshalBinary(data []byte) error {
 	if err != nil {
 		return err
 	}
-	sig.a = a.(curves.PairingPoint)
+	var ok bool
+	sig.a, ok = a.(curves.PairingPoint)
+	if !ok {
+		return errors.New("incorrect type conversion")
+	}
 	sig.e = e
 	sig.s = s
 	return nil

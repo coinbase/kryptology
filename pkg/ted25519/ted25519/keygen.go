@@ -9,6 +9,7 @@ package ted25519
 import (
 	"encoding/binary"
 	"fmt"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/sharing/v1"
 )

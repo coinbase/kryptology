@@ -8,6 +8,7 @@ package mina
 
 import (
 	"fmt"
+
 	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 

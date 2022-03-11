@@ -10,25 +10,25 @@ import (
 	"bytes"
 	"crypto/sha256"
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"math/big"
 	"testing"
 
-	v0 "github.com/coinbase/kryptology/pkg/tecdsa/dkls/v0"
-	"github.com/coinbase/kryptology/pkg/tecdsa/dkls/v1/dkg"
 	"github.com/btcsuite/btcd/btcec"
-
-	"github.com/coinbase/kryptology/pkg/core/protocol"
-
+	"github.com/stretchr/testify/require"
 	"golang.org/x/crypto/sha3"
 
 	"github.com/coinbase/kryptology/pkg/core/curves"
+	"github.com/coinbase/kryptology/pkg/core/protocol"
 	"github.com/coinbase/kryptology/pkg/ot/extension/kos"
-	"github.com/stretchr/testify/require"
+	v0 "github.com/coinbase/kryptology/pkg/tecdsa/dkls/v0"
+	"github.com/coinbase/kryptology/pkg/tecdsa/dkls/v1/dkg"
 )
 
-func runIteratedProtocol(alice protocol.Iterator, bob protocol.Iterator) (error, error) {
+// For DKG bob starts first. For refresh and sign, Alice starts first.
+func runIteratedProtocol(firstParty protocol.Iterator, secondParty protocol.Iterator) (error, error) {
 	var (
 		message *protocol.Message
 		aErr    error
@@ -37,12 +37,12 @@ func runIteratedProtocol(alice protocol.Iterator, bob protocol.Iterator) (error,
 
 	for aErr != protocol.ErrProtocolFinished || bErr != protocol.ErrProtocolFinished {
 		// Crank each protocol forward one iteration
-		message, bErr = bob.Next(message)
+		message, bErr = firstParty.Next(message)
 		if bErr != nil && bErr != protocol.ErrProtocolFinished {
 			return nil, bErr
 		}
 
-		message, aErr = alice.Next(message)
+		message, aErr = secondParty.Next(message)
 		if aErr != nil && aErr != protocol.ErrProtocolFinished {
 			return aErr, nil
 		}
@@ -59,7 +59,7 @@ func TestDkgProto(t *testing.T) {
 	for _, curve := range curveInstances {
 		alice := NewAliceDkg(curve, protocol.Version1)
 		bob := NewBobDkg(curve, protocol.Version1)
-		aErr, bErr := runIteratedProtocol(alice, bob)
+		aErr, bErr := runIteratedProtocol(bob, alice)
 
 		t.Run("both alice/bob complete simultaneously", func(t *testing.T) {
 			require.ErrorIs(t, aErr, protocol.ErrProtocolFinished)
@@ -105,6 +105,73 @@ func TestDkgProto(t *testing.T) {
 	}
 }
 
+// DKG > Refresh > Sign
+func TestRefreshProto(t *testing.T) {
+	t.Parallel()
+	curveInstances := []*curves.Curve{
+		curves.K256(),
+		curves.P256(),
+	}
+	for _, curve := range curveInstances {
+		boundCurve := curve
+		t.Run(fmt.Sprintf("testing refresh for curve %s", boundCurve.Name), func(tt *testing.T) {
+			tt.Parallel()
+			// DKG
+			aliceDkg := NewAliceDkg(boundCurve, protocol.Version1)
+			bobDkg := NewBobDkg(boundCurve, protocol.Version1)
+
+			aDkgErr, bDkgErr := runIteratedProtocol(bobDkg, aliceDkg)
+			require.ErrorIs(tt, aDkgErr, protocol.ErrProtocolFinished)
+			require.ErrorIs(tt, bDkgErr, protocol.ErrProtocolFinished)
+
+			aliceDkgResultMessage, err := aliceDkg.Result(protocol.Version1)
+			require.NoError(tt, err)
+			bobDkgResultMessage, err := bobDkg.Result(protocol.Version1)
+			require.NoError(tt, err)
+
+			// Refresh
+			aliceRefreshResultMessage, bobRefreshResultMessage := refreshV1(t, boundCurve, aliceDkgResultMessage, bobDkgResultMessage)
+
+			// sign
+			signV1(t, boundCurve, aliceRefreshResultMessage, bobRefreshResultMessage)
+		})
+	}
+}
+
+// DKG V0 > DKG V1 > Refresh > Sign
+func TestRefreshFromV0Proto(t *testing.T) {
+	t.Parallel()
+	curve := curves.K256()
+
+	// DKG v0
+	params, err := v0.NewParams(btcec.S256(), curves.K256Scalar{})
+	require.NoError(t, err)
+
+	alice := v0.NewAliceDkg(params)
+	bob := v0.NewBobDkg(params)
+	_, _ = runV0IteratedProtocol(alice, bob)
+
+	aliceBytes, err := v0.EncodeAlice(alice.Alice)
+	require.NoError(t, err)
+	require.NotEmpty(t, aliceBytes)
+	bobBytes, err := v0.EncodeBob(bob.Bob)
+	require.NoError(t, err)
+	require.NotEmpty(t, bobBytes)
+
+	// Convert DKG v0 to v1
+	aliceDkgResultMessage, err := ConvertAliceDkgOutputToV1(params, aliceBytes)
+	require.NoError(t, err)
+
+	bobDkgResultMessage, err := ConvertBobDkgOutputToV1(params, bobBytes)
+	require.NoError(t, err)
+
+	// Refresh
+	aliceRefreshResultMessage, bobRefreshResultMessage := refreshV1(t, curve, aliceDkgResultMessage, bobDkgResultMessage)
+
+	// Sign
+	signV1(t, curve, aliceRefreshResultMessage, bobRefreshResultMessage)
+}
+
 // DKG > Output > NewDklsSign > Sign > Output
 func TestDkgSignProto(t *testing.T) {
 	// Setup
@@ -114,7 +181,7 @@ func TestDkgSignProto(t *testing.T) {
 	bobDkg := NewBobDkg(curve, protocol.Version1)
 
 	// DKG
-	aErr, bErr := runIteratedProtocol(aliceDkg, bobDkg)
+	aErr, bErr := runIteratedProtocol(bobDkg, aliceDkg)
 	require.ErrorIs(t, aErr, protocol.ErrProtocolFinished)
 	require.ErrorIs(t, bErr, protocol.ErrProtocolFinished)
 
@@ -127,14 +194,14 @@ func TestDkgSignProto(t *testing.T) {
 
 	// New DklsSign
 	msg := []byte("As soon as you trust yourself, you will know how to live.")
-	aliceSign, err := NewAliceSign(curve, msg, aliceDkgResultMessage, protocol.Version1)
+	aliceSign, err := NewAliceSign(curve, sha3.New256(), msg, aliceDkgResultMessage, protocol.Version1)
 	require.NoError(t, err)
-	bobSign, err := NewBobSign(curve, msg, bobDkgResultMessage, protocol.Version1)
+	bobSign, err := NewBobSign(curve, sha3.New256(), msg, bobDkgResultMessage, protocol.Version1)
 	require.NoError(t, err)
 
 	// Sign
 	t.Run("sign", func(t *testing.T) {
-		aErr, bErr = runIteratedProtocol(bobSign, aliceSign)
+		aErr, bErr = runIteratedProtocol(aliceSign, bobSign)
 		require.ErrorIs(t, aErr, protocol.ErrProtocolFinished)
 		require.ErrorIs(t, bErr, protocol.ErrProtocolFinished)
 	})
@@ -200,7 +267,7 @@ func TestSignColdStart(t *testing.T) {
 	err = json.Unmarshal(bobDkg, bobDkgMessage)
 	require.NoError(t, err)
 
-	signV1(aliceDkgMessage, bobDkgMessage, t)
+	signV1(t, curves.K256(), aliceDkgMessage, bobDkgMessage)
 }
 
 func TestEncodeDecode(t *testing.T) {
@@ -208,7 +275,7 @@ func TestEncodeDecode(t *testing.T) {
 
 	alice := NewAliceDkg(curve, protocol.Version1)
 	bob := NewBobDkg(curve, protocol.Version1)
-	_, _ = runIteratedProtocol(alice, bob)
+	_, _ = runIteratedProtocol(bob, alice)
 
 	var aliceBytes []byte
 	var bobBytes []byte
@@ -350,23 +417,23 @@ func convertV0AndSignV1(params *v0.Params, aliceBytes []byte, bobBytes []byte, t
 
 	bobDkgResultMessage, err := ConvertBobDkgOutputToV1(params, bobBytes)
 	require.NoError(t, err)
-	signV1(aliceDkgResultMessage, bobDkgResultMessage, t)
+	signV1(t, curves.K256(), aliceDkgResultMessage, bobDkgResultMessage)
 }
 
-func signV1(aliceDkgResultMessage *protocol.Message, bobDkgResultMessage *protocol.Message, t *testing.T) {
+func signV1(t *testing.T, curve *curves.Curve, aliceDkgResultMessage *protocol.Message, bobDkgResultMessage *protocol.Message) {
+	t.Helper()
 	// New DklsSign
-	curve := curves.K256()
 	msg := []byte("As soon as you trust yourself, you will know how to live.")
-	aliceSign, err := NewAliceSign(curve, msg, aliceDkgResultMessage, protocol.Version1)
+	aliceSign, err := NewAliceSign(curve, sha3.New256(), msg, aliceDkgResultMessage, protocol.Version1)
 	require.NoError(t, err)
-	bobSign, err := NewBobSign(curve, msg, bobDkgResultMessage, protocol.Version1)
+	bobSign, err := NewBobSign(curve, sha3.New256(), msg, bobDkgResultMessage, protocol.Version1)
 	require.NoError(t, err)
 
 	// Sign
 	var aErr error
 	var bErr error
 	t.Run("sign", func(t *testing.T) {
-		aErr, bErr = runIteratedProtocol(bobSign, aliceSign)
+		aErr, bErr = runIteratedProtocol(aliceSign, bobSign)
 		require.ErrorIs(t, aErr, protocol.ErrProtocolFinished)
 		require.ErrorIs(t, bErr, protocol.ErrProtocolFinished)
 	})
@@ -411,4 +478,30 @@ func signV1(aliceDkgResultMessage *protocol.Message, bobDkgResultMessage *protoc
 			"signature failed verification",
 		)
 	})
+}
+
+func refreshV1(t *testing.T, curve *curves.Curve, aliceDkgResultMessage, bobDkgResultMessage *protocol.Message) (aliceRefreshResultMessage, bobRefreshResultMessage *protocol.Message) {
+	t.Helper()
+	aliceRefresh, err := NewAliceRefresh(curve, aliceDkgResultMessage, protocol.Version1)
+	require.NoError(t, err)
+	bobRefresh, err := NewBobRefresh(curve, bobDkgResultMessage, protocol.Version1)
+	require.NoError(t, err)
+
+	aErr, bErr := runIteratedProtocol(aliceRefresh, bobRefresh)
+	require.ErrorIs(t, aErr, protocol.ErrProtocolFinished)
+	require.ErrorIs(t, bErr, protocol.ErrProtocolFinished)
+
+	aliceRefreshResultMessage, err = aliceRefresh.Result(protocol.Version1)
+	require.NoError(t, err)
+	require.NotNil(t, aliceRefreshResultMessage)
+	_, err = DecodeAliceRefreshResult(aliceRefreshResultMessage)
+	require.NoError(t, err)
+
+	bobRefreshResultMessage, err = bobRefresh.Result(protocol.Version1)
+	require.NoError(t, err)
+	require.NotNil(t, bobRefreshResultMessage)
+	_, err = DecodeBobRefreshResult(bobRefreshResultMessage)
+	require.NoError(t, err)
+
+	return aliceRefreshResultMessage, bobRefreshResultMessage
 }

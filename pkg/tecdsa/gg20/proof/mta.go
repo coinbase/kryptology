@@ -11,13 +11,12 @@ import (
 	"crypto/elliptic"
 	"encoding/json"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"math/big"
 
-	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
-
 	"github.com/coinbase/kryptology/pkg/core"
+	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/paillier"
+	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/dealer"
 )
 
 // ResponseProofParams encapsulates the values over which a range proof (2) is computed.
@@ -464,13 +463,13 @@ func (pi Range1Proof) Verify(pp *Proof1Params) error {
 	// step 3
 	uHat, err := pi.uHatConstruct(pp)
 	if err != nil {
-		return fmt.Errorf("u hat construction error: %s", err)
+		return fmt.Errorf("u hat construction error: %w", err)
 	}
 
 	// step 4
 	wHat, err := pi.wHatConstruct(pp)
 	if err != nil {
-		return fmt.Errorf("w hat construction error: %s", err)
+		return fmt.Errorf("w hat construction error: %w", err)
 	}
 
 	// 5: Compute e = H(g,q,Pk,N~,h_1,h_2,c,z,uHat,wHat)
@@ -726,17 +725,17 @@ func verify2Proof(pi Range2Proof, pp *verifyProof2Params, wc bool) error {
 	// step 5
 	zHatTick, err := pi.zHatTickConstruct(pp)
 	if err != nil {
-		return fmt.Errorf("z hat tick construction error: %s", err)
+		return fmt.Errorf("z hat tick construction error: %w", err)
 	}
 	// step 6
 	vHat, err := pi.vHatConstruct(pp)
 	if err != nil {
-		return fmt.Errorf("v hat construction error: %s", err)
+		return fmt.Errorf("v hat construction error: %w", err)
 	}
 	// step 7
 	wHat, err := pi.wHatConstruct(pp)
 	if err != nil {
-		return fmt.Errorf("w hat construction error: %s", err)
+		return fmt.Errorf("w hat construction error: %w", err)
 	}
 
 	var uHat *curves.EcPoint
@@ -744,7 +743,7 @@ func verify2Proof(pi Range2Proof, pp *verifyProof2Params, wc bool) error {
 		// steps 3, 4
 		uHat, err = pi.uHatConstruct(pp)
 		if err != nil {
-			return fmt.Errorf("u hat construction error: %s", err)
+			return fmt.Errorf("u hat construction error: %w", err)
 		}
 	}
 

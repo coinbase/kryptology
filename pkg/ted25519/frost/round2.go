@@ -10,9 +10,11 @@ import (
 	"bytes"
 	"encoding/gob"
 	"fmt"
+
+	"github.com/pkg/errors"
+
 	"github.com/coinbase/kryptology/internal"
 	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/pkg/errors"
 )
 
 // Round2Bcast contains values that will be broadcast to other signers after completion of round 2.

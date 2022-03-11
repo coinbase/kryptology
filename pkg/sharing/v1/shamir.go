@@ -9,8 +9,9 @@ package v1
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"math/big"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 // ShamirShare is the data from splitting a secret
@@ -119,7 +120,7 @@ func (s *Shamir) GetSharesAndPolynomial(secret []byte) ([]*ShamirShare, *polynom
 	elemSecret := s.field.NewElement(intSecret)
 	poly, err := newPoly(elemSecret, s.threshold)
 	if err != nil {
-		return nil, nil, fmt.Errorf("failed to generate polynomial: %v", err)
+		return nil, nil, fmt.Errorf("failed to generate polynomial: %w", err)
 	}
 
 	shares := make([]*ShamirShare, s.limit)

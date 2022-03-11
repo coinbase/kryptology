@@ -8,9 +8,9 @@ package participant
 
 import (
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 
 	"github.com/coinbase/kryptology/pkg/core"
+	"github.com/coinbase/kryptology/pkg/core/curves"
 	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/proof"
 )
 

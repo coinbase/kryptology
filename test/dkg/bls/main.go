@@ -9,10 +9,10 @@ package main
 import (
 	"flag"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	sharing "github.com/coinbase/kryptology/pkg/sharing/v1"
 
+	"github.com/coinbase/kryptology/pkg/core/curves"
 	dkg "github.com/coinbase/kryptology/pkg/dkg/gennaro"
+	sharing "github.com/coinbase/kryptology/pkg/sharing/v1"
 	bls "github.com/coinbase/kryptology/pkg/signatures/bls/bls_sig"
 )
 

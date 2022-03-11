@@ -10,8 +10,9 @@ import (
 	"math/big"
 	"testing"
 
-	"github.com/coinbase/kryptology/internal"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/internal"
 )
 
 var (
@@ -196,8 +197,8 @@ func TestAdd(t *testing.T) {
 	// All the tests!
 	for _, test := range tests {
 		actual, err := Add(test.x, test.y, test.m)
-		internal.AssertNoError(t, err)
-		internal.AssertBigIntEq(t, actual, test.expected)
+		require.NoError(t, err)
+		require.Zero(t, actual.Cmp(test.expected))
 	}
 }
 
@@ -213,10 +214,10 @@ func TestAddInvariants(t *testing.T) {
 
 				// Addition is commutative
 				z0, err := Add(x, y, m)
-				internal.AssertNoError(t, err)
+				require.NoError(t, err)
 				z1, err := Add(y, x, m)
-				internal.AssertNoError(t, err)
-				internal.AssertBigIntEq(t, z0, z1)
+				require.NoError(t, err)
+				require.Equal(t, z0, z1)
 
 				// Addition is transitive: x+x+y == y+x+x == x+y+x
 				a0, _ := Add(x, x, m)
@@ -228,8 +229,8 @@ func TestAddInvariants(t *testing.T) {
 				a2, _ := Add(x, y, m)
 				a2, _ = Add(a2, x, m)
 
-				internal.AssertBigIntEq(t, a0, a1)
-				internal.AssertBigIntEq(t, a1, a2)
+				require.Equal(t, a0, a1)
+				require.Equal(t, a1, a2)
 			}
 		}
 	}
@@ -262,8 +263,8 @@ func TestMul(t *testing.T) {
 	// All the tests!
 	for _, test := range tests {
 		z, err := Mul(test.x, test.y, test.m)
-		internal.AssertNoError(t, err)
-		internal.AssertBigIntEq(t, z, test.expected)
+		require.NoError(t, err)
+		require.Zero(t, z.Cmp(test.expected))
 	}
 }
 
@@ -279,10 +280,10 @@ func TestMulInvariants(t *testing.T) {
 
 				// Mul is commutative
 				a, err := Mul(x, y, m)
-				internal.AssertNoError(t, err)
+				require.NoError(t, err)
 				aʹ, err := Mul(y, x, m)
-				internal.AssertNoError(t, err)
-				internal.AssertBigIntEq(t, a, aʹ)
+				require.NoError(t, err)
+				require.Equal(t, a, aʹ)
 
 				// Mul is transitive: (xx)y == (xy)x
 				z, _ := Mul(x, x, m)
@@ -290,7 +291,7 @@ func TestMulInvariants(t *testing.T) {
 
 				zʹ, _ := Mul(x, y, m)
 				zʹ, _ = Mul(zʹ, x, m)
-				internal.AssertBigIntEq(t, z, zʹ)
+				require.Equal(t, z, zʹ)
 			}
 		}
 	}
@@ -325,7 +326,7 @@ func TestNeg(t *testing.T) {
 
 	for _, test := range tests {
 		r, err := Neg(test.x, test.m)
-		internal.AssertNoError(t, err)
+		require.NoError(t, err)
 		if r.Cmp(test.e) != 0 {
 			t.Errorf("TestNeg failed. Expected %v, got: %v ", test.e, r)
 		}
@@ -343,7 +344,7 @@ func TestNegInvariants(t *testing.T) {
 
 	for _, test := range tests {
 		r, err := Neg(test.x, test.m)
-		internal.AssertNoError(t, err)
+		require.NoError(t, err)
 		if r.Cmp(test.e) != 0 {
 			t.Errorf("TestNeg failed. Expected %v, got: %v ", test.e, r)
 		}
@@ -358,9 +359,9 @@ func TestRandDistinct(t *testing.T) {
 	c, _ := Rand(n)
 
 	// ❄️❄️❄️
-	internal.AssertBigIntNe(t, a, b)
-	internal.AssertBigIntNe(t, a, c)
-	internal.AssertBigIntNe(t, b, c)
+	require.NotEqual(t, a, b)
+	require.NotEqual(t, a, c)
+	require.NotEqual(t, b, c)
 }
 
 // Rand values should be O(log2(m)) bits
@@ -371,7 +372,7 @@ func TestRandIsExpectedLength(t *testing.T) {
 	// Generate many nonces, keep the max
 	for i := 0; i < trials; i++ {
 		r, err := Rand(m)
-		internal.AssertNoError(t, err)
+		require.NoError(t, err)
 
 		// Nonces should be < m
 		if r.Cmp(m) != -1 {
@@ -411,7 +412,7 @@ func testUnique(t *testing.T, iterations int, sampleFunc func() *big.Int) {
 	for i := 0; i < iterations; i++ {
 		// Retrieve a sample
 		sample := sampleFunc()
-		internal.AssertNotNil(t, sample)
+		require.NotNil(t, sample)
 
 		// Copy the bytes from slice>array
 		copy(x[:], sample.Bytes())
@@ -432,17 +433,17 @@ func TestRandNotZeroNotOne(t *testing.T) {
 
 	for i := 0; i < iterations; i++ {
 		r, err := Rand(m)
-		internal.AssertNoError(t, err)
+		require.NoError(t, err)
 		// Not 0 or 1
-		internal.AssertBigIntNe(t, r, Zero)
-		internal.AssertBigIntNe(t, r, One)
+		require.NotEqual(t, r, Zero)
+		require.NotEqual(t, r, One)
 	}
 }
 
 func TestRand_NilModulusErrors(t *testing.T) {
 	r, err := Rand(nil)
-	internal.AssertNil(t, r)
-	internal.AssertError(t, err, internal.ErrNilArguments.Error())
+	require.Nil(t, r)
+	require.Contains(t, err.Error(), internal.ErrNilArguments.Error())
 }
 
 // Double-inverse is the identity function in fields

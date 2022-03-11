@@ -12,11 +12,11 @@ import (
 	"crypto/subtle"
 	"encoding/gob"
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
 	"io"
 	"math/big"
 
 	"github.com/coinbase/kryptology/pkg/core"
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 type (

@@ -3,8 +3,9 @@ package native
 import (
 	"encoding/binary"
 	"fmt"
-	"github.com/coinbase/kryptology/internal"
 	"math/big"
+
+	"github.com/coinbase/kryptology/internal"
 )
 
 // FieldLimbs is the number of limbs needed to represent this field

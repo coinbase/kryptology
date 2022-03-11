@@ -7,9 +7,11 @@
 package accumulator
 
 import (
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/stretchr/testify/require"
 	"testing"
+
+	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
 func TestNewAccumulator100(t *testing.T) {
@@ -147,7 +149,7 @@ func TestAccumulatorMarshal(t *testing.T) {
 
 	e := &Accumulator{curve.PointG1.Generator()}
 	_ = e.UnmarshalBinary(data)
-	require.Equal(t, e.value, point)
+	require.True(t, e.value.Equal(point))
 }
 
 func TestUpdate(t *testing.T) {

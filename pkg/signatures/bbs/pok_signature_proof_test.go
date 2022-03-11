@@ -10,10 +10,11 @@ import (
 	crand "crypto/rand"
 	"testing"
 
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/coinbase/kryptology/pkg/signatures/common"
 	"github.com/gtank/merlin"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
+	"github.com/coinbase/kryptology/pkg/signatures/common"
 )
 
 func TestPokSignatureProofSomeMessagesRevealed(t *testing.T) {
@@ -26,7 +27,8 @@ func TestPokSignatureProofSomeMessagesRevealed(t *testing.T) {
 	require.False(t, pk.value.IsIdentity())
 	_, ok := pk.value.(*curves.PointBls12381G2)
 	require.True(t, ok)
-	generators := new(MessageGenerators).Init(pk, 4)
+	generators, err := new(MessageGenerators).Init(pk, 4)
+	require.NoError(t, err)
 	msgs := []curves.Scalar{
 		curve.Scalar.New(2),
 		curve.Scalar.New(3),
@@ -100,7 +102,8 @@ func TestPokSignatureProofAllMessagesRevealed(t *testing.T) {
 	require.False(t, pk.value.IsIdentity())
 	_, ok := pk.value.(*curves.PointBls12381G2)
 	require.True(t, ok)
-	generators := new(MessageGenerators).Init(pk, 4)
+	generators, err := new(MessageGenerators).Init(pk, 4)
+	require.NoError(t, err)
 	msgs := []curves.Scalar{
 		curve.Scalar.New(2),
 		curve.Scalar.New(3),
@@ -176,7 +179,8 @@ func TestPokSignatureProofAllMessagesHidden(t *testing.T) {
 	require.False(t, pk.value.IsIdentity())
 	_, ok := pk.value.(*curves.PointBls12381G2)
 	require.True(t, ok)
-	generators := new(MessageGenerators).Init(pk, 4)
+	generators, err := new(MessageGenerators).Init(pk, 4)
+	require.NoError(t, err)
 	msgs := []curves.Scalar{
 		curve.Scalar.New(2),
 		curve.Scalar.New(3),
@@ -248,7 +252,8 @@ func TestPokSignatureProofMarshalBinary(t *testing.T) {
 	require.False(t, pk.value.IsIdentity())
 	_, ok := pk.value.(*curves.PointBls12381G2)
 	require.True(t, ok)
-	generators := new(MessageGenerators).Init(pk, 4)
+	generators, err := new(MessageGenerators).Init(pk, 4)
+	require.NoError(t, err)
 	msgs := []curves.Scalar{
 		curve.Scalar.New(2),
 		curve.Scalar.New(3),

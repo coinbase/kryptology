@@ -12,6 +12,7 @@ import (
 	"crypto/rand"
 	"crypto/subtle"
 	"fmt"
+
 	"github.com/pkg/errors"
 	"golang.org/x/crypto/sha3"
 

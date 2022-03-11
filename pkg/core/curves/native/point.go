@@ -4,12 +4,13 @@ import (
 	"crypto/sha256"
 	"crypto/sha512"
 	"fmt"
-	"github.com/pkg/errors"
-	"golang.org/x/crypto/blake2b"
-	"golang.org/x/crypto/sha3"
 	"hash"
 	"io"
 	"math/big"
+
+	"github.com/pkg/errors"
+	"golang.org/x/crypto/blake2b"
+	"golang.org/x/crypto/sha3"
 )
 
 // EllipticPointHashType is to indicate which expand operation is used
@@ -313,11 +314,24 @@ func (p *EllipticPoint) Mul(point *EllipticPoint, scalar *Field) *EllipticPoint 
 
 // Equal returns 1 if the two points are equal 0 otherwise.
 func (p *EllipticPoint) Equal(rhs *EllipticPoint) int {
-	l := new(EllipticPoint).Set(p)
-	r := new(EllipticPoint).Set(rhs)
-	p.Arithmetic.ToAffine(l, l)
-	p.Arithmetic.ToAffine(r, r)
-	return l.X.Equal(r.X) & l.Y.Equal(r.Y)
+	var x1, x2, y1, y2 Field
+
+	x1.Arithmetic = p.X.Arithmetic
+	x2.Arithmetic = p.X.Arithmetic
+	y1.Arithmetic = p.Y.Arithmetic
+	y2.Arithmetic = p.Y.Arithmetic
+
+	x1.Mul(p.X, rhs.Z)
+	x2.Mul(rhs.X, p.Z)
+
+	y1.Mul(p.Y, rhs.Z)
+	y2.Mul(rhs.Y, p.Z)
+
+	e1 := p.Z.IsZero()
+	e2 := rhs.Z.IsZero()
+
+	// Both at infinity or coordinates are the same
+	return (e1 & e2) | (^e1 & ^e2)&x1.Equal(&x2)&y1.Equal(&y2)
 }
 
 // Set copies clone into p

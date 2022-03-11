@@ -11,9 +11,8 @@ import (
 	"fmt"
 	"math/big"
 
-	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/proof"
-
 	"github.com/coinbase/kryptology/pkg/core"
+	"github.com/coinbase/kryptology/pkg/tecdsa/gg20/proof"
 )
 
 // Round3Bcast represents the value to be broadcast to all players

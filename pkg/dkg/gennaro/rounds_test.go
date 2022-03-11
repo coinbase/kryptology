@@ -8,13 +8,13 @@ package gennaro
 
 import (
 	"fmt"
-	"github.com/coinbase/kryptology/pkg/core/curves"
-	"github.com/coinbase/kryptology/pkg/sharing/v1"
 	"testing"
 
 	"github.com/btcsuite/btcd/btcec"
-	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+
+	"github.com/coinbase/kryptology/pkg/core/curves"
+	v1 "github.com/coinbase/kryptology/pkg/sharing/v1"
 )
 
 func TestParticipantRound1Works(t *testing.T) {
