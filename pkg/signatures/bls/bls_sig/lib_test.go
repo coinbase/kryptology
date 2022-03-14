@@ -249,3 +249,37 @@ func TestThresholdizeSecretKeyCountsCorrect(t *testing.T) {
 		}
 	}
 }
+
+func TestSecretKeyShareUnmarshalBinary(t *testing.T) {
+	sk := genSecretKey(t)
+	sks, err := thresholdizeSecretKey(sk, 3, 5)
+	if err != nil {
+		t.Errorf("Expected thresholdizeSecretKey to pass but failed.")
+	}
+
+	for i, sh := range sks {
+		b1, err := sh.MarshalBinary()
+		if err != nil {
+			t.Errorf("%d - expected MarshalBinary to pass but failed. sh=%v", i, sh)
+		}
+
+		// UnmarshalBinary b1 to new SecretKeyShare
+		sh1 := new(SecretKeyShare)
+		err = sh1.UnmarshalBinary(b1)
+		if err != nil {
+			t.Errorf("%d - expected UnmarshalBinary to pass but failed. sh=%v", i, sh)
+		}
+
+		// zero bytes slice with length equal to SecretKeySize
+		zeros := make([]byte, SecretKeySize)
+		b2, err := sh1.MarshalBinary()
+		if err != nil {
+			t.Errorf("%d - expected MarshalBinary to pass but failed. sh1=%v", i, sh1)
+		}
+
+		// Check if []bytes from UnmarshalBinary != zeros && Initial bytes(b1) == Final bytes(b2)
+		if bytes.Equal(zeros, b2) && !bytes.Equal(b1, b2) {
+			t.Errorf("%d - expected UnmarshalBinary to give non zeros value but failed. sh1=%v, sh=%v", i, sh1, sh)
+		}
+	}
+}
