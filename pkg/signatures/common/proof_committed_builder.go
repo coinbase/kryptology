@@ -62,6 +62,11 @@ func (pcb *ProofCommittedBuilder) Get(index int) (curves.Point, curves.Scalar) {
 	return pcb.points[index], pcb.scalars[index]
 }
 
+// GetAll returns every point and scalar
+func (pcb *ProofCommittedBuilder) GetAll() (*[]curves.Point, *[]curves.Scalar) {
+	return &pcb.points, &pcb.scalars
+}
+
 // GetChallengeContribution returns the bytes that should be added to
 // a sigma protocol transcript for generating the challenge
 func (pcb ProofCommittedBuilder) GetChallengeContribution() []byte {
