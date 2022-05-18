@@ -86,9 +86,9 @@ func NewRangeProof(curve *curves.Curve) *RangeProof {
 // g, h, u are unique points used as generators for the blinding factor
 // transcript is a merlin transcript to be used for the fiat shamir heuristic.
 func (prover *RangeProver) Prove(v, gamma curves.Scalar, n int, proofGenerators RangeProofGenerators, transcript *merlin.Transcript) (*RangeProof, error) {
-	// n must be less than the number of generators generated
+	// n must be less than or equal to the number of generators generated
 	if n > len(prover.generators.G) {
-		return nil, errors.New("ipp vector length must be less than maxVectorLength")
+		return nil, errors.New("ipp vector length must be less than or equal to maxVectorLength")
 	}
 	// In case where len(a) is less than number of generators precomputed by prover, trim to length
 	proofG := prover.generators.G[0:n]

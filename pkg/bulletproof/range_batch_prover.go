@@ -17,9 +17,9 @@ func (prover *RangeProver) BatchProve(v, gamma []curves.Scalar, n int, proofGene
 	// Define nm as the total bits required for secrets, calculated as number of secrets * n
 	m := len(v)
 	nm := n * m
-	// nm must be less than the number of generators generated
+	// nm must be less than or equal to the number of generators generated
 	if nm > len(prover.generators.G) {
-		return nil, errors.New("ipp vector length must be less than maxVectorLength")
+		return nil, errors.New("ipp vector length must be less than or equal to maxVectorLength")
 	}
 
 	// In case where nm is less than number of generators precomputed by prover, trim to length
