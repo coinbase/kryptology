@@ -9,7 +9,7 @@ import (
 
 // RangeVerifier is the struct used to verify RangeProofs
 // It specifies which curve to use and holds precomputed generators
-// See NewRangeVerifier() for verifier initialization
+// See NewRangeVerifier() for verifier initialization.
 type RangeVerifier struct {
 	curve       curves.Curve
 	generators  *ippGenerators
@@ -19,7 +19,7 @@ type RangeVerifier struct {
 // NewRangeVerifier initializes a new verifier
 // It uses the specified domain to generate generators for vectors of at most maxVectorLength
 // A verifier can be used to verify range proofs for vectors of length less than or equal to maxVectorLength
-// A verifier is defined by an explicit curve
+// A verifier is defined by an explicit curve.
 func NewRangeVerifier(maxVectorLength int, rangeDomain, ippDomain []byte, curve curves.Curve) (*RangeVerifier, error) {
 	generators, err := getGeneratorPoints(maxVectorLength, rangeDomain, curve)
 	if err != nil {
@@ -38,8 +38,8 @@ func NewRangeVerifier(maxVectorLength int, rangeDomain, ippDomain []byte, curve 
 // capV is a commitment to v using blinding factor gamma
 // n is the power that specifies the upper bound of the range, ie. 2^n
 // g, h, u are unique points used as generators for the blinding factor
-// transcript is a merlin transcript to be used for the fiat shamir heuristic
-func (verifier *RangeVerifier) Verify(proof *RangeProof, capV, g, h, u curves.Point, n int, transcript *merlin.Transcript) (bool, error) {
+// transcript is a merlin transcript to be used for the fiat shamir heuristic.
+func (verifier *RangeVerifier) Verify(proof *RangeProof, capV curves.Point, proofGenerators RangeProofGenerators, n int, transcript *merlin.Transcript) (bool, error) {
 	// Length of vectors must be less than the number of generators generated
 	if n > len(verifier.generators.G) {
 		return false, errors.New("ipp vector length must be less than maxVectorLength")
@@ -72,7 +72,7 @@ func (verifier *RangeVerifier) Verify(proof *RangeProof, capV, g, h, u curves.Po
 	}
 
 	// Check tHat: L65, pg20
-	tHatIsValid := verifier.checktHat(proof, capV, g, h, deltayz, x, z)
+	tHatIsValid := verifier.checktHat(proof, capV, proofGenerators.g, proofGenerators.h, deltayz, x, z)
 	if !tHatIsValid {
 		return false, errors.New("rangeproof verify tHat is invalid")
 	}
@@ -83,12 +83,12 @@ func (verifier *RangeVerifier) Verify(proof *RangeProof, capV, g, h, u curves.Po
 		return false, errors.Wrap(err, "rangeproof verify")
 	}
 
-	capPhmu, err := getPhmu(proofG, hPrime, h, proof.capA, proof.capS, x, y, z, proof.mu, n, verifier.curve)
+	capPhmu, err := getPhmu(proofG, hPrime, proofGenerators.h, proof.capA, proof.capS, x, y, z, proof.mu, n, verifier.curve)
 	if err != nil {
 		return false, errors.Wrap(err, "rangeproof verify")
 	}
 
-	ippVerified, err := verifier.ippVerifier.VerifyFromRangeProof(proofG, hPrime, capPhmu, u.Mul(w), proof.tHat, proof.ipp, transcript)
+	ippVerified, err := verifier.ippVerifier.VerifyFromRangeProof(proofG, hPrime, capPhmu, proofGenerators.u.Mul(w), proof.tHat, proof.ipp, transcript)
 	if err != nil {
 		return false, errors.Wrap(err, "rangeproof verify")
 	}
@@ -96,8 +96,8 @@ func (verifier *RangeVerifier) Verify(proof *RangeProof, capV, g, h, u curves.Po
 	return ippVerified, nil
 }
 
-// L65, pg20
-func (verifier *RangeVerifier) checktHat(proof *RangeProof, capV, g, h curves.Point, deltayz, x, z curves.Scalar) bool {
+// L65, pg20.
+func (*RangeVerifier) checktHat(proof *RangeProof, capV, g, h curves.Point, deltayz, x, z curves.Scalar) bool {
 	// g^tHat * h^tau_x
 	gtHat := g.Mul(proof.tHat)
 	htaux := h.Mul(proof.taux)
@@ -114,7 +114,7 @@ func (verifier *RangeVerifier) checktHat(proof *RangeProof, capV, g, h curves.Po
 	return lhs.Equal(rhs)
 }
 
-// gethPrime calculates new h prime generators as defined in L64 on pg20
+// gethPrime calculates new h prime generators as defined in L64 on pg20.
 func gethPrime(h []curves.Point, y curves.Scalar, curve curves.Curve) ([]curves.Point, error) {
 	hPrime := make([]curves.Point, len(h))
 	yInv, err := y.Invert()
@@ -130,7 +130,7 @@ func gethPrime(h []curves.Point, y curves.Scalar, curve curves.Curve) ([]curves.
 
 // Obtain P used for IPP verification
 // See L67 on pg20
-// Note P on L66 includes blinding factor hmu, this method removes that factor
+// Note P on L66 includes blinding factor hmu, this method removes that factor.
 func getPhmu(proofG, proofHPrime []curves.Point, h, capA, capS curves.Point, x, y, z, mu curves.Scalar, n int, curve curves.Curve) (curves.Point, error) {
 	// h'^(z*y^n + z^2*2^n)
 	zyn := multiplyScalarToScalarVector(z, getknVector(y, n, curve))
@@ -147,9 +147,6 @@ func getPhmu(proofG, proofHPrime []curves.Point, h, capA, capS curves.Point, x, 
 	// g^-z --> -z*<1,g>
 	onen := get1nVector(n, curve)
 	zNeg := z.Neg()
-	if err != nil {
-		return nil, errors.Wrap(err, "getPhmu")
-	}
 	zinvonen := multiplyScalarToScalarVector(zNeg, onen)
 	zgdotonen := curve.Point.SumOfProducts(proofG, zinvonen)
 
@@ -161,7 +158,7 @@ func getPhmu(proofG, proofHPrime []curves.Point, h, capA, capS curves.Point, x, 
 	return Phmu, nil
 }
 
-// Delta function for delta(y,z), See (39) on pg18
+// Delta function for delta(y,z), See (39) on pg18.
 func deltayz(y, z curves.Scalar, n int, curve curves.Curve) (curves.Scalar, error) {
 	// z - z^2
 	zMinuszsquare := z.Sub(z.Square())

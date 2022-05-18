@@ -13,7 +13,7 @@ import (
 	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
-// generators contains a list of points to be used as generators for bulletproofs
+// generators contains a list of points to be used as generators for bulletproofs.
 type generators []curves.Point
 
 // ippGenerators holds generators necessary for an Inner Product Proof

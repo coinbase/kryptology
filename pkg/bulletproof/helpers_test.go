@@ -68,18 +68,18 @@ func TestSplitListofPointsZeroLength(t *testing.T) {
 	require.Error(t, err)
 }
 
-func randScalarVec(len int, curve curves.Curve) []curves.Scalar {
-	var out []curves.Scalar
-	for i := 0; i < len; i++ {
-		out = append(out, curve.Scalar.Random(crand.Reader))
+func randScalarVec(length int, curve curves.Curve) []curves.Scalar {
+	out := make([]curves.Scalar, length)
+	for i := 0; i < length; i++ {
+		out[i] = curve.Scalar.Random(crand.Reader)
 	}
 	return out
 }
 
-func randPointVec(len int, curve curves.Curve) []curves.Point {
-	var out []curves.Point
-	for i := 0; i < len; i++ {
-		out = append(out, curve.Point.Random(crand.Reader))
+func randPointVec(length int, curve curves.Curve) []curves.Point {
+	out := make([]curves.Point, length)
+	for i := 0; i < length; i++ {
+		out[i] = curve.Point.Random(crand.Reader)
 	}
 	return out
 }

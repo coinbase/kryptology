@@ -12,7 +12,7 @@ import (
 	"github.com/coinbase/kryptology/pkg/core/curves"
 )
 
-// innerProduct takes two lists of scalars (a, b) and performs the dot product returning a single scalar
+// innerProduct takes two lists of scalars (a, b) and performs the dot product returning a single scalar.
 func innerProduct(a, b []curves.Scalar) (curves.Scalar, error) {
 	if len(a) != len(b) {
 		return nil, errors.New("length of scalar vectors must be the same")
@@ -31,7 +31,7 @@ func innerProduct(a, b []curves.Scalar) (curves.Scalar, error) {
 	return innerProduct, nil
 }
 
-// splitPointVector takes a vector of points, splits it in half returning each half
+// splitPointVector takes a vector of points, splits it in half returning each half.
 func splitPointVector(points []curves.Point) ([]curves.Point, []curves.Point, error) {
 	if len(points) < 1 {
 		return nil, nil, errors.New("length of points must be at least one")
@@ -45,7 +45,7 @@ func splitPointVector(points []curves.Point) ([]curves.Point, []curves.Point, er
 	return firstHalf, secondHalf, nil
 }
 
-// splitScalarVector takes a vector of scalars, splits it in half returning each half
+// splitScalarVector takes a vector of scalars, splits it in half returning each half.
 func splitScalarVector(scalars []curves.Scalar) ([]curves.Scalar, []curves.Scalar, error) {
 	if len(scalars) < 1 {
 		return nil, nil, errors.New("length of scalars must be at least one")
@@ -59,7 +59,7 @@ func splitScalarVector(scalars []curves.Scalar) ([]curves.Scalar, []curves.Scala
 	return firstHalf, secondHalf, nil
 }
 
-// multiplyScalarToPointVector takes a single scalar and a list of points, multiplies each point by scalar
+// multiplyScalarToPointVector takes a single scalar and a list of points, multiplies each point by scalar.
 func multiplyScalarToPointVector(x curves.Scalar, g []curves.Point) []curves.Point {
 	products := make([]curves.Point, len(g))
 	for i, gElem := range g {
@@ -70,7 +70,7 @@ func multiplyScalarToPointVector(x curves.Scalar, g []curves.Point) []curves.Poi
 	return products
 }
 
-// multiplyScalarToScalarVector takes a single scalar (x) and a list of scalars (a), multiplies each scalar in the vector by the scalar
+// multiplyScalarToScalarVector takes a single scalar (x) and a list of scalars (a), multiplies each scalar in the vector by the scalar.
 func multiplyScalarToScalarVector(x curves.Scalar, a []curves.Scalar) []curves.Scalar {
 	products := make([]curves.Scalar, len(a))
 	for i, aElem := range a {
@@ -81,7 +81,7 @@ func multiplyScalarToScalarVector(x curves.Scalar, a []curves.Scalar) []curves.S
 	return products
 }
 
-// multiplyPairwisePointVectors takes two lists of points (g, h) and performs a pairwise multiplication returning a list of points
+// multiplyPairwisePointVectors takes two lists of points (g, h) and performs a pairwise multiplication returning a list of points.
 func multiplyPairwisePointVectors(g, h []curves.Point) ([]curves.Point, error) {
 	if len(g) != len(h) {
 		return nil, errors.New("length of point vectors must be the same")
@@ -94,7 +94,7 @@ func multiplyPairwisePointVectors(g, h []curves.Point) ([]curves.Point, error) {
 	return product, nil
 }
 
-// multiplyPairwiseScalarVectors takes two lists of points (a, b) and performs a pairwise multiplication returning a list of scalars
+// multiplyPairwiseScalarVectors takes two lists of points (a, b) and performs a pairwise multiplication returning a list of scalars.
 func multiplyPairwiseScalarVectors(a, b []curves.Scalar) ([]curves.Scalar, error) {
 	if len(a) != len(b) {
 		return nil, errors.New("length of point vectors must be the same")
@@ -107,7 +107,7 @@ func multiplyPairwiseScalarVectors(a, b []curves.Scalar) ([]curves.Scalar, error
 	return product, nil
 }
 
-// addPairwiseScalarVectors takes two lists of scalars (a, b) and performs a pairwise addition returning a list of scalars
+// addPairwiseScalarVectors takes two lists of scalars (a, b) and performs a pairwise addition returning a list of scalars.
 func addPairwiseScalarVectors(a, b []curves.Scalar) ([]curves.Scalar, error) {
 	if len(a) != len(b) {
 		return nil, errors.New("length of scalar vectors must be the same")
@@ -120,7 +120,7 @@ func addPairwiseScalarVectors(a, b []curves.Scalar) ([]curves.Scalar, error) {
 	return sum, nil
 }
 
-// subtractPairwiseScalarVectors takes two lists of scalars (a, b) and performs a pairwise subtraction returning a list of scalars
+// subtractPairwiseScalarVectors takes two lists of scalars (a, b) and performs a pairwise subtraction returning a list of scalars.
 func subtractPairwiseScalarVectors(a, b []curves.Scalar) ([]curves.Scalar, error) {
 	if len(a) != len(b) {
 		return nil, errors.New("length of scalar vectors must be the same")
@@ -132,7 +132,7 @@ func subtractPairwiseScalarVectors(a, b []curves.Scalar) ([]curves.Scalar, error
 	return diff, nil
 }
 
-// invertScalars takes a list of scalars then returns a list with each element inverted
+// invertScalars takes a list of scalars then returns a list with each element inverted.
 func invertScalars(xs []curves.Scalar) ([]curves.Scalar, error) {
 	xinvs := make([]curves.Scalar, len(xs))
 	for i, x := range xs {
@@ -146,36 +146,35 @@ func invertScalars(xs []curves.Scalar) ([]curves.Scalar, error) {
 	return xinvs, nil
 }
 
-// isPowerOfTwo returns whether a number i is a power of two or not
+// isPowerOfTwo returns whether a number i is a power of two or not.
 func isPowerOfTwo(i int) bool {
 	return i&(i-1) == 0
 }
 
 // get2nVector returns a scalar vector 2^n such that [1, 2, 4, ... 2^(n-1)]
 // See k^n and 2^n definitions on pg 12 of https://eprint.iacr.org/2017/1066.pdf
-func get2nVector(len int, curve curves.Curve) []curves.Scalar {
-	vector2n := make([]curves.Scalar, len)
+func get2nVector(length int, curve curves.Curve) []curves.Scalar {
+	vector2n := make([]curves.Scalar, length)
 	vector2n[0] = curve.Scalar.One()
-	vector2n[1] = vector2n[0].Double()
-	for i := 2; i < len; i++ {
+	for i := 1; i < length; i++ {
 		vector2n[i] = vector2n[i-1].Double()
 	}
 	return vector2n
 }
 
-func get1nVector(len int, curve curves.Curve) []curves.Scalar {
-	vector1n := make([]curves.Scalar, len)
-	for i := 0; i < len; i++ {
+func get1nVector(length int, curve curves.Curve) []curves.Scalar {
+	vector1n := make([]curves.Scalar, length)
+	for i := 0; i < length; i++ {
 		vector1n[i] = curve.Scalar.One()
 	}
 	return vector1n
 }
 
-func getknVector(k curves.Scalar, len int, curve curves.Curve) []curves.Scalar {
-	vectorkn := make([]curves.Scalar, len)
+func getknVector(k curves.Scalar, length int, curve curves.Curve) []curves.Scalar {
+	vectorkn := make([]curves.Scalar, length)
 	vectorkn[0] = curve.Scalar.One()
 	vectorkn[1] = k
-	for i := 2; i < len; i++ {
+	for i := 2; i < length; i++ {
 		vectorkn[i] = vectorkn[i-1].Mul(k)
 	}
 	return vectorkn
