@@ -139,11 +139,6 @@ func (pok *PokSignature) GetChallengeContribution(transcript *merlin.Transcript)
 	transcript.AppendMessage([]byte("Proof2"), pok.proof2.GetChallengeContribution())
 }
 
-// GetBlindingValues returns the generators and blinding factors used to commit the messages
-func (poksig *PokSignature) GetBlindingValues() (*[]curves.Point, *[]curves.Scalar) {
-	return poksig.proof2.GetAll()
-}
-
 // GenerateProof converts the blinding factors and secrets into Schnorr proofs
 func (pok *PokSignature) GenerateProof(challenge curves.Scalar) (*PokSignatureProof, error) {
 	proof1, err := pok.proof1.GenerateProof(challenge, pok.secrets1)
