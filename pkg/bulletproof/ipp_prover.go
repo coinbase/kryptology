@@ -16,7 +16,7 @@ import (
 
 // InnerProductProver is the struct used to create InnerProductProofs
 // It specifies which curve to use and holds precomputed generators
-// See NewInnerProductProver() for prover initialization
+// See NewInnerProductProver() for prover initialization.
 type InnerProductProver struct {
 	curve      curves.Curve
 	generators ippGenerators
@@ -47,7 +47,7 @@ type ippRecursion struct {
 // NewInnerProductProver initializes a new prover
 // It uses the specified domain to generate generators for vectors of at most maxVectorLength
 // A prover can be used to construct inner product proofs for vectors of length less than or equal to maxVectorLength
-// A prover is defined by an explicit curve
+// A prover is defined by an explicit curve.
 func NewInnerProductProver(maxVectorLength int, domain []byte, curve curves.Curve) (*InnerProductProver, error) {
 	generators, err := getGeneratorPoints(maxVectorLength, domain, curve)
 	if err != nil {
@@ -57,7 +57,7 @@ func NewInnerProductProver(maxVectorLength int, domain []byte, curve curves.Curv
 }
 
 // NewInnerProductProof initializes a new InnerProductProof for a specified curve
-// This should be used in tandem with UnmarshalBinary() to convert a marshaled proof into the struct
+// This should be used in tandem with UnmarshalBinary() to convert a marshaled proof into the struct.
 func NewInnerProductProof(curve *curves.Curve) *InnerProductProof {
 	var capLs, capRs []curves.Point
 	newProof := InnerProductProof{
@@ -73,7 +73,7 @@ func NewInnerProductProof(curve *curves.Curve) *InnerProductProof {
 // rangeToIPP takes the output of a range proof and converts it into an inner product proof
 // See section 4.2 on pg 20
 // The conversion specifies generators to use (g and hPrime), as well as the two vectors l, r of which the inner product is tHat
-// Additionally, note that the P used for the IPP is in fact P*h^-mu from the range proof
+// Additionally, note that the P used for the IPP is in fact P*h^-mu from the range proof.
 func (prover *InnerProductProver) rangeToIPP(proofG, proofH []curves.Point, l, r []curves.Scalar, tHat curves.Scalar, capPhmuinv, u curves.Point, transcript *merlin.Transcript) (*InnerProductProof, error) {
 	// Note that P as a witness is only g^l * h^r
 	// P needs to be in the form of g^l * h^r * u^<l,r>
@@ -131,7 +131,7 @@ func (prover *InnerProductProver) getP(a, b []curves.Scalar, u curves.Point) (cu
 
 // Prove executes the prover protocol on pg 16 of https://eprint.iacr.org/2017/1066.pdf
 // It generates an inner product proof for vectors a and b, using u to blind the inner product in P
-// A transcript is used for the Fiat Shamir heuristic
+// A transcript is used for the Fiat Shamir heuristic.
 func (prover *InnerProductProver) Prove(a, b []curves.Scalar, u curves.Point, transcript *merlin.Transcript) (*InnerProductProof, error) {
 	// Vectors must have length power of two
 	if !isPowerOfTwo(len(a)) {
@@ -241,8 +241,10 @@ func (prover *InnerProductProver) proveRecursive(recursionParams *ippRecursion) 
 	capR := rga.Add(rhb).Add(ucR)
 
 	// Add L,R for verifier to use to calculate final g, h
-	newL := append(recursionParams.capLs, capL)
-	newR := append(recursionParams.capRs, capR)
+	newL := recursionParams.capLs
+	newL = append(newL, capL)
+	newR := recursionParams.capRs
+	newR = append(newR, capR)
 
 	// Get x from L, R for non-interactive (See section 4.4 pg22 of https://eprint.iacr.org/2017/1066.pdf)
 	// Note this replaces the interactive model, i.e. L36-28 of pg16 of https://eprint.iacr.org/2017/1066.pdf
@@ -325,10 +327,10 @@ func (prover *InnerProductProver) proveRecursive(recursionParams *ippRecursion) 
 // For each recursion, it takes the current state of the transcript and appends the newly calculated L and R values
 // A new scalar is then read from the transcript
 // See section 4.4 pg22 of https://eprint.iacr.org/2017/1066.pdf
-func (prover *InnerProductProver) calcx(L, R curves.Point, transcript *merlin.Transcript) (curves.Scalar, error) {
-	// Add the newest L and R values to transcript
-	transcript.AppendMessage([]byte("addRecursiveL"), L.ToAffineUncompressed())
-	transcript.AppendMessage([]byte("addRecursiveR"), R.ToAffineUncompressed())
+func (prover *InnerProductProver) calcx(capL, capR curves.Point, transcript *merlin.Transcript) (curves.Scalar, error) {
+	// Add the newest capL and capR values to transcript
+	transcript.AppendMessage([]byte("addRecursiveL"), capL.ToAffineUncompressed())
+	transcript.AppendMessage([]byte("addRecursiveR"), capR.ToAffineUncompressed())
 	// Read 64 bytes from, set to scalar
 	outBytes := transcript.ExtractBytes([]byte("getx"), 64)
 	x, err := prover.curve.NewScalar().SetBytesWide(outBytes)
@@ -339,7 +341,7 @@ func (prover *InnerProductProver) calcx(L, R curves.Point, transcript *merlin.Tr
 	return x, nil
 }
 
-// MarshalBinary takes an inner product proof and marshals into bytes
+// MarshalBinary takes an inner product proof and marshals into bytes.
 func (proof *InnerProductProof) MarshalBinary() []byte {
 	var out []byte
 	out = append(out, proof.a.Bytes()...)
@@ -353,7 +355,7 @@ func (proof *InnerProductProof) MarshalBinary() []byte {
 }
 
 // UnmarshalBinary takes bytes of a marshaled proof and writes them into an inner product proof
-// The inner product proof used should be from the output of NewInnerProductProof()
+// The inner product proof used should be from the output of NewInnerProductProof().
 func (proof *InnerProductProof) UnmarshalBinary(data []byte) error {
 	scalarLen := len(proof.curve.NewScalar().Bytes())
 	pointLen := len(proof.curve.NewGeneratorPoint().ToAffineCompressed())
@@ -361,28 +363,28 @@ func (proof *InnerProductProof) UnmarshalBinary(data []byte) error {
 	// Get scalars
 	a, err := proof.curve.NewScalar().SetBytes(data[ptr : ptr+scalarLen])
 	if err != nil {
-		return errors.New("InnerProductProof UnmarshalBinary SetBytes")
+		return errors.New("innerProductProof UnmarshalBinary SetBytes")
 	}
 	proof.a = a
 	ptr += scalarLen
 	b, err := proof.curve.NewScalar().SetBytes(data[ptr : ptr+scalarLen])
 	if err != nil {
-		return errors.New("InnerProductProof UnmarshalBinary SetBytes")
+		return errors.New("innerProductProof UnmarshalBinary SetBytes")
 	}
 	proof.b = b
 	ptr += scalarLen
 	// Get points
-	var capLs, capRs []curves.Point
+	var capLs, capRs []curves.Point //nolint:prealloc // pointer arithmetic makes it too unreadable.
 	for ptr < len(data) {
 		capLElem, err := proof.curve.Point.FromAffineCompressed(data[ptr : ptr+pointLen])
 		if err != nil {
-			return errors.New("InnerProductProof UnmarshalBinary FromAffineCompressed")
+			return errors.New("innerProductProof UnmarshalBinary FromAffineCompressed")
 		}
 		capLs = append(capLs, capLElem)
 		ptr += pointLen
 		capRElem, err := proof.curve.Point.FromAffineCompressed(data[ptr : ptr+pointLen])
 		if err != nil {
-			return errors.New("InnerProductProof UnmarshalBinary FromAffineCompressed")
+			return errors.New("innerProductProof UnmarshalBinary FromAffineCompressed")
 		}
 		capRs = append(capRs, capRElem)
 		ptr += pointLen

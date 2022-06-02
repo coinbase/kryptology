@@ -20,8 +20,13 @@ func TestRangeProverHappyPath(t *testing.T) {
 	g := curve.Point.Random(crand.Reader)
 	h := curve.Point.Random(crand.Reader)
 	u := curve.Point.Random(crand.Reader)
+	proofGenerators := RangeProofGenerators{
+		g: g,
+		h: h,
+		u: u,
+	}
 	transcript := merlin.NewTranscript("test")
-	proof, err := prover.Prove(v, gamma, n, g, h, u, transcript)
+	proof, err := prover.Prove(v, gamma, n, proofGenerators, transcript)
 	require.NoError(t, err)
 	require.NotNil(t, proof)
 	require.Equal(t, 8, len(proof.ipp.capLs))
@@ -33,8 +38,8 @@ func TestGetaL(t *testing.T) {
 	v := curve.Scalar.Random(crand.Reader)
 	aL, err := getaL(v, 256, *curve)
 	require.NoError(t, err)
-	twon := get2nVector(256, *curve)
-	product, err := innerProduct(aL, twon)
+	twoN := get2nVector(256, *curve)
+	product, err := innerProduct(aL, twoN)
 	require.NoError(t, err)
 	require.Zero(t, product.Cmp(v))
 }
@@ -58,8 +63,13 @@ func TestRangeProverMarshal(t *testing.T) {
 	g := curve.Point.Random(crand.Reader)
 	h := curve.Point.Random(crand.Reader)
 	u := curve.Point.Random(crand.Reader)
+	proofGenerators := RangeProofGenerators{
+		g: g,
+		h: h,
+		u: u,
+	}
 	transcript := merlin.NewTranscript("test")
-	proof, err := prover.Prove(v, gamma, n, g, h, u, transcript)
+	proof, err := prover.Prove(v, gamma, n, proofGenerators, transcript)
 	require.NoError(t, err)
 
 	proofMarshaled := proof.MarshalBinary()

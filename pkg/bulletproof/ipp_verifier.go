@@ -9,7 +9,7 @@ import (
 
 // InnerProductVerifier is the struct used to verify inner product proofs
 // It specifies which curve to use and holds precomputed generators
-// See NewInnerProductProver() for prover initialization
+// See NewInnerProductProver() for prover initialization.
 type InnerProductVerifier struct {
 	curve      curves.Curve
 	generators ippGenerators
@@ -18,7 +18,7 @@ type InnerProductVerifier struct {
 // NewInnerProductVerifier initializes a new verifier
 // It uses the specified domain to generate generators for vectors of at most maxVectorLength
 // A verifier can be used to verify inner product proofs for vectors of length less than or equal to maxVectorLength
-// A verifier is defined by an explicit curve
+// A verifier is defined by an explicit curve.
 func NewInnerProductVerifier(maxVectorLength int, domain []byte, curve curves.Curve) (*InnerProductVerifier, error) {
 	generators, err := getGeneratorPoints(maxVectorLength, domain, curve)
 	if err != nil {
@@ -97,9 +97,9 @@ func (verifier *InnerProductVerifier) VerifyFromRangeProof(proofG, proofH []curv
 	return lhs.Equal(rhs), nil
 }
 
-// getRHS gets the right hand side of the final comparison of section 3.1 on pg17
-func (verifier *InnerProductVerifier) getRHS(P curves.Point, proof *InnerProductProof, xs []curves.Scalar) (curves.Point, error) {
-	product := P
+// getRHS gets the right hand side of the final comparison of section 3.1 on pg17.
+func (*InnerProductVerifier) getRHS(capP curves.Point, proof *InnerProductProof, xs []curves.Scalar) (curves.Point, error) {
+	product := capP
 	for j, Lj := range proof.capLs {
 		Rj := proof.capRs[j]
 		xj := xs[j]
@@ -115,7 +115,7 @@ func (verifier *InnerProductVerifier) getRHS(P curves.Point, proof *InnerProduct
 	return product, nil
 }
 
-// getLHS gets the left hand side of the final comparison of section 3.1 on pg17
+// getLHS gets the left hand side of the final comparison of section 3.1 on pg17.
 func (verifier *InnerProductVerifier) getLHS(u curves.Point, proof *InnerProductProof, g, h []curves.Point, s []curves.Scalar) (curves.Point, error) {
 	sInv, err := invertScalars(s)
 	if err != nil {
@@ -138,14 +138,14 @@ func (verifier *InnerProductVerifier) getLHS(u curves.Point, proof *InnerProduct
 
 // getxs calculates the x values from Ls and Rs
 // Note that each x is read from the transcript, then the L and R at a certain index are written to the transcript
-// This mirrors the reading of xs and writing of Ls and Rs in the prover
-func getxs(transcript *merlin.Transcript, Ls, Rs []curves.Point, curve curves.Curve) ([]curves.Scalar, error) {
-	xs := make([]curves.Scalar, len(Ls))
-	for i, Li := range Ls {
-		Ri := Rs[i]
+// This mirrors the reading of xs and writing of Ls and Rs in the prover.
+func getxs(transcript *merlin.Transcript, capLs, capRs []curves.Point, curve curves.Curve) ([]curves.Scalar, error) {
+	xs := make([]curves.Scalar, len(capLs))
+	for i, capLi := range capLs {
+		capRi := capRs[i]
 		// Add the newest L and R values to transcript
-		transcript.AppendMessage([]byte("addRecursiveL"), Li.ToAffineUncompressed())
-		transcript.AppendMessage([]byte("addRecursiveR"), Ri.ToAffineUncompressed())
+		transcript.AppendMessage([]byte("addRecursiveL"), capLi.ToAffineUncompressed())
+		transcript.AppendMessage([]byte("addRecursiveR"), capRi.ToAffineUncompressed())
 		// Read 64 bytes from, set to scalar
 		outBytes := transcript.ExtractBytes([]byte("getx"), 64)
 		x, err := curve.NewScalar().SetBytesWide(outBytes)
@@ -185,7 +185,7 @@ func (verifier *InnerProductVerifier) gets(xs []curves.Scalar, n int) ([]curves.
 // getsNew calculates the vector s of values used for verification
 // It provides analogous functionality as gets(), but uses a O(n) algorithm vs O(nlogn)
 // The algorithm inverts all xs, then begins multiplying the inversion by the square of x elements to
-// calculate all s values thus minimizing necessary inversions/ computation
+// calculate all s values thus minimizing necessary inversions/ computation.
 func (verifier *InnerProductVerifier) getsNew(xs []curves.Scalar, n int) ([]curves.Scalar, error) {
 	var err error
 	ss := make([]curves.Scalar, n)

@@ -20,15 +20,20 @@ func TestRangeVerifyHappyPath(t *testing.T) {
 	g := curve.Point.Random(crand.Reader)
 	h := curve.Point.Random(crand.Reader)
 	u := curve.Point.Random(crand.Reader)
+	proofGenerators := RangeProofGenerators{
+		g: g,
+		h: h,
+		u: u,
+	}
 	transcript := merlin.NewTranscript("test")
-	proof, err := prover.Prove(v, gamma, n, g, h, u, transcript)
+	proof, err := prover.Prove(v, gamma, n, proofGenerators, transcript)
 	require.NoError(t, err)
 
 	verifier, err := NewRangeVerifier(n, []byte("rangeDomain"), []byte("ippDomain"), *curve)
 	require.NoError(t, err)
 	transcriptVerifier := merlin.NewTranscript("test")
 	capV := getcapV(v, gamma, g, h)
-	verified, err := verifier.Verify(proof, capV, g, h, u, n, transcriptVerifier)
+	verified, err := verifier.Verify(proof, capV, proofGenerators, n, transcriptVerifier)
 	require.NoError(t, err)
 	require.True(t, verified)
 }
@@ -43,8 +48,13 @@ func TestRangeVerifyNotInRange(t *testing.T) {
 	g := curve.Point.Random(crand.Reader)
 	h := curve.Point.Random(crand.Reader)
 	u := curve.Point.Random(crand.Reader)
+	proofGenerators := RangeProofGenerators{
+		g: g,
+		h: h,
+		u: u,
+	}
 	transcript := merlin.NewTranscript("test")
-	_, err = prover.Prove(v, gamma, n, g, h, u, transcript)
+	_, err = prover.Prove(v, gamma, n, proofGenerators, transcript)
 	require.Error(t, err)
 }
 
@@ -58,15 +68,20 @@ func TestRangeVerifyNonRandom(t *testing.T) {
 	g := curve.Point.Random(crand.Reader)
 	h := curve.Point.Random(crand.Reader)
 	u := curve.Point.Random(crand.Reader)
+	proofGenerators := RangeProofGenerators{
+		g: g,
+		h: h,
+		u: u,
+	}
 	transcript := merlin.NewTranscript("test")
-	proof, err := prover.Prove(v, gamma, n, g, h, u, transcript)
+	proof, err := prover.Prove(v, gamma, n, proofGenerators, transcript)
 	require.NoError(t, err)
 
 	verifier, err := NewRangeVerifier(n, []byte("rangeDomain"), []byte("ippDomain"), *curve)
 	require.NoError(t, err)
 	transcriptVerifier := merlin.NewTranscript("test")
 	capV := getcapV(v, gamma, g, h)
-	verified, err := verifier.Verify(proof, capV, g, h, u, n, transcriptVerifier)
+	verified, err := verifier.Verify(proof, capV, proofGenerators, n, transcriptVerifier)
 	require.NoError(t, err)
 	require.True(t, verified)
 }
