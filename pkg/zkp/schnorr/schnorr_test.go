@@ -15,13 +15,12 @@ func TestZKPOverMultipleCurves(t *testing.T) {
 	curveInstances := []*curves.Curve{
 		curves.K256(),
 		curves.P256(),
-		// TODO: the code fails on the following curves. Investigate if this is expected.
-		// curves.PALLAS(),
-		// curves.BLS12377G1(),
-		// curves.BLS12377G2(),
-		// curves.BLS12381G1(),
-		// curves.BLS12381G2(),
-		// curves.ED25519(),
+		curves.PALLAS(),
+		curves.BLS12377G1(),
+		curves.BLS12377G2(),
+		curves.BLS12381G1(),
+		curves.BLS12381G2(),
+		curves.ED25519(),
 	}
 	for i, curve := range curveInstances {
 		uniqueSessionId := sha3.New256().Sum([]byte("random seed"))
