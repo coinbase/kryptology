@@ -164,7 +164,7 @@ func VerifyEval(rs *KZGSetupParamaters, commitment, proof *bls.G1, x, y *native.
 	return e1.Equal(e2)
 }
 
-// CreateWitness creates an evaluation proof of multiple points on a polynomial as a g1 element
+// CreateWitnessBatch creates an evaluation proof of multiple points on a polynomial as a g1 element
 func CreateWitnessBatch(rs *KZGSetupParamaters, p *Polynomial, x, phiX []*native.Field) (*bls.G1, error) {
 
 	// I(x)

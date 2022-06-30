@@ -781,6 +781,8 @@ func (g1 *G1) BigInt() (x, y *big.Int) {
 	return
 }
 
+// SetRaw creates a point from raw arrays x, y
+// and returns the point if it is on the curve
 func (g1 *G1) SetRaw(x, y *[Limbs]uint64) (*G1, error) {
 	var xx, yy fp
 	var pp G1
