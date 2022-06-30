@@ -762,6 +762,24 @@ func (g2 *G2) BigInt() (x, y *big.Int) {
 	return
 }
 
+func (g2 *G2) SetRaw(xc0, xc1, yc0, yc1 *[Limbs]uint64) (*G2, error) {
+	var p G2
+	p.x.A.SetRaw(xc0)
+	p.x.B.SetRaw(xc1)
+	p.y.A.SetRaw(yc0)
+	p.y.B.SetRaw(yc1)
+	p.z.SetOne()
+
+	if p.IsIdentity() == 1 {
+		return g2.Identity(), nil
+	}
+
+	if p.IsOnCurve() == 0 {
+		return nil, errors.New("point is not on the curve")
+	}
+	return g2.Set(&p), nil
+}
+
 // SetBigInt creates a point from affine x, y
 // and returns the point if it is on the curve
 func (g2 *G2) SetBigInt(x, y *big.Int) (*G2, error) {
