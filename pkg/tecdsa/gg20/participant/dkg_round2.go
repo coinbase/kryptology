@@ -24,7 +24,7 @@ type DkgRound2Bcast struct {
 
 // DkgRound2P2PSend contains value that will be P2PSend to all other player Pj
 type DkgRound2P2PSend struct {
-	xij *v1.ShamirShare
+	Xij *v1.ShamirShare
 }
 
 // DkgRound2 implements distributed key generation round 2
@@ -103,12 +103,12 @@ func (dp *DkgParticipant) DkgRound2(params map[uint32]*DkgRound1Bcast) (*DkgRoun
 			return nil, nil, err
 		}
 
-		// P2PSend xij to player Pj
+		// P2PSend Xij to player Pj
 		if dp.state.X == nil || dp.state.X[id-1] == nil {
 			return nil, nil, fmt.Errorf("Missing Shamir share to P2P send")
 		}
 		p2PSend[id] = &DkgRound2P2PSend{
-			xij: dp.state.X[id-1],
+			Xij: dp.state.X[id-1],
 		}
 
 		// Store other parties data
