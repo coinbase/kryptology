@@ -295,11 +295,15 @@ func makeXMap(curve elliptic.Curve, publicSharesMap map[uint32]*dealer.PublicSha
 	return x, nil
 }
 
-func NewDkgParticipant(curve elliptic.Curve, id uint32, round uint) *DkgParticipant {
+func NewDkgParticipant(curve elliptic.Curve, id, total, threshold uint32, round uint) *DkgParticipant {
 	return &DkgParticipant{
 		Curve: curve,
 		id:    id,
 		Round: round,
+		state: &dkgstate{
+			Threshold: threshold,
+			Limit:     total,
+		},
 	}
 }
 
