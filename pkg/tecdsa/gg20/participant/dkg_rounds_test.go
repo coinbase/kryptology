@@ -942,23 +942,23 @@ func TestDkgFullRoundsWorks(t *testing.T) {
 	decommitments[3] = dkgR2Bcast[3].Di
 
 	dkgR3Out[1], err = dkgParticipants[1].DkgRound3(decommitments, map[uint32]*v1.ShamirShare{
-		1: dkgParticipants[1].state.X[0],
-		2: dkgParticipants[2].state.X[0],
-		3: dkgParticipants[3].state.X[0],
+		1: nil,
+		2: dkgR2P2PSend[2][1].Xij,
+		3: dkgR2P2PSend[3][1].Xij,
 	})
 	require.NoError(t, err)
 
 	dkgR3Out[2], err = dkgParticipants[2].DkgRound3(decommitments, map[uint32]*v1.ShamirShare{
-		1: dkgParticipants[1].state.X[1],
-		2: dkgParticipants[2].state.X[1],
-		3: dkgParticipants[3].state.X[1],
+		1: dkgR2P2PSend[1][2].Xij,
+		2: nil,
+		3: dkgR2P2PSend[3][2].Xij,
 	})
 	require.NoError(t, err)
 
 	dkgR3Out[3], err = dkgParticipants[3].DkgRound3(decommitments, map[uint32]*v1.ShamirShare{
-		1: dkgParticipants[1].state.X[2],
-		2: dkgParticipants[2].state.X[2],
-		3: dkgParticipants[3].state.X[2],
+		1: dkgR2P2PSend[1][3].Xij,
+		2: dkgR2P2PSend[2][3].Xij,
+		3: nil,
 	})
 	require.NoError(t, err)
 
