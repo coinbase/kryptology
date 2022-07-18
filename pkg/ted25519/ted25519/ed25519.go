@@ -121,9 +121,6 @@ func newKeyFromSeed(privateKey, seed []byte) error {
 	}
 
 	digest := sha512.Sum512(seed)
-	digest[0] &= 248
-	digest[31] &= 127
-	digest[31] |= 64
 
 	var hBytes [32]byte
 	copy(hBytes[:], digest[:])
