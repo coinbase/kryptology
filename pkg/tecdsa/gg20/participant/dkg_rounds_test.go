@@ -8,6 +8,7 @@ package participant
 
 import (
 	"crypto/elliptic"
+	"fmt"
 	"math/big"
 	"testing"
 
@@ -1042,4 +1043,172 @@ func TestDkgFullRoundsWorks(t *testing.T) {
 	require.Equal(t, dkgR4Out[1].ParticipantData[2].ProofParams, dkgR4Out[3].ParticipantData[2].ProofParams)
 	require.Equal(t, dkgR4Out[1].ParticipantData[3].ProofParams, dkgR4Out[2].ParticipantData[3].ProofParams)
 	require.Equal(t, dkgR4Out[2].ParticipantData[1].ProofParams, dkgR4Out[3].ParticipantData[1].ProofParams)
+
+	signers := make(map[uint32]*Signer)
+	cosigners := make([]uint32, total)
+	for i := 0; i < total; i++ {
+		id := uint32(i + 1)
+		cosigners[i] = id
+	}
+
+	for i := 0; i < total; i++ {
+		id := uint32(i + 1)
+
+		participant, err := DKGToPaticipant(id, dkgR1Out, dkgParticipants, dkgR4Out[id])
+		require.NoError(t, err)
+
+		signer, err := NewSigner(participant, cosigners)
+		require.NoError(t, err)
+
+		signers[id] = signer
+	}
+
+	_, err = gg20Sign(signers)
+	require.NoError(t, err)
+}
+
+func gg20Sign(signers map[uint32]*Signer) (signatures []*curves.EcdsaSignature, err error) {
+	var (
+		bcastR1 = make(map[uint32]*Round1Bcast)
+		p2pR1   = make(map[uint32]map[uint32]*Round1P2PSend)
+
+		p2pR2 = make(map[uint32]map[uint32]*P2PSend)
+
+		bcastR3 = make(map[uint32]*Round3Bcast)
+
+		bcastR4 = make(map[uint32]*Round4Bcast)
+
+		bcastR5 = make(map[uint32]*Round5Bcast)
+		p2pR5   = make(map[uint32]map[uint32]*Round5P2PSend)
+
+		bcastR6 = make(map[uint32]*Round6FullBcast)
+	)
+
+	for id, signer := range signers {
+		bcast, p2p, innerErr := signer.SignRound1()
+		if innerErr != nil {
+			return nil, innerErr
+		}
+
+		bcastR1[id] = bcast
+
+		for to, msg := range p2p {
+			if _, ok := p2pR1[to]; !ok {
+				p2pR1[to] = map[uint32]*Round1P2PSend{id: msg}
+				continue
+			}
+
+			p2pR1[to][id] = msg
+		}
+	}
+
+	for id, signer := range signers {
+		p2pR1[id][id] = nil
+
+		p2p, innerErr := signer.SignRound2(bcastR1, p2pR1[id])
+		if innerErr != nil {
+			return nil, fmt.Errorf("round2: %w", innerErr)
+		}
+
+		for to, msg := range p2p {
+			if _, ok := p2pR2[to]; !ok {
+				p2pR2[to] = map[uint32]*P2PSend{id: msg}
+				continue
+			}
+
+			p2pR2[to][id] = msg
+		}
+	}
+
+	for id, signer := range signers {
+		p2pR2[id][id] = nil
+
+		bcastR3[id], err = signer.SignRound3(p2pR2[id])
+		if err != nil {
+			return nil, fmt.Errorf("round3: %w", err)
+		}
+	}
+
+	for id, signer := range signers {
+		bcastR4[id], err = signer.SignRound4(bcastR3)
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	for id, signer := range signers {
+		bcast, p2p, innerErr := signer.SignRound5(bcastR4)
+		if innerErr != nil {
+			return nil, innerErr
+		}
+
+		bcastR5[id] = bcast
+
+		for to, msg := range p2p {
+			if _, ok := p2pR5[to]; !ok {
+				p2pR5[to] = map[uint32]*Round5P2PSend{id: msg}
+				continue
+			}
+
+			p2pR5[to][id] = msg
+		}
+	}
+
+	for id, signer := range signers {
+		p2pR5[id][id] = nil
+
+		bcastR6[id], err = signer.SignRound6Full([]byte("sign me"), bcastR5, p2pR5[id])
+		if err != nil {
+			return nil, err
+		}
+	}
+
+	for _, signer := range signers {
+		sign, err := signer.SignOutput(bcastR6)
+		if err != nil {
+			return nil, err
+		}
+
+		signatures = append(signatures, sign)
+	}
+
+	return signatures, nil
+}
+
+func DKGToPaticipant(index uint32, bcast map[uint32]*DkgRound1Bcast, participants map[uint32]*DkgParticipant, dkg *DkgResult) (*dealer.ParticipantData, error) {
+	encryptKeys := make(map[uint32]*paillier.PublicKey)
+	proofParams := make(map[uint32]*dealer.ProofParams)
+
+	pubShares := make(map[uint32]*dealer.PublicShare, len(dkg.PublicShares))
+	for i, p := range dkg.PublicShares {
+		pubShares[uint32(i+1)] = &dealer.PublicShare{Point: p}
+	}
+
+	proofParams[index] = &dealer.ProofParams{
+		N:  bcast[index].Ni,
+		H1: bcast[index].H1i,
+		H2: bcast[index].H2i,
+	}
+
+	for id, pk := range dkg.ParticipantData {
+		encryptKeys[id] = pk.PublicKey
+		proofParams[id] = pk.ProofParams
+	}
+
+	field := curves.NewField(participants[index].Curve.Params().N)
+
+	share := v1.NewShamirShare(index, dkg.SigningKeyShare.Bytes(), field)
+
+	return &dealer.ParticipantData{
+		Id:         index,
+		DecryptKey: dkg.EncryptionKey,
+		SecretKeyShare: &dealer.Share{
+			ShamirShare: share,
+			Point:       pubShares[index].Point,
+		},
+		EcdsaPublicKey: dkg.VerificationKey,
+		KeyGenType:     dealer.DistributedKeyGenType{ProofParams: proofParams},
+		PublicShares:   pubShares,
+		EncryptKeys:    encryptKeys,
+	}, nil
 }
