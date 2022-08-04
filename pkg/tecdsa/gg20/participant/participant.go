@@ -236,7 +236,7 @@ func (p Participant) convertToAdditive(curve elliptic.Curve, publicSharesMap map
 	return &Signer{
 		sk:              p.sk,
 		share:           privateKeyShare,
-		publicSharesMap: publicSharesMap,
+		publicSharesMap: additiveMap,
 		Round:           1,
 		state:           &state{},
 	}, nil
