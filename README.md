@@ -1,3 +1,6 @@
+# Important
+This library has been archived and is no longer supported. As such it should not be used, and it is not used by Coinbase.
+
 # Kryptology
 Coinbase's advanced cryptography library
 
@@ -57,8 +60,9 @@ This abstraction is currently only used in DKLs18 implementation.
   - [KOS OT Extension](pkg/ot/extension/kos)
 - Threshold ECDSA Signature
   - [DKLs18 - DKG and Signing](pkg/tecdsa/dkls/v1)
-  - [GG20 - DKG](pkg/dkg/gennaro)
-  - [GG20 - Signing](pkg/tecdsa/gg20)
+  - GG20: The authors of GG20 have stated that the protocol is obsolete and should not be used. See [https://eprint.iacr.org/2020/540.pdf](https://eprint.iacr.org/2020/540.pdf).
+    - [GG20 - DKG](pkg/dkg/gennaro)
+    - [GG20 - Signing](pkg/tecdsa/gg20)
 - Threshold Schnorr Signature
   - [FROST threshold signature - DKG](pkg/dkg/frost)
   - [FROST threshold signature - Signing](pkg/ted25519/frost)
