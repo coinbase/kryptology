@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/require"
+	"golang.org/x/crypto/sha3"
 
 	"github.com/coinbase/kryptology/pkg/core/curves"
 )
@@ -30,14 +31,13 @@ func TestGeneratorsUniquePerDomain(t *testing.T) {
 }
 
 func noDuplicates(gs generators) bool {
-	var seen []curves.Point
+	seen := map[[32]byte]bool{}
 	for _, G := range gs {
-		for _, seenG := range seen {
-			if seenG.Equal(G) {
-				return false
-			}
+		value := sha3.Sum256(G.ToAffineCompressed())
+		if seen[value] {
+			return false
 		}
-		seen = append(seen, G)
+		seen[value] = true
 	}
 	return true
 }

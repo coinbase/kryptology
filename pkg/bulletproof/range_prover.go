@@ -19,7 +19,7 @@ import (
 
 // RangeProver is the struct used to create RangeProofs
 // It specifies which curve to use and holds precomputed generators
-// See NewRangeProver() for prover initialization
+// See NewRangeProver() for prover initialization.
 type RangeProver struct {
 	curve      curves.Curve
 	generators *ippGenerators
@@ -32,7 +32,7 @@ type RangeProver struct {
 // capTau1,2 are commitments to t1,t2 respectively using randomness tau_1,2
 // tHat represents t(X) as defined on page 19
 // taux is the blinding factor for tHat
-// ipp is the inner product proof used for compacting the transfer of l,r (See 4.2 on pg20)
+// ipp is the inner product proof used for compacting the transfer of l,r (See 4.2 on pg20).
 type RangeProof struct {
 	capA, capS, capT1, capT2 curves.Point
 	taux, mu, tHat           curves.Scalar
@@ -40,10 +40,14 @@ type RangeProof struct {
 	curve                    *curves.Curve
 }
 
+type RangeProofGenerators struct {
+	g, h, u curves.Point
+}
+
 // NewRangeProver initializes a new prover
 // It uses the specified domain to generate generators for vectors of at most maxVectorLength
 // A prover can be used to construct range proofs for vectors of length less than or equal to maxVectorLength
-// A prover is defined by an explicit curve
+// A prover is defined by an explicit curve.
 func NewRangeProver(maxVectorLength int, rangeDomain, ippDomain []byte, curve curves.Curve) (*RangeProver, error) {
 	generators, err := getGeneratorPoints(maxVectorLength, rangeDomain, curve)
 	if err != nil {
@@ -57,7 +61,7 @@ func NewRangeProver(maxVectorLength int, rangeDomain, ippDomain []byte, curve cu
 }
 
 // NewRangeProof initializes a new RangeProof for a specified curve
-// This should be used in tandem with UnmarshalBinary() to convert a marshaled proof into the struct
+// This should be used in tandem with UnmarshalBinary() to convert a marshaled proof into the struct.
 func NewRangeProof(curve *curves.Curve) *RangeProof {
 	out := RangeProof{
 		capA:  nil,
@@ -80,18 +84,21 @@ func NewRangeProof(curve *curves.Curve) *RangeProof {
 // n is the power that specifies the upper bound of the range, ie. 2^n
 // gamma is a scalar used for as a blinding factor
 // g, h, u are unique points used as generators for the blinding factor
-// transcript is a merlin transcript to be used for the fiat shamir heuristic
-func (prover *RangeProver) Prove(v, gamma curves.Scalar, n int, g, h, u curves.Point, transcript *merlin.Transcript) (*RangeProof, error) {
-	// n must be less than the number of generators generated
+// transcript is a merlin transcript to be used for the fiat shamir heuristic.
+func (prover *RangeProver) Prove(v, gamma curves.Scalar, n int, proofGenerators RangeProofGenerators, transcript *merlin.Transcript) (*RangeProof, error) {
+	// n must be less than or equal to the number of generators generated
 	if n > len(prover.generators.G) {
-		return nil, errors.New("ipp vector length must be less than maxVectorLength")
+		return nil, errors.New("ipp vector length must be less than or equal to maxVectorLength")
 	}
 	// In case where len(a) is less than number of generators precomputed by prover, trim to length
 	proofG := prover.generators.G[0:n]
 	proofH := prover.generators.H[0:n]
 
 	// Check that v is in range [0, 2^n]
-	bigZero := big.NewInt(0)
+	if bigZero := big.NewInt(0); v.BigInt().Cmp(bigZero) == -1 {
+		return nil, errors.New("v is less than 0")
+	}
+
 	bigTwo := big.NewInt(2)
 	if n < 0 {
 		return nil, errors.New("n cannot be less than 0")
@@ -99,9 +106,6 @@ func (prover *RangeProver) Prove(v, gamma curves.Scalar, n int, g, h, u curves.P
 	bigN := big.NewInt(int64(n))
 	var bigTwoToN big.Int
 	bigTwoToN.Exp(bigTwo, bigN, nil)
-	if v.BigInt().Cmp(bigZero) == -1 {
-		return nil, errors.New("v is less than 0")
-	}
 	if v.BigInt().Cmp(&bigTwoToN) == 1 {
 		return nil, errors.New("v is greater than 2^n")
 	}
@@ -120,7 +124,7 @@ func (prover *RangeProver) Prove(v, gamma curves.Scalar, n int, g, h, u curves.P
 
 	alpha := prover.curve.Scalar.Random(crand.Reader)
 	// Calc A (L44, pg19)
-	halpha := h.Mul(alpha)
+	halpha := proofGenerators.h.Mul(alpha)
 	gaL := prover.curve.Point.SumOfProducts(proofG, aL)
 	haR := prover.curve.Point.SumOfProducts(proofH, aR)
 	capA := halpha.Add(gaL).Add(haR)
@@ -131,13 +135,13 @@ func (prover *RangeProver) Prove(v, gamma curves.Scalar, n int, g, h, u curves.P
 	rho := prover.curve.Scalar.Random(crand.Reader)
 
 	// Calc S (L47, pg19)
-	hrho := h.Mul(rho)
+	hrho := proofGenerators.h.Mul(rho)
 	gsL := prover.curve.Point.SumOfProducts(proofG, sL)
 	hsR := prover.curve.Point.SumOfProducts(proofH, sR)
 	capS := hrho.Add(gsL).Add(hsR)
 
 	// Fiat Shamir for y,z (L49, pg19)
-	capV := getcapV(v, gamma, g, h)
+	capV := getcapV(v, gamma, proofGenerators.g, proofGenerators.h)
 	y, z, err := calcyz(capV, capA, capS, transcript, prover.curve)
 	if err != nil {
 		return nil, errors.Wrap(err, "rangeproof prove")
@@ -155,8 +159,8 @@ func (prover *RangeProver) Prove(v, gamma curves.Scalar, n int, g, h, u curves.P
 	linearTerml := sL
 
 	// z^2 * 2^N
-	twon := get2nVector(n, prover.curve)
-	zSquareTwon := multiplyScalarToScalarVector(z.Square(), twon)
+	twoN := get2nVector(n, prover.curve)
+	zSquareTwon := multiplyScalarToScalarVector(z.Square(), twoN)
 	// a_r + z*1^n
 	aRPluszonen, err := addPairwiseScalarVectors(aR, zonen)
 	if err != nil {
@@ -199,8 +203,8 @@ func (prover *RangeProver) Prove(v, gamma curves.Scalar, n int, g, h, u curves.P
 	tau2 := prover.curve.Scalar.Random(crand.Reader)
 
 	// T_1, T_2 (L53, pg20)
-	capT1 := g.Mul(t1).Add(h.Mul(tau1))
-	capT2 := g.Mul(t2).Add(h.Mul(tau2))
+	capT1 := proofGenerators.g.Mul(t1).Add(proofGenerators.h.Mul(tau1))
+	capT2 := proofGenerators.g.Mul(t2).Add(proofGenerators.h.Mul(tau2))
 
 	// Fiat shamir for x (L55, pg20)
 	x, err := calcx(capT1, capT2, transcript, prover.curve)
@@ -250,7 +254,7 @@ func (prover *RangeProver) Prove(v, gamma curves.Scalar, n int, g, h, u curves.P
 		return nil, errors.Wrap(err, "rangeproof prove")
 	}
 
-	capPhmu, err := getPhmu(proofG, hPrime, h, capA, capS, x, y, z, mu, n, prover.curve)
+	capPhmu, err := getPhmu(proofG, hPrime, proofGenerators.h, capA, capS, x, y, z, mu, n, prover.curve)
 	if err != nil {
 		return nil, errors.Wrap(err, "rangeproof prove")
 	}
@@ -261,7 +265,7 @@ func (prover *RangeProver) Prove(v, gamma curves.Scalar, n int, g, h, u curves.P
 		return nil, errors.Wrap(err, "rangeproof prove")
 	}
 
-	ipp, err := prover.ippProver.rangeToIPP(proofG, hPrime, l, r, tHat, capPhmu, u.Mul(w), transcript)
+	ipp, err := prover.ippProver.rangeToIPP(proofG, hPrime, l, r, tHat, capPhmu, proofGenerators.u.Mul(w), transcript)
 	if err != nil {
 		return nil, errors.Wrap(err, "rangeproof prove")
 	}
@@ -280,7 +284,7 @@ func (prover *RangeProver) Prove(v, gamma curves.Scalar, n int, g, h, u curves.P
 	return out, nil
 }
 
-// MarshalBinary takes a range proof and marshals into bytes
+// MarshalBinary takes a range proof and marshals into bytes.
 func (proof *RangeProof) MarshalBinary() []byte {
 	var out []byte
 	out = append(out, proof.capA.ToAffineCompressed()...)
@@ -296,7 +300,7 @@ func (proof *RangeProof) MarshalBinary() []byte {
 }
 
 // UnmarshalBinary takes bytes of a marshaled proof and writes them into a range proof
-// The range proof used should be from the output of NewRangeProof()
+// The range proof used should be from the output of NewRangeProof().
 func (proof *RangeProof) UnmarshalBinary(data []byte) error {
 	scalarLen := len(proof.curve.NewScalar().Bytes())
 	pointLen := len(proof.curve.NewGeneratorPoint().ToAffineCompressed())
@@ -304,25 +308,25 @@ func (proof *RangeProof) UnmarshalBinary(data []byte) error {
 	// Get points
 	capA, err := proof.curve.Point.FromAffineCompressed(data[ptr : ptr+pointLen])
 	if err != nil {
-		return errors.New("RangeProof UnmarshalBinary FromAffineCompressed")
+		return errors.New("rangeProof UnmarshalBinary FromAffineCompressed")
 	}
 	proof.capA = capA
 	ptr += pointLen
 	capS, err := proof.curve.Point.FromAffineCompressed(data[ptr : ptr+pointLen])
 	if err != nil {
-		return errors.New("RangeProof UnmarshalBinary FromAffineCompressed")
+		return errors.New("rangeProof UnmarshalBinary FromAffineCompressed")
 	}
 	proof.capS = capS
 	ptr += pointLen
 	capT1, err := proof.curve.Point.FromAffineCompressed(data[ptr : ptr+pointLen])
 	if err != nil {
-		return errors.New("RangeProof UnmarshalBinary FromAffineCompressed")
+		return errors.New("rangeProof UnmarshalBinary FromAffineCompressed")
 	}
 	proof.capT1 = capT1
 	ptr += pointLen
 	capT2, err := proof.curve.Point.FromAffineCompressed(data[ptr : ptr+pointLen])
 	if err != nil {
-		return errors.New("RangeProof UnmarshalBinary FromAffineCompressed")
+		return errors.New("rangeProof UnmarshalBinary FromAffineCompressed")
 	}
 	proof.capT2 = capT2
 	ptr += pointLen
@@ -330,19 +334,19 @@ func (proof *RangeProof) UnmarshalBinary(data []byte) error {
 	// Get scalars
 	taux, err := proof.curve.NewScalar().SetBytes(data[ptr : ptr+scalarLen])
 	if err != nil {
-		return errors.New("RangeProof UnmarshalBinary SetBytes")
+		return errors.New("rangeProof UnmarshalBinary SetBytes")
 	}
 	proof.taux = taux
 	ptr += scalarLen
 	mu, err := proof.curve.NewScalar().SetBytes(data[ptr : ptr+scalarLen])
 	if err != nil {
-		return errors.New("RangeProof UnmarshalBinary SetBytes")
+		return errors.New("rangeProof UnmarshalBinary SetBytes")
 	}
 	proof.mu = mu
 	ptr += scalarLen
 	tHat, err := proof.curve.NewScalar().SetBytes(data[ptr : ptr+scalarLen])
 	if err != nil {
-		return errors.New("RangeProof UnmarshalBinary SetBytes")
+		return errors.New("rangeProof UnmarshalBinary SetBytes")
 	}
 	proof.tHat = tHat
 	ptr += scalarLen
@@ -350,22 +354,39 @@ func (proof *RangeProof) UnmarshalBinary(data []byte) error {
 	// Get IPP
 	err = proof.ipp.UnmarshalBinary(data[ptr:])
 	if err != nil {
-		return errors.New("RangeProof UnmarshalBinary")
+		return errors.New("rangeProof UnmarshalBinary")
 	}
 
 	return nil
 }
 
-// getBlindingVector returns a vector of scalars used as blinding factors for commitments
-func getBlindingVector(len int, curve curves.Curve) []curves.Scalar {
-	vec := make([]curves.Scalar, len)
-	for i := 0; i < len; i++ {
+// checkRange validates whether some scalar v is within the range [0, 2^n - 1]
+// It will return an error if v is less than 0 or greater than 2^n - 1
+// Otherwise it will return nil.
+func checkRange(v curves.Scalar, n int) error {
+	bigOne := big.NewInt(1)
+	if n < 0 {
+		return errors.New("n cannot be less than 0")
+	}
+	var bigTwoToN big.Int
+	bigTwoToN.Lsh(bigOne, uint(n))
+	if v.BigInt().Cmp(&bigTwoToN) == 1 {
+		return errors.New("v is greater than 2^n")
+	}
+
+	return nil
+}
+
+// getBlindingVector returns a vector of scalars used as blinding factors for commitments.
+func getBlindingVector(length int, curve curves.Curve) []curves.Scalar {
+	vec := make([]curves.Scalar, length)
+	for i := 0; i < length; i++ {
 		vec[i] = curve.Scalar.Random(crand.Reader)
 	}
 	return vec
 }
 
-// getcapV returns a commitment to v using blinding factor gamma
+// getcapV returns a commitment to v using blinding factor gamma.
 func getcapV(v, gamma curves.Scalar, g, h curves.Point) curves.Point {
 	return h.Mul(gamma).Add(g.Mul(v))
 }
@@ -393,7 +414,7 @@ func getaL(v curves.Scalar, n int, curve curves.Curve) ([]curves.Scalar, error) 
 	return aL, nil
 }
 
-// cmoveScalar provides a constant time operation that returns x if which is 0 and returns y if which is 1
+// cmoveScalar provides a constant time operation that returns x if which is 0 and returns y if which is 1.
 func cmoveScalar(x, y curves.Scalar, which int, curve curves.Curve) (curves.Scalar, error) {
 	if which != 0 && which != 1 {
 		return nil, errors.New("cmoveScalar which must be 0 or 1")
@@ -416,9 +437,9 @@ func cmoveScalar(x, y curves.Scalar, which int, curve curves.Curve) (curves.Scal
 // It takes the current state of the transcript and appends the newly calculated capA and capS values
 // Two new scalars are then read from the transcript
 // See section 4.4 pg22 of https://eprint.iacr.org/2017/1066.pdf
-func calcyz(V, capA, capS curves.Point, transcript *merlin.Transcript, curve curves.Curve) (curves.Scalar, curves.Scalar, error) {
+func calcyz(capV, capA, capS curves.Point, transcript *merlin.Transcript, curve curves.Curve) (curves.Scalar, curves.Scalar, error) {
 	// Add the A,S values to transcript
-	transcript.AppendMessage([]byte("addV"), V.ToAffineUncompressed())
+	transcript.AppendMessage([]byte("addV"), capV.ToAffineUncompressed())
 	transcript.AppendMessage([]byte("addcapA"), capA.ToAffineUncompressed())
 	transcript.AppendMessage([]byte("addcapS"), capS.ToAffineUncompressed())
 	// Read 64 bytes twice from, set to scalar for y and z
