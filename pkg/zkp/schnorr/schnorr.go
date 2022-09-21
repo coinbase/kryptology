@@ -9,11 +9,11 @@
 package schnorr
 
 import (
+	"bytes"
 	"crypto/rand"
 	"crypto/subtle"
 	"fmt"
 
-	"github.com/pkg/errors"
 	"golang.org/x/crypto/sha3"
 
 	"github.com/coinbase/kryptology/pkg/core/curves"
@@ -52,28 +52,18 @@ func NewProver(curve *curves.Curve, basepoint curves.Point, uniqueSessionId []by
 // in the process, it will actually also construct the statement (just one curve mult in this case)
 func (p *Prover) Prove(x curves.Scalar) (*Proof, error) {
 	// assumes that params, and pub are already populated. populates the fields c and s...
-	var err error
 	result := &Proof{}
 	result.Statement = p.basePoint.Mul(x)
 	k := p.curve.Scalar.Random(rand.Reader)
 	random := p.basePoint.Mul(k)
-	hash := sha3.New256()
-	if _, err = hash.Write(p.uniqueSessionId); err != nil {
-		return nil, errors.Wrap(err, "writing salt to hash in schnorr prove")
-	}
-	if _, err = hash.Write(p.basePoint.ToAffineCompressed()); err != nil {
-		return nil, errors.Wrap(err, "writing basePoint to hash in schnorr prove")
-	}
-	if _, err = hash.Write(result.Statement.ToAffineCompressed()); err != nil {
-		return nil, errors.Wrap(err, "writing statement to hash in schnorr prove")
-	}
-	if _, err = hash.Write(random.ToAffineCompressed()); err != nil {
-		return nil, errors.Wrap(err, "writing point K to hash in schnorr prove")
-	}
-	result.C, err = p.curve.Scalar.SetBytes(hash.Sum(nil))
-	if err != nil {
-		return nil, errors.Wrap(err, "writing point K to hash in schnorr prove")
-	}
+
+	var buff bytes.Buffer
+	_, _ = buff.Write(p.uniqueSessionId) // Buffer.Write doesn't err
+	_, _ = buff.Write(p.basePoint.ToAffineCompressed())
+	_, _ = buff.Write(result.Statement.ToAffineCompressed())
+	_, _ = buff.Write(random.ToAffineCompressed())
+
+	result.C = p.curve.Scalar.Hash(buff.Bytes())
 	result.S = result.C.Mul(x).Add(k)
 	return result, nil
 }
@@ -87,20 +77,15 @@ func Verify(proof *Proof, curve *curves.Curve, basepoint curves.Point, uniqueSes
 	gs := basepoint.Mul(proof.S)
 	xc := proof.Statement.Mul(proof.C.Neg())
 	random := gs.Add(xc)
-	hash := sha3.New256()
-	if _, err := hash.Write(uniqueSessionId); err != nil {
-		return errors.Wrap(err, "writing salt to hash in schnorr verify")
-	}
-	if _, err := hash.Write(basepoint.ToAffineCompressed()); err != nil {
-		return errors.Wrap(err, "writing basePoint to hash in schnorr verify")
-	}
-	if _, err := hash.Write(proof.Statement.ToAffineCompressed()); err != nil {
-		return errors.Wrap(err, "writing statement to hash in schnorr verify")
-	}
-	if _, err := hash.Write(random.ToAffineCompressed()); err != nil {
-		return errors.Wrap(err, "writing point K to hash in schnorr verify")
-	}
-	if subtle.ConstantTimeCompare(proof.C.Bytes(), hash.Sum(nil)) != 1 {
+
+	var buff bytes.Buffer
+	_, _ = buff.Write(uniqueSessionId)
+	_, _ = buff.Write(basepoint.ToAffineCompressed())
+	_, _ = buff.Write(proof.Statement.ToAffineCompressed())
+	_, _ = buff.Write(random.ToAffineCompressed())
+
+	ComputedC := curve.Scalar.Hash(buff.Bytes())
+	if proof.C.Cmp(ComputedC) != 0 {
 		return fmt.Errorf("schnorr verification failed")
 	}
 	return nil
